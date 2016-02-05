@@ -4,7 +4,7 @@ SRCDIR=src
 OBJDIR=obj
 EPICS_INC_FLAGS=-I/ade/epics/supTop/base/R3.14.11/include/os/Linux -I/ade/epics/supTop/base/R3.14.11/include -D_POSIX_C_SOURCE=199506L -D_POSIX_THREADS -D_XOPEN_SOURCE=500 -D_X86_64_  -DUNIX  -D_BSD_SOURCE -Dlinux  -D_REENTRANT -m64 
 PYTHON_INC_FLAGS=-I/usr/include/python2.6
-#CPPFLAGS+=$(EPICS_INC_FLAGS)
+CPPFLAGS+=$(EPICS_INC_FLAGS)
 CPPFLAGS+=$(PYTHON_INC_FLAGS)
 CPPFLAGS+=-I./inc -arch=sm_35 -Xcompiler '-fPIC' -O3 -g -w #-DDOUBLE_PRECISION #-D_DEBUG
 #CPPFLAGS+=-Xptxas -v -Xptxas -dlcm=ca -g
@@ -28,14 +28,16 @@ vpath %.cu ./src
 
 
 #all: ./packages/HPSim.so ./packages/PyEPICS.so lib/libsqliteext.so start2d startalex
-all: run
+all: run runtest 
 
 $(OBJDIR)/%.o: %.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 $(OBJDIR)/%.cu.o: %.cu
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 run: $(NONGRAPHICS_OBJS) $(NONGRAPHICS_CUOBJS) main.cpp
-	$(CXX) $(CPPFLAGS) $(LDFLAGS) -o $@ $^
+	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(EPICS_LD_FLAGS) $(PYTHON_LD_FLAGS) -o $@ $^
+runtest: $(NONGRAPHICS_OBJS) $(NONGRAPHICS_CUOBJS) test_epics.cpp
+	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(EPICS_LD_FLAGS) $(PYTHON_LD_FLAGS) -o $@ $^
 clean:
 	rm run $(OBJDIR)/* 
 

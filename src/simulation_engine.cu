@@ -15,9 +15,9 @@ extern "C"
 {
   namespace
   {
-    SpaceCharge* spch;
-    Beam* beam;
-    BeamLine* bl;
+    SpaceCharge* spch_tmp;
+    Beam* beam_tmp;
+    BeamLine* bl_tmp;
     SimulationParam* param;
     uint grid_size;
     uint blck_size;
@@ -36,19 +36,19 @@ extern "C"
     int num_spch_kicks = 1;
     double length = r_drift->GetLength();
     if(param->space_charge_on)
-      num_spch_kicks = std::ceil(length / spch->GetInterval());
+      num_spch_kicks = std::ceil(length / spch_tmp->GetInterval());
     double hf_spch_len = 0.5 * length / num_spch_kicks;
     for(int nk = 0; nk < num_spch_kicks; ++nk)
     {
-      SimulatePartialDriftKernel<<<grid_size, blck_size>>>(beam->x, beam->y, 
-        beam->phi, beam->xp, beam->yp, beam->w, beam->loss, hf_spch_len, 
+      SimulatePartialDriftKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, 
+        beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, hf_spch_len, 
         r_drift->GetAperture(), cur_id);
 
       if(param->space_charge_on)
-        spch->Start(beam, 2.0*hf_spch_len); 
+        spch_tmp->Start(beam_tmp, 2.0*hf_spch_len); 
 
-      SimulatePartialDriftKernel<<<grid_size, blck_size>>>(beam->x, beam->y, 
-        beam->phi, beam->xp, beam->yp, beam->w, beam->loss, hf_spch_len, 
+      SimulatePartialDriftKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, 
+        beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, hf_spch_len, 
         r_drift->GetAperture(), cur_id);
     }// for
     ++cur_id;
@@ -56,13 +56,13 @@ extern "C"
   void SimulateQuad(Quad* r_quad)
   {
     //std::cout << cur_id << "--- Visit Quad" << std::endl;
-    SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(beam->x, beam->y, beam->phi, 
-      beam->xp, beam->yp, beam->w, beam->loss, r_quad->GetLength(),
+    SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, 
+      beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, r_quad->GetLength(),
       r_quad->GetAperture(), r_quad->GetGradient(), cur_id);
     if(param->space_charge_on)
-      spch->Start(beam, r_quad->GetLength()); 
-    SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(beam->x, beam->y, beam->phi, 
-      beam->xp, beam->yp, beam->w, beam->loss, r_quad->GetLength(),
+      spch_tmp->Start(beam_tmp, r_quad->GetLength()); 
+    SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, 
+      beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, r_quad->GetLength(),
       r_quad->GetAperture(), r_quad->GetGradient(), cur_id);
     ++cur_id;
   }
@@ -73,24 +73,24 @@ extern "C"
     cudaMemcpyAsync(rfparam, r_gap->GetParametersOnDevice(), sizeof(RFGapParameter), 
                     cudaMemcpyDeviceToDevice, 0);
     // check frequency change
-    if(beam->freq != r_gap->GetFrequency())
+    if(beam_tmp->freq != r_gap->GetFrequency())
     {
       double freq = r_gap->GetFrequency();
       UpdateWaveLengthKernel<<<1, 1>>>(freq);
-      beam->ChangeFrequency(freq);
+      beam_tmp->ChangeFrequency(freq);
     }
           
     // calculate phase_in used in the gap to calculate half phase advance in the gap
     double phi_in = 0.0;
-    uint bl_sz = bl->GetSize();
+    uint bl_sz = bl_tmp->GetSize();
 
     // first gap in DTL tank
-    if(cur_id == 1 || cur_id > 1 && (*bl)[cur_id - 2]->GetType() != "RFGap-DTL")
+    if(cur_id == 1 || cur_id > 1 && (*bl_tmp)[cur_id - 2]->GetType() != "RFGap-DTL")
     {
       // make sure this is not the only gap in the tank
-      if(cur_id + 2 < bl_sz && (*bl)[cur_id + 2]->GetType() == "RFGap-DTL")
+      if(cur_id + 2 < bl_sz && (*bl_tmp)[cur_id + 2]->GetType() == "RFGap-DTL")
       {
-        RFGap* next_gap = dynamic_cast<RFGap*>((*bl)[cur_id + 2]);
+        RFGap* next_gap = dynamic_cast<RFGap*>((*bl_tmp)[cur_id + 2]);
         phi_in = r_gap->GetRefPhase() - 0.5 * (
           next_gap->GetRefPhase() - r_gap->GetRefPhase());
       }
@@ -106,7 +106,7 @@ extern "C"
     }
     else if (cur_id > 1) // not the first gap in DTL tank
     {
-      RFGap* prev_gap = dynamic_cast<RFGap*>((*bl)[cur_id - 2]);
+      RFGap* prev_gap = dynamic_cast<RFGap*>((*bl_tmp)[cur_id - 2]);
       phi_in = 0.5 * (prev_gap->GetRefPhase() + r_gap->GetRefPhase()); 
     }
     else // cur_id == 0
@@ -114,21 +114,21 @@ extern "C"
       std::cerr << "A quad is missing before the DTL gap! " << std::endl;
       exit(0);
     }
-    Quad* prev_quad = dynamic_cast<Quad*>((*bl)[cur_id - 1]);
-    Quad* next_quad = dynamic_cast<Quad*>((*bl)[cur_id + 1]);
+    Quad* prev_quad = dynamic_cast<Quad*>((*bl_tmp)[cur_id - 1]);
+    Quad* next_quad = dynamic_cast<Quad*>((*bl_tmp)[cur_id + 1]);
     double quad1_len = prev_quad->GetLength();
     double quad2_len = next_quad->GetLength();
-    SimulateRFGapFirstHalfKernel<<<grid_size, blck_size/2>>>(beam->x, 
-      beam->y, beam->phi, beam->xp, beam->yp, beam->w, beam->loss, 
+    SimulateRFGapFirstHalfKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, 
       design_w, phi_in, rfparam, r_gap->GetLength(), quad1_len, quad2_len, false);
     // apply space charge
     if(param->space_charge_on)
-      spch->Start(beam, r_gap->GetLength()); 
-    SimulateRFGapSecondHalfKernel<<<grid_size, blck_size/2>>>(beam->x, 
-      beam->y, beam->phi, beam->xp, beam->yp, beam->w, beam->loss, design_w, 
+      spch_tmp->Start(beam_tmp, r_gap->GetLength()); 
+    SimulateRFGapSecondHalfKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, 
       phi_in, rfparam, r_gap->GetLength(), 0, quad1_len, quad2_len, false, true);
     design_w = r_gap->GetEnergyOut();
-    beam->design_w = design_w;
+    beam_tmp->design_w = design_w;
     ++cur_id;
   }
   void SimulateRotation(Rotation*)
@@ -140,12 +140,12 @@ extern "C"
   }
   void Init(Beam* r_beam, BeamLine* r_bl, SpaceCharge* r_spch, SimulationParam& r_param)
   {
-    spch = r_spch;
-    beam = r_beam;
-    bl = r_bl;
+    spch_tmp= r_spch;
+    beam_tmp = r_beam;
+    bl_tmp = r_bl;
     param = &r_param; 
-    grid_size = beam->grid_size;
-    blck_size = beam->blck_size;
+    grid_size = beam_tmp->grid_size;
+    blck_size = beam_tmp->blck_size;
     design_w = r_beam->design_w;
     UpdateWaveLengthKernel<<<1, 1>>>(r_beam->freq);
     cudaMalloc((void**)&rfparam, sizeof(RFGapParameter));
@@ -165,21 +165,21 @@ extern "C"
 
 //    BeamLineElement* d_bl = r_bl->GetDeviceBeamLinePtr();
 //    BeamLineElement* h_bl = r_bl->GetHostBeamLinePtr();
-//    UpdateWaveLengthKernel<<<1, 1>>>(r_beam->freq);
+//    UpdateWaveLengthKernel<<<1, 1>>>(r_beam_tmp->freq);
 
-//    double design_w = r_beam->design_w;
+//    double design_w = r_beam_tmp->design_w;
 //    static int ccl_cell_num = 0; // reset to zero at the beginning of every ccl tank
 //    int monitor_num = 0;
 //    uint loss_num = 0;
 //
 //    for(uint i = 0; i <= r_end_index; ++i) 
 //    {
-//      double* x = r_beam->x, *xp = r_beam->xp;
-//      double* y = r_beam->y, *yp = r_beam->yp;
-//      double* phi = r_beam->phi, *w = r_beam->w;
-//      uint* loss = r_beam->loss;
-//      uint grid_size = r_beam->grid_size;
-//      uint blck_size = r_beam->blck_size;
+//      double* x = r_beam_tmp->x, *xp = r_beam_tmp->xp;
+//      double* y = r_beam_tmp->y, *yp = r_beam_tmp->yp;
+//      double* phi = r_beam_tmp->phi, *w = r_beam_tmp->w;
+//      uint* loss = r_beam_tmp->loss;
+//      uint grid_size = r_beam_tmp->grid_size;
+//      uint blck_size = r_beam_tmp->blck_size;
 
 //      // SPACE CHARGE COMPENSATION
 //      if(h_bl[i].type[0] == 's' && h_bl[i].type[1] == 'c' && r_spch != NULL)
@@ -201,7 +201,7 @@ extern "C"
 //            SimulatePartialDriftKernel<<<grid_size, blck_size>>>(x, y, phi, xp, 
 //              yp, w, loss, hf_spch_len, h_bl[i].aperture1, i);
 //            if(r_param.space_charge_on)
-//              r_spch->Start(r_beam, 2.0*hf_spch_len); 
+//              r_spch->Start(r_beam_tmp, 2.0*hf_spch_len); 
 //
 //            SimulatePartialDriftKernel<<<grid_size, blck_size>>>(x, y, phi, xp, 
 //              yp, w, loss, hf_spch_len, h_bl[i].aperture1, i);
@@ -223,10 +223,10 @@ extern "C"
 //        if(h_bl[i].type[0] == 'b' && h_bl[i].type[1] == 'c' && h_bl[i].t != 0.0)
 //        {
 //          // check frequency change
-//          if(r_beam->freq != h_bl[i].freq)
+//          if(r_beam_tmp->freq != h_bl[i].freq)
 //          {
 //            UpdateWaveLengthKernel<<<1, 1>>>(h_bl[i].freq);
-//            r_beam->ChangeFrequency(h_bl[i].freq);
+//            r_beam_tmp->ChangeFrequency(h_bl[i].freq);
 //          }
 //
 //          if(h_bl[i].rf_amp != 0.0)
@@ -243,7 +243,7 @@ extern "C"
 //          SimulateFirstHalfDipoleKernel<<<grid_size, blck_size/4>>>(x, y, phi, xp,
 //            yp, w, loss, d_elem);
 //          if(r_param.space_charge_on)
-//            r_spch->Start(r_beam, h_bl[i].length*h_bl[i].gradient); 
+//            r_spch->Start(r_beam_tmp, h_bl[i].length*h_bl[i].gradient); 
 //          SimulateSecondHalfDipoleKernel<<<grid_size, blck_size/4>>>(x, y, phi, xp, 
 //            yp, w, loss, d_elem);
 //        }
@@ -254,20 +254,20 @@ extern "C"
 //          SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(x, y, phi, xp, yp, 
 //            w, loss, d_elem, i);
 //          // temporary
-////          r_beam->UpdateGoodParticleCount();
-////          r_beam->UpdateAvgPhi(true);
-////          r_beam->UpdateRelativePhi(true);
-////          r_beam->UpdateSigRelativePhi(true);
-////          double sigphi = r_beam->GetSigRelativePhi(true);
-////          r_beam->UpdateSigX(true);
-////          double sigx = r_beam->GetSigX(true);
-////          r_beam->UpdateSigY(true);
-////          double sigy = r_beam->GetSigY(true);
-////          r_beam->UpdateAvgW(true);
-////          double ke = r_beam->GetAvgW(true);
-////          double gamma = (double)ke / r_beam->mass + 1.0;
+////          r_beam_tmp->UpdateGoodParticleCount();
+////          r_beam_tmp->UpdateAvgPhi(true);
+////          r_beam_tmp->UpdateRelativePhi(true);
+////          r_beam_tmp->UpdateSigRelativePhi(true);
+////          double sigphi = r_beam_tmp->GetSigRelativePhi(true);
+////          r_beam_tmp->UpdateSigX(true);
+////          double sigx = r_beam_tmp->GetSigX(true);
+////          r_beam_tmp->UpdateSigY(true);
+////          double sigy = r_beam_tmp->GetSigY(true);
+////          r_beam_tmp->UpdateAvgW(true);
+////          double ke = r_beam_tmp->GetAvgW(true);
+////          double gamma = (double)ke / r_beam_tmp->mass + 1.0;
 ////          double beta = std::sqrt(1.0-1.0/(gamma*gamma));
-////          double lmbd = 299.792458/r_beam->freq;
+////          double lmbd = 299.792458/r_beam_tmp->freq;
 ////          double sigz = sigphi*0.5/3.14159265*beta*lmbd;
 ////          double sigr = std::sqrt(sigx*sigx + sigy*sigy);
 ////          double aratio = sigz/sigr*gamma;
@@ -281,34 +281,34 @@ extern "C"
 //          if(h_bl[i].t != 0)
 //            if(r_param.graphics_on)
 //            {
-//              r_beam->UpdateLoss();
-//              double loss_local_h = r_beam->GetLossNum() - loss_num;
+//              r_beam_tmp->UpdateLoss();
+//              double loss_local_h = r_beam_tmp->GetLossNum() - loss_num;
 //              loss_num += loss_local_h;
-//              loss_local_h /= r_beam->num_particle;
-//              double loss_ratio_h = (double)loss_num/r_beam->num_particle;
+//              loss_local_h /= r_beam_tmp->num_particle;
+//              double loss_ratio_h = (double)loss_num/r_beam_tmp->num_particle;
 //              cudaMemcpyAsync((r_param.plot_data->loss_local).d_ptr + monitor_num, &loss_local_h, sizeof(double), cudaMemcpyHostToDevice, 0);
 //              cudaMemcpyAsync((r_param.plot_data->loss_ratio).d_ptr + monitor_num, &loss_ratio_h, sizeof(double), cudaMemcpyHostToDevice, 0);
-//              r_beam->UpdateEmittance();
-//              cudaMemcpyAsync((r_param.plot_data->xavg).d_ptr + monitor_num, r_beam->x_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->xsig).d_ptr + monitor_num, r_beam->x_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->xpavg).d_ptr + monitor_num, r_beam->xp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->xpsig).d_ptr + monitor_num, r_beam->xp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->yavg).d_ptr + monitor_num, r_beam->y_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->ysig).d_ptr + monitor_num, r_beam->y_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->ypavg).d_ptr + monitor_num, r_beam->yp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->ypsig).d_ptr + monitor_num, r_beam->yp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->phiavg).d_ptr + monitor_num, r_beam->phi_avg_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->phisig).d_ptr + monitor_num, r_beam->phi_sig_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->wsig).d_ptr + monitor_num, r_beam->w_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->xemit).d_ptr + monitor_num, r_beam->x_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->yemit).d_ptr + monitor_num, r_beam->y_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->zemit).d_ptr + monitor_num, r_beam->z_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              double w_avg = r_beam->GetAvgW() - r_beam->GetRefEnergy();
+//              r_beam_tmp->UpdateEmittance();
+//              cudaMemcpyAsync((r_param.plot_data->xavg).d_ptr + monitor_num, r_beam_tmp->x_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->xsig).d_ptr + monitor_num, r_beam_tmp->x_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->xpavg).d_ptr + monitor_num, r_beam_tmp->xp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->xpsig).d_ptr + monitor_num, r_beam_tmp->xp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->yavg).d_ptr + monitor_num, r_beam_tmp->y_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->ysig).d_ptr + monitor_num, r_beam_tmp->y_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->ypavg).d_ptr + monitor_num, r_beam_tmp->yp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->ypsig).d_ptr + monitor_num, r_beam_tmp->yp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->phiavg).d_ptr + monitor_num, r_beam_tmp->phi_avg_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->phisig).d_ptr + monitor_num, r_beam_tmp->phi_sig_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->wsig).d_ptr + monitor_num, r_beam_tmp->w_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->xemit).d_ptr + monitor_num, r_beam_tmp->x_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->yemit).d_ptr + monitor_num, r_beam_tmp->y_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->zemit).d_ptr + monitor_num, r_beam_tmp->z_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              double w_avg = r_beam_tmp->GetAvgW() - r_beam_tmp->GetRefEnergy();
 //              cudaMemcpy((r_param.plot_data->wavg).d_ptr + monitor_num, &w_avg, sizeof(double), cudaMemcpyHostToDevice);
 //              ++monitor_num;
 //            } 
 //          if(r_param.space_charge_on)
-//            r_spch->Start(r_beam, h_bl[i].length); 
+//            r_spch->Start(r_beam_tmp, h_bl[i].length); 
 //          SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(x, y, phi, xp, yp, 
 //            w, loss, d_elem, i);
 //        } // if quad
@@ -317,10 +317,10 @@ extern "C"
 //        {
 //          cudaMemcpyAsync(d_elem, &d_bl[i], sizeof(BeamLineElement), cudaMemcpyDeviceToDevice, 0);
 //          // check frequency change
-//          if(r_beam->freq != h_bl[i].freq)
+//          if(r_beam_tmp->freq != h_bl[i].freq)
 //          {
 //            UpdateWaveLengthKernel<<<1, 1>>>(h_bl[i].freq);
-//            r_beam->ChangeFrequency(h_bl[i].freq);
+//            r_beam_tmp->ChangeFrequency(h_bl[i].freq);
 //          }
 //          
 //          // calculate phase_in used in the gap to calculate half phase 
@@ -355,20 +355,20 @@ extern "C"
 //          SimulateRFGapFirstHalfKernel<<<grid_size, blck_size/2>>>(x, y, phi, xp, 
 //            yp, w, loss, design_w, phi_in, d_elem, quad1_len, quad2_len, false);
 //          // temporary
-////          r_beam->UpdateGoodParticleCount();
-////          r_beam->UpdateAvgPhi(true);
-////          r_beam->UpdateRelativePhi(true);
-////          r_beam->UpdateSigRelativePhi(true);
-////          double sigphi = r_beam->GetSigRelativePhi(true);
-////          r_beam->UpdateSigX(true);
-////          double sigx = r_beam->GetSigX(true);
-////          r_beam->UpdateSigY(true);
-////          double sigy = r_beam->GetSigY(true);
-////          r_beam->UpdateAvgW(true);
-////          double ke = r_beam->GetAvgW(true);
-////          double gamma = (double)ke / r_beam->mass + 1.0;
+////          r_beam_tmp->UpdateGoodParticleCount();
+////          r_beam_tmp->UpdateAvgPhi(true);
+////          r_beam_tmp->UpdateRelativePhi(true);
+////          r_beam_tmp->UpdateSigRelativePhi(true);
+////          double sigphi = r_beam_tmp->GetSigRelativePhi(true);
+////          r_beam_tmp->UpdateSigX(true);
+////          double sigx = r_beam_tmp->GetSigX(true);
+////          r_beam_tmp->UpdateSigY(true);
+////          double sigy = r_beam_tmp->GetSigY(true);
+////          r_beam_tmp->UpdateAvgW(true);
+////          double ke = r_beam_tmp->GetAvgW(true);
+////          double gamma = (double)ke / r_beam_tmp->mass + 1.0;
 ////          double beta = std::sqrt(1.0-1.0/(gamma*gamma));
-////          double lmbd = 299.792458/r_beam->freq;
+////          double lmbd = 299.792458/r_beam_tmp->freq;
 ////          double sigz = sigphi*0.5/3.14159265*beta*lmbd;
 ////          double sigr = std::sqrt(sigx*sigx + sigy*sigy);
 ////          double aratio = sigz/sigr*gamma;
@@ -381,20 +381,20 @@ extern "C"
 //          /////////////////////////
 //
 //          if(r_param.space_charge_on)
-//            r_spch->Start(r_beam, h_bl[i].length); 
+//            r_spch->Start(r_beam_tmp, h_bl[i].length); 
 //          SimulateRFGapSecondHalfKernel<<<grid_size, blck_size/2>>>(x, y, phi, xp, 
 //            yp, w, loss, design_w, phi_in, d_elem, 0, quad1_len, quad2_len, false);
 //          design_w = h_bl[i].energy_out;
-//          r_beam->design_w = design_w;
+//          r_beam_tmp->design_w = design_w;
 //        }               
 //        // RF GAP in CCL
 //        if(h_bl[i].type[0] == 'g' && h_bl[i].type[1] == 'c')
 //        {
 //          // check frequency change
-//          if(r_beam->freq != h_bl[i].freq)
+//          if(r_beam_tmp->freq != h_bl[i].freq)
 //          {
 //            UpdateWaveLengthKernel<<<1, 1>>>(h_bl[i].freq);
-//            r_beam->ChangeFrequency(h_bl[i].freq);
+//            r_beam_tmp->ChangeFrequency(h_bl[i].freq);
 //          }
 // 
 //          // check if this is the first cell in a ccl tank
@@ -423,20 +423,20 @@ extern "C"
 //          SimulateRFGapFirstHalfKernel<<<grid_size, gc_blck_size>>>(x, y, phi, xp,
 //            yp, w, loss, design_w, phi_in, d_elem);
 //          // temporary
-////          r_beam->UpdateGoodParticleCount();
-////          r_beam->UpdateAvgPhi(true);
-////          r_beam->UpdateRelativePhi(true);
-////          r_beam->UpdateSigRelativePhi(true);
-////          double sigphi = r_beam->GetSigRelativePhi(true);
-////          r_beam->UpdateSigX(true);
-////          double sigx = r_beam->GetSigX(true);
-////          r_beam->UpdateSigY(true);
-////          double sigy = r_beam->GetSigY(true);
-////          r_beam->UpdateAvgW(true);
-////          double ke = r_beam->GetAvgW(true);
-////          double gamma = (double)ke / r_beam->mass + 1.0;
+////          r_beam_tmp->UpdateGoodParticleCount();
+////          r_beam_tmp->UpdateAvgPhi(true);
+////          r_beam_tmp->UpdateRelativePhi(true);
+////          r_beam_tmp->UpdateSigRelativePhi(true);
+////          double sigphi = r_beam_tmp->GetSigRelativePhi(true);
+////          r_beam_tmp->UpdateSigX(true);
+////          double sigx = r_beam_tmp->GetSigX(true);
+////          r_beam_tmp->UpdateSigY(true);
+////          double sigy = r_beam_tmp->GetSigY(true);
+////          r_beam_tmp->UpdateAvgW(true);
+////          double ke = r_beam_tmp->GetAvgW(true);
+////          double gamma = (double)ke / r_beam_tmp->mass + 1.0;
 ////          double beta = std::sqrt(1.0-1.0/(gamma*gamma));
-////          double lmbd = 299.792458/r_beam->freq;
+////          double lmbd = 299.792458/r_beam_tmp->freq;
 ////          double sigz = sigphi*0.5/3.14159265*beta*lmbd;
 ////          double sigr = std::sqrt(sigx*sigx + sigy*sigy);
 ////          double aratio = sigz/sigr*gamma;
@@ -448,11 +448,11 @@ extern "C"
 ////                    << pratior << "\t" << pratioz << "\t" << cratior << "\t" << cratioz <<std::endl;
 //          /////////////////////////
 //          if(r_param.space_charge_on)
-//            r_spch->Start(r_beam, h_bl[i].length);
+//            r_spch->Start(r_beam_tmp, h_bl[i].length);
 //          SimulateRFGapSecondHalfKernel<<<grid_size, gc_blck_size>>>(x, y, phi, xp,
 //            yp, w, loss, design_w, phi_out, d_elem, ccl_cell_num++);
 //          design_w = h_bl[i].energy_out;
-//          r_beam->design_w = design_w;
+//          r_beam_tmp->design_w = design_w;
 //        }
 //        // ROTATION
 //        if(h_bl[i].type[0] == 'r' && h_bl[i].type[1] == 'o')
@@ -463,20 +463,20 @@ extern "C"
 //        // h_bl[i].t == 0.0 when raperture is out
 //        if(h_bl[i].type[0] == 'r' && h_bl[i].type[1] == 'a' && h_bl[i].t != 0.0)
 //        {
-//          r_beam->UpdateLoss();
-//          r_beam->UpdateAvgXY();
+//          r_beam_tmp->UpdateLoss();
+//          r_beam_tmp->UpdateAvgXY();
 //          SimulateRectangularApertureKernel<<<grid_size, blck_size>>>(x, y, loss, 
 //            h_bl[i].aperture1, h_bl[i].tp, h_bl[i].aperture2, h_bl[i].sp, 
-//            r_beam->x_avg, r_beam->y_avg, i);
+//            r_beam_tmp->x_avg, r_beam_tmp->y_avg, i);
 //        } 
 //        // CIRCULAR APERTURE
 //        // h_bl[i].t == 0.0 when caperture is out
 //        if(h_bl[i].type[0] == 'c' && h_bl[i].type[1] == 'a' && h_bl[i].t != 0.0)
 //        {
-//          r_beam->UpdateLoss();
-//          r_beam->UpdateAvgXY();
+//          r_beam_tmp->UpdateLoss();
+//          r_beam_tmp->UpdateAvgXY();
 //          SimulateCircularApertureKernel<<<grid_size, blck_size>>>(x, y, loss, 
-//            h_bl[i].aperture1, r_beam->x_avg, r_beam->y_avg, i);
+//            h_bl[i].aperture1, r_beam_tmp->x_avg, r_beam_tmp->y_avg, i);
 //        } 
 //        // DISPLACE
 //        if(h_bl[i].type[0] == 'x')
@@ -494,29 +494,29 @@ extern "C"
 //          if(h_bl[i].t != 0)
 //            if(r_param.graphics_on)
 //            {
-//              r_beam->UpdateLoss();
-//              double loss_local_h = r_beam->GetLossNum() - loss_num;
+//              r_beam_tmp->UpdateLoss();
+//              double loss_local_h = r_beam_tmp->GetLossNum() - loss_num;
 //              loss_num += loss_local_h;
-//              loss_local_h /= r_beam->num_particle;
-//              double loss_ratio_h = (double)loss_num/r_beam->num_particle;
+//              loss_local_h /= r_beam_tmp->num_particle;
+//              double loss_ratio_h = (double)loss_num/r_beam_tmp->num_particle;
 //              cudaMemcpyAsync((r_param.plot_data->loss_local).d_ptr + monitor_num, &loss_local_h, sizeof(double), cudaMemcpyHostToDevice, 0);
 //              cudaMemcpyAsync((r_param.plot_data->loss_ratio).d_ptr + monitor_num, &loss_ratio_h, sizeof(double), cudaMemcpyHostToDevice, 0);
-//              r_beam->UpdateEmittance();
-//              cudaMemcpyAsync((r_param.plot_data->xavg).d_ptr + monitor_num, r_beam->x_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->xsig).d_ptr + monitor_num, r_beam->x_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->xpavg).d_ptr + monitor_num, r_beam->xp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->xpsig).d_ptr + monitor_num, r_beam->xp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->yavg).d_ptr + monitor_num, r_beam->y_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->ysig).d_ptr + monitor_num, r_beam->y_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->ypavg).d_ptr + monitor_num, r_beam->yp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->ypsig).d_ptr + monitor_num, r_beam->yp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->phiavg).d_ptr + monitor_num, r_beam->phi_avg_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->phisig).d_ptr + monitor_num, r_beam->phi_sig_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->wsig).d_ptr + monitor_num, r_beam->w_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->xemit).d_ptr + monitor_num, r_beam->x_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->yemit).d_ptr + monitor_num, r_beam->y_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              cudaMemcpyAsync((r_param.plot_data->zemit).d_ptr + monitor_num, r_beam->z_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-//              double w_avg = r_beam->GetAvgW() - r_beam->GetRefEnergy();
+//              r_beam_tmp->UpdateEmittance();
+//              cudaMemcpyAsync((r_param.plot_data->xavg).d_ptr + monitor_num, r_beam_tmp->x_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->xsig).d_ptr + monitor_num, r_beam_tmp->x_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->xpavg).d_ptr + monitor_num, r_beam_tmp->xp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->xpsig).d_ptr + monitor_num, r_beam_tmp->xp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->yavg).d_ptr + monitor_num, r_beam_tmp->y_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->ysig).d_ptr + monitor_num, r_beam_tmp->y_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->ypavg).d_ptr + monitor_num, r_beam_tmp->yp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->ypsig).d_ptr + monitor_num, r_beam_tmp->yp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->phiavg).d_ptr + monitor_num, r_beam_tmp->phi_avg_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->phisig).d_ptr + monitor_num, r_beam_tmp->phi_sig_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->wsig).d_ptr + monitor_num, r_beam_tmp->w_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->xemit).d_ptr + monitor_num, r_beam_tmp->x_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->yemit).d_ptr + monitor_num, r_beam_tmp->y_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              cudaMemcpyAsync((r_param.plot_data->zemit).d_ptr + monitor_num, r_beam_tmp->z_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+//              double w_avg = r_beam_tmp->GetAvgW() - r_beam_tmp->GetRefEnergy();
 //              cudaMemcpy((r_param.plot_data->wavg).d_ptr + monitor_num, &w_avg, sizeof(double), cudaMemcpyHostToDevice);
 //              ++monitor_num;
 //            } 
@@ -525,12 +525,12 @@ extern "C"
 //    } // for i
     
 //    StopTimer(&start, &stop, "whole Simulation");
-//    r_beam->UpdateStatForPlotting();
+//    r_beam_tmp->UpdateStatForPlotting();
 //  }
 
 //////////////////////////////////////////////////////////////////////////////////
 /*
-  void StepSimulationKernelCall(Beam* r_beam, BeamLine* r_bl, 
+  void StepSimulationKernelCall(Beam* r_beam_tmp, BeamLine* r_bl, 
     SpaceCharge* r_spch, SimulationParam& r_param, uint r_index)
   {
     // start simulation
@@ -539,26 +539,26 @@ extern "C"
     
     BeamLineElement* d_bl = r_bl->GetDeviceBeamLinePtr();
     BeamLineElement* h_bl = r_bl->GetHostBeamLinePtr();
-    UpdateWaveLengthKernel<<<1, 1>>>(r_beam->freq);
+    UpdateWaveLengthKernel<<<1, 1>>>(r_beam_tmp->freq);
 
-    static double design_w = r_beam->GetRefEnergy();
+    static double design_w = r_beam_tmp->GetRefEnergy();
     static int ccl_cell_num = 0;
     static uint prev_index = r_index;
     if(r_index < prev_index) // simulation restarted.
     {
       std::cout << "3D Simulation start " << std::endl;
-      design_w = r_beam->GetRefEnergy();
+      design_w = r_beam_tmp->GetRefEnergy();
       ccl_cell_num = 0;
     }
     prev_index = r_index;
     for(uint i = 0; i <= r_index; ++i) 
     {
-      double* x = r_beam->x, *xp = r_beam->xp;
-      double* y = r_beam->y, *yp = r_beam->yp;
-      double* phi = r_beam->phi, *w = r_beam->w;
-      uint* loss = r_beam->loss;
-      uint grid_size = r_beam->grid_size;
-      uint blck_size = r_beam->blck_size;
+      double* x = r_beam_tmp->x, *xp = r_beam_tmp->xp;
+      double* y = r_beam_tmp->y, *yp = r_beam_tmp->yp;
+      double* phi = r_beam_tmp->phi, *w = r_beam_tmp->w;
+      uint* loss = r_beam_tmp->loss;
+      uint grid_size = r_beam_tmp->grid_size;
+      uint blck_size = r_beam_tmp->blck_size;
       // SPACE CHARGE COMPENSATION
       if(h_bl[i].type[0] == 's' && h_bl[i].type[1] == 'c' && r_spch != NULL)
       {
@@ -579,7 +579,7 @@ extern "C"
             SimulatePartialDriftKernel<<<grid_size, blck_size>>>(x, y, phi, xp, 
               yp, w, loss, hf_spch_len, h_bl[i].aperture1, i);
             if(r_param.space_charge_on)
-              r_spch->Start(r_beam, 2.0*hf_spch_len); 
+              r_spch->Start(r_beam_tmp, 2.0*hf_spch_len); 
             SimulatePartialDriftKernel<<<grid_size, blck_size>>>(x, y, phi, xp, 
               yp, w, loss, hf_spch_len, h_bl[i].aperture1, i);
           }// for nk
@@ -588,10 +588,10 @@ extern "C"
         if(h_bl[i].type[0] == 'b' && h_bl[i].type[1] == 'c' && h_bl[i].t != 0.0)
         {
           // check frequency change
-          if(r_beam->freq != h_bl[i].freq)
+          if(r_beam_tmp->freq != h_bl[i].freq)
           {
             UpdateWaveLengthKernel<<<1, 1>>>(h_bl[i].freq);
-            r_beam->ChangeFrequency(h_bl[i].freq);
+            r_beam_tmp->ChangeFrequency(h_bl[i].freq);
           }
           if(h_bl[i].rf_amp != 0.0)
           {
@@ -607,7 +607,7 @@ extern "C"
           SimulateFirstHalfDipoleKernel<<<grid_size, blck_size/4>>>(x, y, phi, xp,
             yp, w, loss, d_elem);
           if(r_param.space_charge_on)
-            r_spch->Start(r_beam, h_bl[i].length*h_bl[i].gradient); 
+            r_spch->Start(r_beam_tmp, h_bl[i].length*h_bl[i].gradient); 
           SimulateSecondHalfDipoleKernel<<<grid_size, blck_size/4>>>(x, y, phi, xp, 
             yp, w, loss, d_elem);
         }
@@ -618,7 +618,7 @@ extern "C"
           SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(x, y, phi, xp, yp, 
             w, loss, d_elem, i);
           if(r_param.space_charge_on)
-            r_spch->Start(r_beam, h_bl[i].length); 
+            r_spch->Start(r_beam_tmp, h_bl[i].length); 
           SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(x, y, phi, xp, yp, 
             w, loss, d_elem, i);
         } // if quad
@@ -627,10 +627,10 @@ extern "C"
         {
           cudaMemcpyAsync(d_elem, &d_bl[i], sizeof(BeamLineElement), cudaMemcpyDeviceToDevice, 0);
           // check frequency change
-          if(r_beam->freq != h_bl[i].freq)
+          if(r_beam_tmp->freq != h_bl[i].freq)
           {
             UpdateWaveLengthKernel<<<1, 1>>>(h_bl[i].freq);
-            r_beam->ChangeFrequency(h_bl[i].freq);
+            r_beam_tmp->ChangeFrequency(h_bl[i].freq);
           }
           
           // calculate phase_in used in the gap to calculate half phase 
@@ -665,7 +665,7 @@ extern "C"
           SimulateRFGapFirstHalfKernel<<<grid_size, blck_size/2>>>(x, y, phi, xp, 
             yp, w, loss, design_w, phi_in, d_elem, quad1_len, quad2_len, false);
           if(r_param.space_charge_on)
-            r_spch->Start(r_beam, h_bl[i].length); 
+            r_spch->Start(r_beam_tmp, h_bl[i].length); 
           SimulateRFGapSecondHalfKernel<<<grid_size, blck_size/2>>>(x, y, phi, xp, 
             yp, w, loss, design_w, phi_in, d_elem, 0, quad1_len, quad2_len, false);
           design_w = h_bl[i].energy_out;
@@ -674,10 +674,10 @@ extern "C"
         if(h_bl[i].type[0] == 'g' && h_bl[i].type[1] == 'c')
         {
           // check frequency change
-          if(r_beam->freq != h_bl[i].freq)
+          if(r_beam_tmp->freq != h_bl[i].freq)
           {
             UpdateWaveLengthKernel<<<1, 1>>>(h_bl[i].freq);
-            r_beam->ChangeFrequency(h_bl[i].freq);
+            r_beam_tmp->ChangeFrequency(h_bl[i].freq);
           }
  
           // check if this is the first cell in a ccl tank
@@ -706,7 +706,7 @@ extern "C"
           SimulateRFGapFirstHalfKernel<<<grid_size, gc_blck_size>>>(x, y, phi, xp,
             yp, w, loss, design_w, phi_in, d_elem);
           if(r_param.space_charge_on)
-            r_spch->Start(r_beam, h_bl[i].length);
+            r_spch->Start(r_beam_tmp, h_bl[i].length);
           SimulateRFGapSecondHalfKernel<<<grid_size, gc_blck_size>>>(x, y, phi, xp,
             yp, w, loss, design_w, phi_out, d_elem, ccl_cell_num++);
           design_w = h_bl[i].energy_out;
@@ -720,20 +720,20 @@ extern "C"
         // h_bl[i].t == 0.0 when raperture is out
         if(h_bl[i].type[0] == 'r' && h_bl[i].type[1] == 'a' && h_bl[i].t != 0.0)
         {
-          r_beam->UpdateLoss();
-          r_beam->UpdateAvgXY();
+          r_beam_tmp->UpdateLoss();
+          r_beam_tmp->UpdateAvgXY();
           SimulateRectangularApertureKernel<<<grid_size, blck_size>>>(x, y, loss, 
             h_bl[i].aperture1, h_bl[i].tp, h_bl[i].aperture2, h_bl[i].sp, 
-            r_beam->x_avg, r_beam->y_avg, i);
+            r_beam_tmp->x_avg, r_beam_tmp->y_avg, i);
         } 
         // CIRCULAR APERTURE
         // h_bl[i].t == 0.0 when caperture is out
         if(h_bl[i].type[0] == 'c' && h_bl[i].type[1] == 'a' && h_bl[i].t != 0.0)
         {
-          r_beam->UpdateLoss();
-          r_beam->UpdateAvgXY();
+          r_beam_tmp->UpdateLoss();
+          r_beam_tmp->UpdateAvgXY();
           SimulateCircularApertureKernel<<<grid_size, blck_size>>>(x, y, loss, 
-            h_bl[i].aperture1, r_beam->x_avg, r_beam->y_avg, i);
+            h_bl[i].aperture1, r_beam_tmp->x_avg, r_beam_tmp->y_avg, i);
         } 
         // DISPLACE
         if(h_bl[i].type[0] == 'x')
@@ -750,9 +750,9 @@ extern "C"
         // output for 3D graphics
       }// if(i == r_start_index)
     } // for i
-    r_beam->UpdateStatForPlotting();
-//    std::cout << "Simualtion engine: "<< r_beam->GetAvgRelativePhi() << ", " << r_beam->GetSigRelativePhi(true) <<", " << r_beam->GetAvgW(true) << ", " 
-//      << r_beam->GetSigW(true) << std::endl;
+    r_beam_tmp->UpdateStatForPlotting();
+//    std::cout << "Simualtion engine: "<< r_beam_tmp->GetAvgRelativePhi() << ", " << r_beam_tmp->GetSigRelativePhi(true) <<", " << r_beam_tmp->GetAvgW(true) << ", " 
+//      << r_beam_tmp->GetSigW(true) << std::endl;
   }
 */
 }// extern "C"

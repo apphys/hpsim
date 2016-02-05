@@ -60,6 +60,8 @@ public:
   double GetFrequency() const;
   double GetRefPhase() const;
   double GetEnergyOut() const;
+  double GetRFAmplitude() const;
+  double GetPhaseShift() const;
   void SetFrequency(double);
   void SetCellLengthOverBetaLambda(double);
   void SetRFAmplitude(double);
@@ -201,6 +203,16 @@ inline
 double RFGap::GetEnergyOut() const
 {
   return param_h_->energy_out;
+}
+inline
+double RFGap::GetRFAmplitude() const
+{
+  return param_h_->amplitude;
+}
+inline 
+double RFGap::GetPhaseShift() const
+{
+  return param_h_->phase_shift;
 }
 inline
 void RFGap::SetFrequency(double r_freq)
