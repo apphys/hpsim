@@ -1,13 +1,13 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "pvlist.h"
+#include "pv_observer_list.h"
 
 extern bool server_stop_flag;
 struct ServerArg
 {
   int num_monitor;
-  PVList* channels;  
+  PVObserverList* channels;  
 };
 
 void* ServerRoutine(void*);

@@ -57,3 +57,18 @@ std::vector<uint> BeamLine::GetMonitoredElementsIndices(std::string r_begin, std
       indices.push_back(i);
   return indices;
 }
+
+BeamLineElement* BeamLine::operator[](std::string r_name) 
+{
+  for(int i = 0; i < bl.size(); ++i)
+    if(bl[i]->GetName() == r_name)
+      return bl[i];
+  return NULL;
+}
+const BeamLineElement* BeamLine::operator[](std::string r_name) const
+{
+  for(int i = 0; i < bl.size(); ++i)
+    if(bl[i]->GetName() == r_name)
+      return bl[i];
+  return NULL;
+}

@@ -12,7 +12,7 @@
 #include "tool_lib.h"
 
 bool server_stop_flag = false;
-PVList* pv_channels;
+PVObserverList* pv_channels;
 
 void event_handler(evargs args)
 {
@@ -29,15 +29,9 @@ void event_handler(evargs args)
     std::ostringstream osstr;
     osstr << val;
 
-    Updater* updater = (*pv_channels)[std::string(ppv->name)];
+    PVObserver* updater = (*pv_channels)[std::string(ppv->name)];
 //    ThreadCheck(pthread_mutex_lock(&updater_pair.second), "EPICSMonitorRoutine:lock mutex");
-    updater->SetValue(osstr.str());
-    updater->UpdateDB();
-    updater->UpdateModel();
-    std::cout << ppv->name << " after setting val old : " << 
-      updater->old_val_ << ", new = " << 
-      updater->val_ << std::endl;
-    updater->UpdateOldValue();
+    updater->Update(osstr.str());
 //    ThreadCheck(pthread_mutex_unlock(&updater_pair.second), "EPICSMonitorRoutine:unlock mutex");
   }
 }
@@ -81,7 +75,7 @@ void connection_handler(struct connection_handler_args args)
   }
 }
 
-bool InitChannel(Updater* r_up)
+bool InitChannel(PVObserver* r_up)
 {
   std::string pv_name = r_up->GetPV();
   chid mychid;
@@ -99,7 +93,7 @@ bool InitChannel(Updater* r_up)
 
   std::ostringstream osstr;
   osstr << val_dbl;
-  r_up->SetValue(osstr.str());
+  r_up->Update(osstr.str());
   return true;
 }
 
@@ -110,14 +104,12 @@ void* ServerRoutine(void* r_arg)
 
   ServerArg* arg = (ServerArg*)r_arg;
   pv_channels = arg->channels; 
-  std::cout <<"server is monitoring " << pv_channels->GetListSize() << " pvs" << std::endl;
+  std::cout <<"server is monitoring " << pv_channels->GetSize() << " pvs" << std::endl;
   
-  std::map<std::string, Updater*>::iterator iter;
-
-  const int num_channel = pv_channels->GetListSize();
+  const int num_channel = pv_channels->GetSize();
   pv* pvs = new pv[num_channel];
   int cnt = 0;
-  for (iter = (pv_channels->list).begin(); iter != (pv_channels->list).end(); ++iter)
+  for (PVObserverList::MapIter iter = (pv_channels->GetList()).begin(); iter != (pv_channels->GetList()).end(); ++iter)
   {
     pvs[cnt++].name = const_cast<char*>((iter->first).c_str());
     InitChannel((iter->second));

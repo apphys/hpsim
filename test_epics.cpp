@@ -9,7 +9,6 @@
 #include <cuda_runtime_api.h>
 #include "beamline.h"
 #include "init.h"
-#include "init_pvlist.h"
 #include "sql_utility.h"
 #include "server.h"
 #include "pthread_check.h"
@@ -17,6 +16,8 @@
 #include "plot_data.h"
 #include "input_data.h"
 #include "epics_put.h"
+#include "init_pv_observer_list.h"
+#include "pv_observer_list.h"
 
 #include <typeinfo>
 
@@ -25,7 +26,7 @@ SimulationEngine engine;
 std::string start_elem;
 std::string end_elem;
 // data server
-PVList uplist;
+PVObserverList oblist;
 pthread_t server;
 ServerArg* sarg;
 pthread_t epicsput;
@@ -134,12 +135,13 @@ int main(int argc, char* argv[])
   GenerateBeamLine(bl, &dbcon1);
 
 //----------------------- start data server
-  InitPVList(uplist, bl, dbcon1);
+  InitPVObserverList(oblist, bl, dbcon1);
+  oblist.Print();
 
   if (!server_stop_flag)
   {
     sarg = new ServerArg;
-    sarg->channels = &uplist;
+    sarg->channels = &oblist;
     ThreadCheck(pthread_create(&server, NULL, ServerRoutine,
                 (void*)sarg), "create server thread");
   }

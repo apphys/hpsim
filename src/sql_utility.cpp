@@ -129,7 +129,7 @@ GetQueryResults(sqlite3* r_db, const char* r_sql)
 {
   std::vector<std::vector<std::string> > rt;
   char **result, *err = NULL;
-  int nrows, ncols;
+  int nrows = 0, ncols = 0;
   SQLCheck(sqlite3_get_table(r_db, r_sql, &result, &nrows, &ncols, &err), 
     "GetQueryResults():\n" + std::string(r_sql), err); 
   std::vector<std::string> arow;

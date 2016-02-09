@@ -341,12 +341,6 @@ void SimulateRFGapSecondHalfKernel(double* r_x, double* r_y, double* r_phi,
       double t_fac = gap.t;
       double tp_fac = gap.tp;
       double sp_fac = gap.sp;
-      if (flag_horder_tf)
-        GetTransitTimeFactors(&t_fac, &tp_fac, &sp_fac, beta, 
-          gap.fit_beta_center, gap.fit_beta_min, 
-          gap.fit_t0, gap.fit_t1, gap.fit_t2, gap.fit_t3, gap.fit_t4, gap.fit_t5, 
-          gap.fit_s1, gap.fit_s2, gap.fit_s3, gap.fit_s4, gap.fit_s5);
-
       if(gap.amplitude== 0.0 || (flag_ccl && flag_horder_tf && beta < gap.fit_beta_min)) 
       {
         r_x[index] = x + dd2*xp;
@@ -357,6 +351,11 @@ void SimulateRFGapSecondHalfKernel(double* r_x, double* r_y, double* r_phi,
       }
       else
       {
+        if (flag_horder_tf)
+          GetTransitTimeFactors(&t_fac, &tp_fac, &sp_fac, beta, 
+            gap.fit_beta_center, gap.fit_beta_min, 
+            gap.fit_t0, gap.fit_t1, gap.fit_t2, gap.fit_t3, gap.fit_t4, gap.fit_t5, 
+            gap.fit_s1, gap.fit_s2, gap.fit_s3, gap.fit_s4, gap.fit_s5);
         double wave_len = CLIGHT/gap.frequency;
         double cl = cell_len/gap.cell_length_over_beta_lambda;
         double betag_ccl = cl/wave_len;

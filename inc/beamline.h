@@ -21,6 +21,8 @@ struct BeamLine : public PyWrapper
   void Print() const;
   const BeamLineElement* operator[](uint) const;
   BeamLineElement* operator[](uint);
+  const BeamLineElement* operator[](std::string) const;
+  BeamLineElement* operator[](std::string);
    
   std::vector<BeamLineElement*> bl;
 };
