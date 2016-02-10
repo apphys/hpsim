@@ -12,6 +12,7 @@ extern "C"
   void SimulateDTLRFGap(RFGap*);
   void SimulateCCLRFGap(RFGap*);
   void SimulateRotation(Rotation*);
+  void SimulateSpaceChargeCompensation(SpaceChargeCompensation*);
 } // extern "C"
 
 #endif

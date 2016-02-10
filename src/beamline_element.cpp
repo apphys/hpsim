@@ -9,6 +9,47 @@ BeamLineElement::BeamLineElement(std::string r_name, std::string r_type,
 {
 }
 
+ApertureCircular::ApertureCircular(std::string r_name) :
+  BeamLineElement(r_name, "ApertureC"), isin_(false)
+{
+}
+
+void ApertureCircular::Accept(Visitor* r_visitor)
+{
+  r_visitor->Visit(this);
+}
+
+void ApertureCircular::Print() const
+{
+  std::cout << GetName() << ": " << GetType() 
+    << ", aper = " << GetAperture() 
+    << "in/out = " << (IsIn() ? "in" : "out")
+    << std::endl;
+}
+
+ApertureRectangular::ApertureRectangular(std::string r_name) :
+  BeamLineElement(r_name, "ApertureR"), aperture_x_left_(0.0),
+  aperture_x_right_(0.0), aperture_y_left_(0.0),
+  aperture_y_right_(0.0), isin_(false)
+{
+}
+
+void ApertureRectangular::Accept(Visitor* r_visitor)
+{
+  r_visitor->Visit(this);
+}
+
+void ApertureRectangular::Print() const
+{
+  std::cout << GetName() << ": " << GetType() 
+    << ", aper_x_l = " << GetApertureXLeft() 
+    << ", aper_x_r = " << GetApertureXRight() 
+    << ", aper_y_l = " << GetApertureYLeft() 
+    << ", aper_y_r = " << GetApertureYRight() 
+    << "in/out = " << (IsIn() ? "in" : "out")
+    << std::endl;
+}
+
 Buncher::Buncher(std::string r_name) : BeamLineElement(r_name, "Buncher")
 {
 }
@@ -20,11 +61,26 @@ void Buncher::Accept(Visitor* r_visitor)
 
 void Buncher::Print() const
 {
-  std::cout << GetName() << ": " << GetType() << ", length = " << GetLength()
-    << ", aper = " << GetAperture() << "\n"
-    << "\t voltage = " << voltage_ << ", freq = " << frequency_ 
-    << ", phase = " << phase_ << ", on_off = "
-    << (ison_ ? "on" : "off") << std::endl;
+  std::cout << GetName() << ": " << GetType()
+    << ", voltage = " << GetVoltage() << ", freq = " << GetFrequency()
+    << ", phase = " << GetPhase() << ", on_off = "
+    << (IsOn() ? "on" : "off") << std::endl;
+}
+
+Diagnostics::Diagnostics(std::string r_name) : 
+  BeamLineElement(r_name, "diagnostics")
+{
+}
+
+void Diagnostics::Accept(Visitor* r_visitor)
+{
+  r_visitor->Visit(this);
+}
+
+void Diagnostics::Print() const
+{
+  std::cout << GetName() << ": " << GetType()
+    << "monitor_on/off  = " << (IsMonitorOn() ? "on" : "off") << std::endl;
 }
 
 Dipole::Dipole(std::string r_name) : BeamLineElement(r_name, "Dipole")
@@ -196,3 +252,38 @@ void Rotation::Accept(Visitor* r_visitor)
 {
   r_visitor->Visit(this);
 }
+
+SpaceChargeCompensation::SpaceChargeCompensation(std::string r_name) :
+  BeamLineElement(r_name, "SpchComp")
+{
+}
+
+void SpaceChargeCompensation::Accept(Visitor* r_visitor)
+{
+  r_visitor->Visit(this);
+}
+
+void SpaceChargeCompensation::Print() const
+{
+  std::cout << GetName() << ": " << GetType() << ", fraction= "
+    << GetFraction() << std::endl;
+}
+
+Steerer::Steerer(std::string r_name) : BeamLineElement(r_name, "Steerer")
+{
+}
+
+void Steerer::Accept(Visitor* r_visitor)
+{
+  r_visitor->Visit(this);
+}
+
+void Steerer::Print() const
+{
+  std::cout << GetName() << ": " << GetType() << ", bl_h = "
+    << GetIntegratedFieldHorizontal() 
+    << ", bl_v = " << GetIntegratedFieldVertical()
+    << std::endl;
+}
+
+

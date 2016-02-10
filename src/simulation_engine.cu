@@ -119,10 +119,9 @@ extern "C"
       exit(0);
     }
 
-    // DTL RFGap length is the cell length including quad lengths.
-    // It needs the lengths of the previous and following quads to figure out the 
-    // real gap length. 
-    // TODO: maybe change the database to make the gap length = cell length - quads
+    // DTL RFGap length is the cell length substracts quad lengths.
+    // The lengths of the previous and following quads are needed to 
+    // figure out the cell length. 
     Quad* prev_quad = dynamic_cast<Quad*>((*bl_tmp)[cur_id - 1]);
     Quad* next_quad = dynamic_cast<Quad*>((*bl_tmp)[cur_id + 1]);
     double quad1_len = prev_quad->GetLength();
@@ -190,6 +189,11 @@ extern "C"
   void SimulateRotation(Rotation* r_rot)
   {
     SimulateRotationKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->xp, beam_tmp->yp, beam_tmp->loss, r_rot->GetAngle());
+  }
+  
+  void SimulateSpaceChargeCompensation(SpaceChargeCompensation* r_spcomp)
+  {
+    spch_tmp->SetFraction(r_spcomp->GetFraction());
   }
 
   void Cleanup()

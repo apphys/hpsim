@@ -31,6 +31,44 @@ private:
   bool monitor_on_;
 };
 
+class ApertureCircular: public BeamLineElement
+{
+public:
+  ApertureCircular(std::string);
+  bool IsIn() const;
+  void SetIn();
+  void SetOut();
+  void Accept(Visitor*);
+  void Print() const;
+private:
+  bool isin_;
+};
+
+class ApertureRectangular: public BeamLineElement
+{
+public:
+  ApertureRectangular(std::string);
+  bool IsIn() const;
+  double GetApertureXLeft() const;
+  double GetApertureXRight() const;
+  double GetApertureYLeft() const;
+  double GetApertureYRight() const;
+  void SetIn();
+  void SetOut();
+  void SetApertureXLeft(double);
+  void SetApertureXRight(double);
+  void SetApertureYLeft(double);
+  void SetApertureYRight(double);
+  void Accept(Visitor*);
+  void Print() const;
+private:
+  bool isin_;
+  double aperture_x_left_;
+  double aperture_x_right_;
+  double aperture_y_left_;
+  double aperture_y_right_;
+};
+
 class Buncher: public BeamLineElement
 {
 public:
@@ -51,6 +89,14 @@ private:
   double voltage_;
   double frequency_;
   double phase_;
+};
+
+class Diagnostics: public BeamLineElement
+{
+public:
+  Diagnostics(std::string);
+  void Print() const;
+  void Accept(Visitor*); 
 };
 
 class Dipole: public BeamLineElement
@@ -153,6 +199,33 @@ private:
   double angle_;
 };
 
+class SpaceChargeCompensation: public BeamLineElement
+{
+public:
+  SpaceChargeCompensation(std::string);
+  double GetFraction() const;
+  void SetFraction(double);
+  void Accept(Visitor*);
+  void Print() const;
+private:
+  double fraction_;
+};
+
+class Steerer: public BeamLineElement
+{
+public:
+  Steerer(std::string);
+  double GetIntegratedFieldHorizontal() const;
+  double GetIntegratedFieldVertical() const;
+  void SetIntegratedFieldHorizontal(double);
+  void SetIntegratedFieldVertical(double);
+  void Accept(Visitor*);
+  void Print() const;
+private:
+  double bl_h_;
+  double bl_v_; 
+};
+
 inline  
 std::string BeamLineElement::GetName() const
 {
@@ -203,6 +276,77 @@ void BeamLineElement::SetMonitorOff()
 {
   monitor_on_ = false;
 }
+inline
+bool ApertureCircular::IsIn() const
+{
+  return isin_;
+}
+inline
+void ApertureCircular::SetIn()
+{
+  isin_ = true;
+}
+inline
+void ApertureCircular::SetOut()
+{
+  isin_ = false;
+}
+inline
+bool ApertureRectangular::IsIn() const
+{
+  return isin_;
+}
+inline
+double ApertureRectangular::GetApertureXLeft() const
+{
+  return aperture_x_left_;
+}
+inline
+double ApertureRectangular::GetApertureXRight() const
+{
+  return aperture_x_right_;
+}
+inline
+double ApertureRectangular::GetApertureYLeft() const
+{
+  return aperture_y_left_;
+}
+inline
+double ApertureRectangular::GetApertureYRight() const
+{
+  return aperture_y_right_;
+}
+inline
+void ApertureRectangular::SetIn()
+{
+  isin_ = true;
+}
+inline
+void ApertureRectangular::SetOut()
+{
+  isin_ = false;
+}
+inline
+void ApertureRectangular::SetApertureXLeft(double r_aper)
+{
+  aperture_x_left_ = r_aper;
+}
+inline
+void ApertureRectangular::SetApertureXRight(double r_aper)
+{
+  aperture_x_right_ = r_aper;
+}
+inline
+void ApertureRectangular::SetApertureYLeft(double r_aper)
+{
+  aperture_y_left_ = r_aper;
+}
+inline
+void ApertureRectangular::SetApertureYRight(double r_aper)
+{
+  aperture_y_right_ = r_aper;
+}
+
 inline
 bool Buncher::IsOn() const
 {
@@ -468,4 +612,35 @@ void Rotation::SetAngle(double r_angle)
 {
   angle_ = r_angle;
 }
+inline
+double SpaceChargeCompensation::GetFraction() const
+{
+  return fraction_;
+}
+inline
+void SpaceChargeCompensation::SetFraction(double r_frac)
+{
+  fraction_ = r_frac;
+}
+inline
+double Steerer::GetIntegratedFieldHorizontal() const
+{
+  return bl_h_;
+}
+inline
+double Steerer::GetIntegratedFieldVertical() const
+{
+  return bl_v_;
+}
+inline
+void Steerer::SetIntegratedFieldHorizontal(double r_bl_h)
+{
+  bl_h_ = r_bl_h; 
+}
+inline
+void Steerer::SetIntegratedFieldVertical(double r_bl_v)
+{
+  bl_v_ = r_bl_v;
+}
+
 #endif

@@ -48,8 +48,10 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
   cudaEvent_t start, stop;  
   StartTimer(&start, &stop);
   for(uint i = 0; i <= end_index; ++i)
-    if (i >= start_index)
+  {
+    if (i >= start_index || (*beamline_)[i]->GetType() == "SpchComp")
       (*beamline_)[i]->Accept(this);
+  }
   StopTimer(&start, &stop, "whole Simulation");
   Cleanup();
 }
@@ -58,7 +60,14 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
 //{
 //  StepSimulationKernelCall(beam_, beamline_, spch_, param_, r_id);
 //}
-
+void SimulationEngine::Visit(ApertureCircular* r_aper)
+{
+//  r_aper->Print();
+}
+void SimulationEngine::Visit(ApertureRectangular* r_aper)
+{
+//  r_aper->Print();
+}
 void SimulationEngine::Visit(Buncher* r_buncher)
 {
 //  r_buncher->Print();
@@ -67,6 +76,11 @@ void SimulationEngine::Visit(Buncher* r_buncher)
 void SimulationEngine::Visit(Dipole* r_dipole)
 {
 //  r_dipole->PrintFromDevice();
+}
+
+void SimulationEngine::Visit(Diagnostics* r_diag)
+{
+//  r_diag->PrintFromDevice();
 }
 
 void SimulationEngine::Visit(Drift* r_drift)
@@ -94,4 +108,14 @@ void SimulationEngine::Visit(Rotation* r_rot)
 {
 //  r_rot->Print();
   SimulateRotation(r_rot);
+}
+
+void SimulationEngine::Visit(SpaceChargeCompensation* r_spcomp)
+{
+  SimulateSpaceChargeCompensation(r_spcomp);
+}
+
+void SimulationEngine::Visit(Steerer* r_steerer)
+{
+//  r_steerer->Print();
 }

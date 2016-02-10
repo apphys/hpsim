@@ -42,12 +42,17 @@ public:
   }
 
 private:
+  void Visit(ApertureCircular*);  
+  void Visit(ApertureRectangular*);  
   void Visit(Buncher*);
   void Visit(Dipole*);
+  void Visit(Diagnostics*);
   void Visit(Drift*);
   void Visit(Quad*);
   void Visit(RFGap*);
   void Visit(Rotation*);
+  void Visit(SpaceChargeCompensation*);
+  void Visit(Steerer*);
 
   Beam* beam_;
   BeamLine* beamline_;
