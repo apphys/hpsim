@@ -9,7 +9,8 @@ extern "C"
   void StepSimulationKernelCall(Beam*, BeamLine*, SpaceCharge*, SimulationParam&, uint);
   void SimulateDrift(Drift*);
   void SimulateQuad(Quad*);
-  void SimulateRFGap(RFGap*);
+  void SimulateDTLRFGap(RFGap*);
+  void SimulateCCLRFGap(RFGap*);
   void SimulateRotation(Rotation*);
 } // extern "C"
 

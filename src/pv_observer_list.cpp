@@ -41,7 +41,7 @@ void PVObserverList::Print()
     std::cout << iter->first << ": ";
     if(iter->second != NULL)
     {
-      std::vector<std::string> elems =  iter->second->GetElementNames();
+      std::vector<std::string> elems =  iter->second->GetBeamLineElementNames();
       std::copy(elems.begin(), elems.end(), std::ostream_iterator<std::string>(std::cout, " "));
     }
     std::cout << std::endl;

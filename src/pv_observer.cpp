@@ -59,7 +59,7 @@ void QuadPVObserver::UpdateModel()
 //sqlite3_exec(GetDBconn(), "END TRANSACTION", NULL, NULL, &errmsg);
 }
 
-std::vector<std::string> QuadPVObserver::GetElementNames() const
+std::vector<std::string> QuadPVObserver::GetBeamLineElementNames() const
 {
   std::vector<std::string> rlt(quad_.size(), "");
   for(int i = 0; i < quad_.size(); ++i)
@@ -98,7 +98,7 @@ void RFPhasePVObserver::AttachBeamLineElement(BeamLineElement* r_elem)
   }
 }
 
-std::vector<std::string> RFPhasePVObserver::GetElementNames() const
+std::vector<std::string> RFPhasePVObserver::GetBeamLineElementNames() const
 {
   std::vector<std::string> rlt(gap_.size(), "");
   for(int i = 0; i < gap_.size(); ++i)
@@ -140,7 +140,7 @@ void RFAmplitudePVObserver::AttachBeamLineElement(BeamLineElement* r_elem)
   }
 }
 
-std::vector<std::string> RFAmplitudePVObserver::GetElementNames() const
+std::vector<std::string> RFAmplitudePVObserver::GetBeamLineElementNames() const
 {
   std::vector<std::string> rlt(gap_.size(), "");
   for(int i = 0; i < gap_.size(); ++i)

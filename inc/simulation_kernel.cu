@@ -315,7 +315,7 @@ void SimulateRFGapSecondHalfKernel(double* r_x, double* r_y, double* r_phi,
                             double r_phi_in, RFGapParameter* r_elem, 
                             double r_length, uint r_ccl_cell_num, 
                             double r_qlen1 = 0.0, double r_qlen2 = 0.0,
-                            bool flag_ccl = true, bool flag_horder_tf = false)
+                            bool flag_ccl = true, bool flag_horder_tf = true)
 {
   RFGapParameter gap = *r_elem;
   uint index = blockIdx.x*blockDim.x+threadIdx.x;

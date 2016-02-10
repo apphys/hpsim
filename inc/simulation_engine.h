@@ -1,6 +1,5 @@
 #ifndef SIMULATION_ENGHINE_H
 #define SIMULATION_ENGHINE_H
-
 #include "beam.h"
 #include "beamline.h"
 #include "space_charge.h"
@@ -8,9 +7,19 @@
 #include "visitor.h"
 #include "py_wrapper.h"
 
+/*! 
+ * \brief Used for conducting simulations.
+ *
+ *  Implements visitor pattern to access BeamLineElement
+ *  and strategy pattern to use different SpaceCharge methods.
+ *
+ */
 class SimulationEngine : public Visitor, PyWrapper
 {
 public:
+  /*!
+   * \brief Constructor
+   */
   SimulationEngine() : PyWrapper() {}
   void InitEngine(Beam*, BeamLine*, SpaceCharge* r_spch = NULL, 
           bool r_graph_on = false, PlotData* r_plot_data = NULL);
@@ -31,12 +40,13 @@ public:
     else
       param_.space_charge_on = false;
   }
+
+private:
   void Visit(Drift*);
   void Visit(Quad*);
   void Visit(RFGap*);
   void Visit(Rotation*);
 
-private:
   Beam* beam_;
   BeamLine* beamline_;
   SpaceCharge* spch_;

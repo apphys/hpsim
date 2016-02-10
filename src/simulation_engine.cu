@@ -24,7 +24,9 @@ extern "C"
     uint cur_id = 0;
     double design_w;
     RFGapParameter* rfparam;
+    uint ccl_cell_num;
   }
+
   void SetConstOnDevice(SimulationConstOnDevice* r_const)
   {
     cudaMemcpyToSymbol(d_const, r_const, sizeof(SimulationConstOnDevice));
@@ -32,7 +34,6 @@ extern "C"
 
   void SimulateDrift(Drift* r_drift)
   {
-    //std::cout << cur_id << "--- Visit Drift ---------------" << std::endl;
     int num_spch_kicks = 1;
     double length = r_drift->GetLength();
     if(param->space_charge_on)
@@ -53,9 +54,9 @@ extern "C"
     }// for
     ++cur_id;
   }
+
   void SimulateQuad(Quad* r_quad)
   {
-    //std::cout << cur_id << "--- Visit Quad" << std::endl;
     SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, 
       beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, r_quad->GetLength(),
       r_quad->GetAperture(), r_quad->GetGradient(), cur_id);
@@ -66,25 +67,28 @@ extern "C"
       r_quad->GetAperture(), r_quad->GetGradient(), cur_id);
     ++cur_id;
   }
-  void SimulateRFGap(RFGap* r_gap)
+
+  void PrepSimulateRFGap(RFGap* r_gap)
   {
-    //std::cout << cur_id << "--- Visit RFGap" << std::endl;
     // asyn copy to a device pointer made the simulation 20 times faster for DTL!
     cudaMemcpyAsync(rfparam, r_gap->GetParametersOnDevice(), sizeof(RFGapParameter), 
                     cudaMemcpyDeviceToDevice, 0);
     // check frequency change
     if(beam_tmp->freq != r_gap->GetFrequency())
     {
-      double freq = r_gap->GetFrequency();
+      double freq = r_gap->GetFrequency(); // read from pinned mem
       UpdateWaveLengthKernel<<<1, 1>>>(freq);
       beam_tmp->ChangeFrequency(freq);
     }
-          
+
+  }
+  void SimulateDTLRFGap(RFGap* r_gap)
+  {
+    PrepSimulateRFGap(r_gap);         
     // calculate phase_in used in the gap to calculate half phase advance in the gap
     double phi_in = 0.0;
     uint bl_sz = bl_tmp->GetSize();
-
-    // first gap in DTL tank
+    // if first gap in DTL tank
     if(cur_id == 1 || cur_id > 1 && (*bl_tmp)[cur_id - 2]->GetType() != "RFGap-DTL")
     {
       // make sure this is not the only gap in the tank
@@ -104,16 +108,21 @@ extern "C"
       else // this is the only gap in the tank
         phi_in = r_gap->GetRefPhase();
     }
-    else if (cur_id > 1) // not the first gap in DTL tank
+    else if (cur_id > 1) // if not the first gap in DTL tank
     {
       RFGap* prev_gap = dynamic_cast<RFGap*>((*bl_tmp)[cur_id - 2]);
       phi_in = 0.5 * (prev_gap->GetRefPhase() + r_gap->GetRefPhase()); 
     }
-    else // cur_id == 0
+    else // if cur_id == 0
     {
       std::cerr << "A quad is missing before the DTL gap! " << std::endl;
       exit(0);
     }
+
+    // DTL RFGap length is the cell length including quad lengths.
+    // It needs the lengths of the previous and following quads to figure out the 
+    // real gap length. 
+    // TODO: maybe change the database to make the gap length = cell length - quads
     Quad* prev_quad = dynamic_cast<Quad*>((*bl_tmp)[cur_id - 1]);
     Quad* next_quad = dynamic_cast<Quad*>((*bl_tmp)[cur_id + 1]);
     double quad1_len = prev_quad->GetLength();
@@ -126,18 +135,67 @@ extern "C"
       spch_tmp->Start(beam_tmp, r_gap->GetLength()); 
     SimulateRFGapSecondHalfKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, 
       beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, 
-      phi_in, rfparam, r_gap->GetLength(), 0, quad1_len, quad2_len, false, true);
+      phi_in, rfparam, r_gap->GetLength(), 0, quad1_len, quad2_len, false);
     design_w = r_gap->GetEnergyOut();
     beam_tmp->design_w = design_w;
     ++cur_id;
   }
+
+  void SimulateCCLRFGap(RFGap* r_gap)
+  {
+    PrepSimulateRFGap(r_gap);         
+    // check if this is the first cell in a ccl tank
+    if(cur_id == 0 || (*bl_tmp)[cur_id - 1]->GetType() != "RFGap-CCL")
+      ccl_cell_num = 0;
+
+    double phi_in = 0, phi_out = 0;
+    if(ccl_cell_num == 0) // first gap in tank
+    {
+      RFGap* next_gap = dynamic_cast<RFGap*>((*bl_tmp)[cur_id + 1]);
+      double cur_phase = r_gap->GetRefPhase();
+      double next_phase = next_gap->GetRefPhase();
+      phi_in = cur_phase - 0.5 * (next_phase - cur_phase);
+      phi_out = 0.5 * (next_phase + cur_phase);
+    }
+    else if ((*bl_tmp)[cur_id + 1]->GetType() != "RFGap-CCL") // last gap in tank
+    {
+      RFGap* prev_gap = dynamic_cast<RFGap*>((*bl_tmp)[cur_id - 1]);
+      double cur_phase = r_gap->GetRefPhase();
+      double prev_phase = prev_gap->GetRefPhase();
+      phi_in = 0.5 * (cur_phase + prev_phase);
+      phi_out = cur_phase + 0.5 * (cur_phase - prev_phase);
+    }
+    else // mid cells
+    {
+      RFGap* next_gap = dynamic_cast<RFGap*>((*bl_tmp)[cur_id + 1]);
+      RFGap* prev_gap = dynamic_cast<RFGap*>((*bl_tmp)[cur_id - 1]);
+      double cur_phase = r_gap->GetRefPhase();
+      phi_in = 0.5 * (cur_phase + prev_gap->GetRefPhase());
+      phi_out = 0.5 * (cur_phase + next_gap->GetRefPhase());
+    }
+    int gc_blck_size = blck_size/4 > 1 ? blck_size/4 : blck_size;
+    int gc_grid_size = grid_size/2 > 1 ? grid_size/2 : grid_size;
+
+    SimulateRFGapFirstHalfKernel<<<grid_size, gc_blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp,
+      beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, phi_in, rfparam, r_gap->GetLength());
+    if(param->space_charge_on)
+      spch_tmp->Start(beam_tmp, r_gap->GetLength());
+    SimulateRFGapSecondHalfKernel<<<grid_size, gc_blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp,
+      beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, phi_out, rfparam, r_gap->GetLength(), ccl_cell_num++);
+    design_w = r_gap->GetEnergyOut();
+    beam_tmp->design_w = design_w;
+    ++cur_id;
+  }
+
   void SimulateRotation(Rotation*)
   {
   }
+
   void Cleanup()
   {
     cudaFree(rfparam); 
   }
+
   void Init(Beam* r_beam, BeamLine* r_bl, SpaceCharge* r_spch, SimulationParam& r_param)
   {
     spch_tmp= r_spch;
@@ -146,6 +204,7 @@ extern "C"
     param = &r_param; 
     grid_size = beam_tmp->grid_size;
     blck_size = beam_tmp->blck_size;
+    ccl_cell_num = 0;
     design_w = r_beam->design_w;
     UpdateWaveLengthKernel<<<1, 1>>>(r_beam->freq);
     cudaMalloc((void**)&rfparam, sizeof(RFGapParameter));

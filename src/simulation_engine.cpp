@@ -2,6 +2,15 @@
 #include "simulation_engine_cu.h"
 #include "timer.h"
 
+/*!
+ * \brief Initialize the simulation setting
+ * \param r_beam Beam*
+ * \param r_bl   BeamLine*
+ * \param r_spch SpaceCharge*
+ * \param r_graph_on Indicates if it is running the online mode
+ * \param r_plot_data If it is running in the online mode, data 
+ *         for online plotting are written out to this pointer.
+ */
 void SimulationEngine::InitEngine(Beam* r_beam, BeamLine* r_bl, 
   SpaceCharge* r_spch, bool r_graph_on, PlotData* r_plot_data)
 {
@@ -21,6 +30,11 @@ void SimulationEngine::InitEngine(Beam* r_beam, BeamLine* r_bl,
   SetConstOnDevice(&d_const);
 }
 
+/*!
+ * \brief Simulate inclusively from an element to another.
+ * \param r_start Name of the start element
+ * \param r_end Name of the end element
+ */
 void SimulationEngine::Simulate(std::string r_start, std::string r_end)
 {
   int start_index = 0;
@@ -60,7 +74,10 @@ void SimulationEngine::Visit(Quad* r_quad)
 void SimulationEngine::Visit(RFGap* r_gap)
 {
 //  r_gap->PrintFromDevice();
-  SimulateRFGap(r_gap);
+  if (r_gap->GetType() == "RFGap-DTL")
+    SimulateDTLRFGap(r_gap);
+  else if (r_gap->GetType() == "RFGap-CCL")
+    SimulateCCLRFGap(r_gap);
 }
 
 void SimulationEngine::Visit(Rotation* r_rot)

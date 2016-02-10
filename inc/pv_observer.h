@@ -18,7 +18,7 @@ public:
   void SetDBconn(sqlite3* r_db_conn);
   void Update(std::string);
   virtual void AttachBeamLineElement(BeamLineElement*) = 0;
-  virtual std::vector<std::string> GetElementNames() const = 0;
+  virtual std::vector<std::string> GetBeamLineElementNames() const = 0;
 private:
   void UpdateDB();
   virtual void UpdateModel() = 0;
@@ -33,7 +33,7 @@ class QuadPVObserver : public PVObserver
 public:
   QuadPVObserver(std::string, std::string);
   void AttachBeamLineElement(BeamLineElement*);
-  std::vector<std::string> GetElementNames() const;
+  std::vector<std::string> GetBeamLineElementNames() const;
 private:
   void UpdateModel();
   std::vector<Quad*> quad_;
@@ -44,7 +44,7 @@ class RFPhasePVObserver : public PVObserver
 public:
   RFPhasePVObserver(std::string, std::string);
   void AttachBeamLineElement(BeamLineElement*);
-  std::vector<std::string> GetElementNames() const;
+  std::vector<std::string> GetBeamLineElementNames() const;
 private:
   void UpdateModel();
   std::vector<RFGap*> gap_;
@@ -55,7 +55,7 @@ class RFAmplitudePVObserver : public PVObserver
 public:
   RFAmplitudePVObserver(std::string, std::string);
   void AttachBeamLineElement(BeamLineElement*);
-  std::vector<std::string> GetElementNames() const;
+  std::vector<std::string> GetBeamLineElementNames() const;
 private:
   void UpdateModel();
   std::vector<RFGap*> gap_;
