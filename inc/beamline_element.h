@@ -2,6 +2,7 @@
 #define BEAMLINE_ELEMENT_H
 
 #include <string>
+#include "dipole_parameter.h"
 #include "rfgap_parameter.h"
 
 class Visitor;
@@ -28,6 +29,50 @@ private:
   double length_;
   double aperture_;
   bool monitor_on_;
+};
+
+class Buncher: public BeamLineElement
+{
+public:
+  Buncher(std::string);
+  bool IsOn() const;
+  double GetVoltage() const;
+  double GetFrequency() const;
+  double GetPhase() const;
+  void TurnOn();
+  void TurnOff();
+  void SetVoltage(double);
+  void SetFrequency(double); 
+  void SetPhase(double);
+  void Print() const;
+  void Accept(Visitor*); 
+private:
+  bool ison_;
+  double voltage_;
+  double frequency_;
+  double phase_;
+};
+
+class Dipole: public BeamLineElement
+{
+public:
+  Dipole(std::string);
+  ~Dipole();
+  void SetRadius(double);
+  void SetAngle(double);
+  void SetEdgeAngleIn(double);
+  void SetEdgeAngleOut(double);
+  void SetHalfGap(double);
+  void SetK1(double);
+  void SetK2(double);
+  void SetFieldIndex(double);
+  void SetKineticEnergy(double);
+  void Print() const;
+  void PrintFromDevice() const;
+  void Accept(Visitor*);
+private:
+  DipoleParameter* param_h_;
+  DipoleParameter* param_d_;
 };
 
 class Drift: public BeamLineElement
@@ -88,7 +133,6 @@ public:
   void SetFitS4(double);
   void SetFitS5(double);
   
-  void Sync();
   void Print() const;
   void PrintFromDevice() const;
   void Accept(Visitor*);
@@ -160,14 +204,94 @@ void BeamLineElement::SetMonitorOff()
   monitor_on_ = false;
 }
 inline
-double Rotation::GetAngle() const
+bool Buncher::IsOn() const
 {
-  return angle_;
+  return ison_;
 }
-inline 
-void Rotation::SetAngle(double r_angle) 
+inline
+double Buncher::GetVoltage() const
 {
-  angle_ = r_angle;
+  return voltage_;
+}
+inline
+double Buncher::GetFrequency() const
+{
+  return frequency_;
+}
+inline
+double Buncher::GetPhase() const
+{
+  return phase_;
+}
+inline
+void Buncher::TurnOn()
+{
+  ison_ = true;
+}
+inline
+void Buncher::TurnOff()
+{
+  ison_ = false;
+}
+inline
+void Buncher::SetVoltage(double r_vol)
+{
+  voltage_ = r_vol;
+}
+inline
+void Buncher::SetFrequency(double r_freq)
+{
+  frequency_ = r_freq;
+}
+inline
+void Buncher::SetPhase(double r_ph)
+{
+  phase_ = r_ph;
+}
+inline
+void Dipole::SetRadius(double r_radius)
+{
+  param_h_->radius = r_radius;
+}
+inline
+void Dipole::SetAngle(double r_angle)
+{
+  param_h_->angle = r_angle;
+}
+inline
+void Dipole::SetEdgeAngleIn(double r_eangle_in)
+{
+  param_h_->edge_angle_in = r_eangle_in;
+}
+inline
+void Dipole::SetEdgeAngleOut(double r_eangle_out)
+{
+  param_h_->edge_angle_out = r_eangle_out;
+}
+inline
+void Dipole::SetHalfGap(double r_half_gap)
+{
+  param_h_->half_gap = r_half_gap;
+}
+inline
+void Dipole::SetK1(double r_k1)
+{
+  param_h_->k1 = r_k1;
+}
+inline
+void Dipole::SetK2(double r_k2)
+{
+  param_h_->k2 = r_k2;
+}
+inline
+void Dipole::SetFieldIndex(double r_findx)
+{
+  param_h_->field_index = r_findx;
+}
+inline
+void Dipole::SetKineticEnergy(double r_kenergy)
+{
+  param_h_->kinetic_energy = r_kenergy;
 }
 inline
 double Quad::GetGradient() const
@@ -333,5 +457,15 @@ inline
 void RFGap::SetFitS5(double r_fits5)
 {
   param_h_->fit_s5 = r_fits5;
+}
+inline
+double Rotation::GetAngle() const
+{
+  return angle_;
+}
+inline 
+void Rotation::SetAngle(double r_angle) 
+{
+  angle_ = r_angle;
 }
 #endif

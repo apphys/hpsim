@@ -22,10 +22,6 @@ void CopyDataFromDevice(T* r_pointer_h, T* r_pointer_d, uint r_sz)
   cudaMemcpy(r_pointer_h, r_pointer_d, sizeof(T) * r_sz, cudaMemcpyDeviceToHost);
 }
 
-void sync()
-{
-  cudaDeviceSynchronize();
-}
 //extern "C"
 //{
 //  void CreateBeamLineOnPinMem(int r_sz, BeamLineElement** r_h_bl, 

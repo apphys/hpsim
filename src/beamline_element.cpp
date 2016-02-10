@@ -9,6 +9,73 @@ BeamLineElement::BeamLineElement(std::string r_name, std::string r_type,
 {
 }
 
+Buncher::Buncher(std::string r_name) : BeamLineElement(r_name, "Buncher")
+{
+}
+
+void Buncher::Accept(Visitor* r_visitor)
+{
+  r_visitor->Visit(this);
+}
+
+void Buncher::Print() const
+{
+  std::cout << GetName() << ": " << GetType() << ", length = " << GetLength()
+    << ", aper = " << GetAperture() << "\n"
+    << "\t voltage = " << voltage_ << ", freq = " << frequency_ 
+    << ", phase = " << phase_ << ", on_off = "
+    << (ison_ ? "on" : "off") << std::endl;
+}
+
+Dipole::Dipole(std::string r_name) : BeamLineElement(r_name, "Dipole")
+{
+  CreateDataOnPinMem(1, &param_h_, &param_d_);
+}
+
+Dipole::~Dipole()
+{
+  if (param_h_ != NULL)
+    FreeDataOnPinMem(param_h_); 
+}
+
+void Dipole::Accept(Visitor* r_visitor)
+{
+  r_visitor->Visit(this);
+}
+
+void Dipole::Print() const
+{
+  std::cout << GetName() << ": " << GetType() << ", length = " << GetLength()
+    << ", aper = " << GetAperture() << "\n"
+    << "\t radius = " << param_h_->radius << ", angle = " << param_h_->angle
+    << ", edge_angle_in = " << param_h_->edge_angle_in << "\n"
+    << "\t, edge_angle_out = " << param_h_->edge_angle_out
+    << ", half_gap = " << param_h_->half_gap 
+    << ", k1 = " << param_h_->k1 << "\n"
+    << "\t k2 = " << param_h_->k2 
+    << ", field_index = " << param_h_->field_index 
+    << ", kenergy = " << param_h_->kinetic_energy
+    << std::endl;
+}
+
+void Dipole::PrintFromDevice() const
+{
+  DipoleParameter* tmp = new DipoleParameter;
+  CopyDataFromDevice(tmp, param_d_, 1); 
+  std::cout << GetName() << ": " << GetType() << ", length = " << GetLength()
+    << ", aper = " << GetAperture() << "\n"
+    << "\t radius = " << tmp->radius << ", angle = " << tmp->angle
+    << ", edge_angle_in = " << tmp->edge_angle_in << "\n"
+    << "\t, edge_angle_out = " << tmp->edge_angle_out
+    << ", half_gap = " << tmp->half_gap 
+    << ", k1 = " << tmp->k1 << "\n"
+    << "\t k2 = " << tmp->k2 
+    << ", field_index = " << tmp->field_index 
+    << ", kenergy = " << tmp->kinetic_energy
+    << std::endl;
+  delete tmp;
+}
+
 Drift::Drift(std::string r_name) : BeamLineElement(r_name, "Drift")
 {
 }
@@ -20,21 +87,6 @@ void Drift::Print() const
 }
 
 void Drift::Accept(Visitor* r_visitor)
-{
-  r_visitor->Visit(this);
-}
-
-Rotation::Rotation(std::string r_name) : BeamLineElement(r_name, "Rotation")
-{
-}
-
-void Rotation::Print() const
-{
-  std::cout << GetName() << ": " << GetType() << ", angle = "   
-    << GetAngle() << std::endl;
-}
-
-void Rotation::Accept(Visitor* r_visitor)
 {
   r_visitor->Visit(this);
 }
@@ -68,10 +120,6 @@ RFGap::~RFGap()
     FreeDataOnPinMem(param_h_); 
 }
 
-void RFGap::Sync()
-{
-  sync();  
-}
 void RFGap::Print() const
 {
   std::cout << GetName() + ": " << GetType() << ", length = " << GetLength() 
@@ -130,6 +178,21 @@ void RFGap::PrintFromDevice() const
 }
 
 void RFGap::Accept(Visitor* r_visitor)
+{
+  r_visitor->Visit(this);
+}
+
+Rotation::Rotation(std::string r_name) : BeamLineElement(r_name, "Rotation")
+{
+}
+
+void Rotation::Print() const
+{
+  std::cout << GetName() << ": " << GetType() << ", angle = "   
+    << GetAngle() << std::endl;
+}
+
+void Rotation::Accept(Visitor* r_visitor)
 {
   r_visitor->Visit(this);
 }

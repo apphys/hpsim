@@ -187,8 +187,9 @@ extern "C"
     ++cur_id;
   }
 
-  void SimulateRotation(Rotation*)
+  void SimulateRotation(Rotation* r_rot)
   {
+    SimulateRotationKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->xp, beam_tmp->yp, beam_tmp->loss, r_rot->GetAngle());
   }
 
   void Cleanup()

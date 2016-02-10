@@ -42,6 +42,8 @@ public:
   }
 
 private:
+  void Visit(Buncher*);
+  void Visit(Dipole*);
   void Visit(Drift*);
   void Visit(Quad*);
   void Visit(RFGap*);

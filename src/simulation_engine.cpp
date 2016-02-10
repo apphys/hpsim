@@ -59,6 +59,16 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
 //  StepSimulationKernelCall(beam_, beamline_, spch_, param_, r_id);
 //}
 
+void SimulationEngine::Visit(Buncher* r_buncher)
+{
+//  r_buncher->Print();
+}
+
+void SimulationEngine::Visit(Dipole* r_dipole)
+{
+//  r_dipole->PrintFromDevice();
+}
+
 void SimulationEngine::Visit(Drift* r_drift)
 {
 //  r_drift->Print();
