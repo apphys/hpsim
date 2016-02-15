@@ -410,10 +410,10 @@ void Beam::UpdateBeamFromFile(std::string r_file)
   input.close();
   x_h[0] = 0.0; xp_h[0] = 0.0; y_h[0] = 0.0; yp_h[0] = 0.0;
   design_w = w_h[0];
-  if(num_col > 6)
-    UpdateBeamOnDevice(this, x_h, xp_h, y_h, yp_h, phi_h, w_h, loss_h);
-  else if(num_col > 7)
+  if(num_col > 7)
     UpdateBeamOnDevice(this, x_h, xp_h, y_h, yp_h, phi_h, w_h, loss_h, lloss_h);
+  else if(num_col > 6)
+    UpdateBeamOnDevice(this, x_h, xp_h, y_h, yp_h, phi_h, w_h, loss_h);
   else
     UpdateBeamOnDevice(this, x_h, xp_h, y_h, yp_h, phi_h, w_h);
   delete [] x_h; delete [] xp_h;
@@ -483,7 +483,7 @@ void Beam::Print(std::string r_file, std::string r_msg)
   out << "Mass " << mass << std::endl;
   out << "Current " << current << std::endl;
   out << "Frequency " << freq << std::endl;
-  out << std::setprecision(18);
+  out << std::setprecision(15);
 //  out << "Loss Num: " << *num_loss_h << std::endl;
   for(int i = 0; i < num; ++i)
     out << x_h[i] << "  " << xp_h[i] << "  "
@@ -520,7 +520,7 @@ void Beam::Print(uint r_indx)
   uint* loss_h = new uint;
   uint* lloss_h = new uint;
   CopyParticleFromDevice(this, r_indx, x_h, xp_h, y_h, yp_h, phi_h, w_h, loss_h, lloss_h);
-  std::cout << std::setprecision(18) << std::fixed;
+  std::cout << std::setprecision(15) << std::fixed;
   std::cout << *x_h << "\t" << *xp_h << "\t" << *y_h << "\t" << *yp_h << "\t" 
     << *phi_h << "\t" << *w_h << "\t" << *loss_h << "\t" << *lloss_h << std::endl;
   delete x_h;
@@ -967,7 +967,9 @@ void Beam::ShiftW(double r_val)
 
 void Beam::ChangeFrequency(double r_freq)
 {
-  std::cout << "Change beam frequency from " << freq << " to " << r_freq << ", ratio = " << r_freq/freq << std::endl;
+  current *= r_freq/freq;
+  std::cout << "Change beam frequency from " << freq << " to " << r_freq << ", ratio = " << r_freq/freq 
+    << ", current change to " << current << std::endl;
   ChangeFrequnecyKernelCall(this, r_freq/freq);
   freq = r_freq;
   UpdateAvgPhi();

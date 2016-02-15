@@ -3,6 +3,7 @@
   
 struct RFGapParameter
 {
+  double length;
   double frequency;
   double cell_length_over_beta_lambda;
   double amplitude;

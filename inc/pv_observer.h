@@ -10,6 +10,7 @@ class PVObserver
 {
 public:
   PVObserver(std::string, std::string); // name, db
+  virtual ~PVObserver(){}
   std::string GetPV() const;
   std::string GetDB() const;
   sqlite3* GetDBconn() const;
@@ -61,6 +62,54 @@ private:
   std::vector<RFGap*> gap_;
 };
 
+class BuncherPVObserver: public PVObserver
+{
+public:
+  BuncherPVObserver(std::string, std::string);
+  virtual ~BuncherPVObserver(){}
+  void AttachBeamLineElement(BeamLineElement*);
+  std::vector<std::string> GetBeamLineElementNames() const;
+protected:
+  virtual void UpdateModel() = 0;
+  Buncher* buncher_;
+};
+
+class BuncherPhasePVObserver: public BuncherPVObserver
+{
+public:
+  BuncherPhasePVObserver(std::string, std::string);
+private:
+  void UpdateModel();
+};
+
+class BuncherAmplitudePVObserver: public BuncherPVObserver
+{
+public:
+  BuncherAmplitudePVObserver(std::string, std::string);
+private:
+  void UpdateModel();
+};
+
+class BuncherOnOffPVObserver: public BuncherPVObserver
+{
+public:
+  BuncherOnOffPVObserver(std::string, std::string);
+private:
+  void UpdateModel();
+};
+
+class DipolePVObserver: public PVObserver
+{
+public:
+  DipolePVObserver(std::string, std::string);
+  virtual ~DipolePVObserver(){}
+  void AttachBeamLineElement(BeamLineElement*);
+  std::vector<std::string> GetBeamLineElementNames() const;
+protected:
+  virtual void UpdateModel();
+  std::vector<Dipole*> dipole_;
+};
+
 inline
 std::string PVObserver::GetPV() const
 {
@@ -91,4 +140,5 @@ void PVObserver::SetDB(std::string r_db)
 {
   db_ = r_db;
 }
+
 #endif

@@ -19,6 +19,7 @@ struct BeamLine : public PyWrapper
   uint GetNumOfMonitors(std::string r_begin = "", std::string r_end = "") const; // inclusive
   std::vector<uint> GetMonitoredElementsIndices(std::string r_begin = "", std::string r_end = "") const;
   void Print() const;
+  void Print(std::string, std::string) const;
   const BeamLineElement* operator[](uint) const;
   BeamLineElement* operator[](uint);
   const BeamLineElement* operator[](std::string) const;

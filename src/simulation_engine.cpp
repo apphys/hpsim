@@ -51,6 +51,7 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
   {
     if (i >= start_index || (*beamline_)[i]->GetType() == "SpchComp")
       (*beamline_)[i]->Accept(this);
+    IncreaseBlIndex();
   }
   StopTimer(&start, &stop, "whole Simulation");
   Cleanup();
@@ -63,24 +64,29 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
 void SimulationEngine::Visit(ApertureCircular* r_aper)
 {
 //  r_aper->Print();
+  SimulateApertureCircular(r_aper);
 }
 void SimulationEngine::Visit(ApertureRectangular* r_aper)
 {
 //  r_aper->Print();
+  SimulateApertureRectangular(r_aper);
 }
 void SimulationEngine::Visit(Buncher* r_buncher)
 {
 //  r_buncher->Print();
+  SimulateBuncher(r_buncher);
 }
 
 void SimulationEngine::Visit(Dipole* r_dipole)
 {
 //  r_dipole->PrintFromDevice();
+  SimulateDipole(r_dipole);
 }
 
 void SimulationEngine::Visit(Diagnostics* r_diag)
 {
 //  r_diag->PrintFromDevice();
+  SimulateDiagnostics(r_diag);
 }
 
 void SimulationEngine::Visit(Drift* r_drift)
@@ -118,4 +124,5 @@ void SimulationEngine::Visit(SpaceChargeCompensation* r_spcomp)
 void SimulationEngine::Visit(Steerer* r_steerer)
 {
 //  r_steerer->Print();
+  SimulateSteerer(r_steerer);
 }

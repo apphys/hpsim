@@ -28,13 +28,17 @@ vpath %.cu ./src
 
 
 #all: ./packages/HPSim.so ./packages/PyEPICS.so lib/libsqliteext.so start2d startalex
-all: run runtest 
+all: run runtest runccl runta
 
 $(OBJDIR)/%.o: %.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 $(OBJDIR)/%.cu.o: %.cu
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 run: $(NONGRAPHICS_OBJS) $(NONGRAPHICS_CUOBJS) main.cpp
+	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(EPICS_LD_FLAGS) $(PYTHON_LD_FLAGS) -o $@ $^
+runta: $(NONGRAPHICS_OBJS) $(NONGRAPHICS_CUOBJS) tatd_main.cpp
+	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(EPICS_LD_FLAGS) $(PYTHON_LD_FLAGS) -o $@ $^
+runccl: $(NONGRAPHICS_OBJS) $(NONGRAPHICS_CUOBJS) ccl_main.cpp
 	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(EPICS_LD_FLAGS) $(PYTHON_LD_FLAGS) -o $@ $^
 runtest: $(NONGRAPHICS_OBJS) $(NONGRAPHICS_CUOBJS) test_epics.cpp
 	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(EPICS_LD_FLAGS) $(PYTHON_LD_FLAGS) -o $@ $^

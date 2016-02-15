@@ -147,3 +147,127 @@ std::vector<std::string> RFAmplitudePVObserver::GetBeamLineElementNames() const
     rlt[i] = gap_[i]->GetName(); 
   return rlt; 
 }
+
+BuncherPVObserver::BuncherPVObserver(std::string r_pv, std::string r_db)
+  : PVObserver(r_pv, r_db)
+{
+}
+
+void BuncherPVObserver::AttachBeamLineElement(BeamLineElement* r_elem)
+{
+  if(Buncher* buncher = dynamic_cast<Buncher*>(r_elem))
+    buncher_ = buncher;
+  else
+  {
+    std::cerr << "Cann't attach " << r_elem->GetName() 
+      << " to a BuncherPhasePVObserver!" << std::endl;
+    exit(-1);
+  }
+}
+
+std::vector<std::string> BuncherPVObserver::GetBeamLineElementNames() const
+{
+  std::vector<std::string> rlt(1, buncher_->GetName());
+  return rlt; 
+}
+
+BuncherPhasePVObserver::BuncherPhasePVObserver(std::string r_pv, std::string r_db)
+  : BuncherPVObserver(r_pv, r_db)
+{
+}
+
+void BuncherPhasePVObserver::UpdateModel()
+{
+  std::string sql = "select phase_model from " + GetDB() + ".buncher where name = '" 
+                    + buncher_->GetName() + "'";
+  std::string data = GetDataFromDB(GetDBconn(), sql.c_str());
+  if (data != "")
+   buncher_->SetPhase(std::atof(data.c_str()));
+  else
+   std::cerr << "BuncherPhasePVObserver::UpdateModel() failed, no phase_model were found for " 
+     << "buncher : " << buncher_->GetName() << std::endl; 
+}
+
+BuncherAmplitudePVObserver::BuncherAmplitudePVObserver(std::string r_pv, std::string r_db)
+  : BuncherPVObserver(r_pv, r_db)
+{
+}
+
+void BuncherAmplitudePVObserver::UpdateModel()
+{
+  std::string sql = "select voltage_model from " + GetDB() + ".buncher where name = '" 
+                    + buncher_->GetName() + "'";
+  std::string data = GetDataFromDB(GetDBconn(), sql.c_str());
+  if (data != "")
+   buncher_->SetVoltage(std::atof(data.c_str()));
+  else
+   std::cerr << "BuncherAmplitudePVObserver::UpdateModel() failed, no voltage_model were found for " 
+     << "buncher : " << buncher_->GetName() << std::endl; 
+}
+
+BuncherOnOffPVObserver::BuncherOnOffPVObserver(std::string r_pv, std::string r_db)
+  : BuncherPVObserver(r_pv, r_db)
+{
+}
+
+void BuncherOnOffPVObserver::UpdateModel()
+{
+  std::string sql = "select on_off from " + GetDB() + ".buncher where name = '" 
+                    + buncher_->GetName() + "'";
+  std::string data = GetDataFromDB(GetDBconn(), sql.c_str());
+  if (data != "")
+    if(std::atof(data.c_str()) > 0)
+      buncher_->TurnOn();
+    else
+      buncher_->TurnOff();
+  else
+   std::cerr << "BuncherOneOffPVObserver::UpdateModel() failed, no on_off were found for " 
+     << "buncher : " << buncher_->GetName() << std::endl; 
+}
+
+DipolePVObserver::DipolePVObserver(std::string r_pv, std::string r_db)
+  : PVObserver(r_pv, r_db)
+{
+}
+
+void DipolePVObserver::AttachBeamLineElement(BeamLineElement* r_elem)
+{
+  if(Dipole* dipole = dynamic_cast<Dipole*>(r_elem))
+    dipole_.push_back(dipole);
+  else
+  {
+    std::cerr << "Cann't attach " << r_elem->GetName() 
+      << " to a DipolePhasePVObserver!" << std::endl;
+    exit(-1);
+  }
+}
+
+std::vector<std::string> DipolePVObserver::GetBeamLineElementNames() const
+{
+  std::vector<std::string> rlt(dipole_.size(), "");
+  for(int i = 0; i < dipole_.size(); ++i)
+    rlt[i] = dipole_[i]->GetName(); 
+  return rlt; 
+}
+
+void DipolePVObserver::UpdateModel()
+{
+  for(int i = 0; i < dipole_.size(); ++i)
+  {
+    std::string sql = "select rho_model, angle_model, edge_angle1_model, edge_angle2_model, kenergy_model from " 
+          + GetDB() + ".dipole where name = '" + dipole_[i]->GetName() + "'";
+    std::vector<std::vector<std::string> > data = GetQueryResults(GetDBconn(), sql.c_str());
+    if(!data.empty())
+    {
+      dipole_[i]->SetRadius(std::atof(data[0][0].c_str()));
+      dipole_[i]->SetAngle(std::atof(data[0][1].c_str()));
+      dipole_[i]->SetEdgeAngleIn(std::atof(data[0][2].c_str()));
+      dipole_[i]->SetEdgeAngleOut(std::atof(data[0][3].c_str()));
+      dipole_[i]->SetKineticEnergy(std::atof(data[0][4].c_str()));
+    }
+    else
+      std::cerr << "DipolePVObserver::UpdateModel() failed,  "
+        "for dipole : " << dipole_[i]->GetName() << std::endl;
+  }
+}
+

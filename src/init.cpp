@@ -36,6 +36,7 @@ void GenerateBeamLine(BeamLine& r_linac, DBConnection* r_db_conn)
     // start a new beamline db 
     sql = "select name, view_index, model_type from " + dbs[dbs_indx] + ".linac";
     std::vector<std::pair<std::string, std::pair<std::string, std::string> > > elems = GetDataTripletArrayFromDB(db_conn, sql.c_str());
+    std::cout << " @@@@ " << elems.size() << std::endl;
     for(int elem_indx = 0; elem_indx < elems.size(); ++elem_indx)
     {
       name = elems[elem_indx].first;
@@ -175,6 +176,181 @@ void GenerateBeamLine(BeamLine& r_linac, DBConnection* r_db_conn)
         msstr << model_index++;
         sql = "update " + dbs[dbs_indx] + ".rotation set model_index = " + msstr.str() + " where view_index = " + view_index;
         SQLCheck(sqlite3_exec(db_conn, sql.c_str(), NULL, NULL, &errmsg), "sqlite3_exec rotation: " + view_index);
+        tmp = "";
+      }
+      else if(tmp == "caperture")
+      {
+        ApertureCircular* elem = new ApertureCircular(name);
+        sql = "select aperture_model from " + dbs[dbs_indx] + ".caperture where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetAperture(std::atof(tmp.c_str()));
+
+        sql = "select in_out_model from " + dbs[dbs_indx] + ".caperture where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        if(std::atoi(tmp.c_str()) > 0)
+          elem->SetIn();
+
+        r_linac.AddElement(elem);
+
+        msstr.str("");
+        msstr << model_index++;
+        sql = "update " + dbs[dbs_indx] + ".caperture set model_index = " + msstr.str() + " where view_index = " + view_index;
+        SQLCheck(sqlite3_exec(db_conn, sql.c_str(), NULL, NULL, &errmsg), "sqlite3_exec caperture: " + view_index);
+        tmp = "";
+      } 
+      else if(tmp == "raperture")
+      {
+        ApertureRectangular* elem = new ApertureRectangular(name);
+        sql = "select aperture_xl_model from " + dbs[dbs_indx] + ".raperture where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetApertureXLeft(std::atof(tmp.c_str()));
+        sql = "select aperture_xr_model from " + dbs[dbs_indx] + ".raperture where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetApertureXRight(std::atof(tmp.c_str()));
+        sql = "select aperture_yt_model from " + dbs[dbs_indx] + ".raperture where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetApertureYTop(std::atof(tmp.c_str()));
+        sql = "select aperture_yb_model from " + dbs[dbs_indx] + ".raperture where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetApertureYBottom(std::atof(tmp.c_str()));
+        sql = "select in_out_model from " + dbs[dbs_indx] + ".raperture where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        if(std::atoi(tmp.c_str()) > 0)
+          elem->SetIn();
+
+        r_linac.AddElement(elem);
+
+        msstr.str("");
+        msstr << model_index++;
+        sql = "update " + dbs[dbs_indx] + ".raperture set model_index = " + msstr.str() + " where view_index = " + view_index;
+        SQLCheck(sqlite3_exec(db_conn, sql.c_str(), NULL, NULL, &errmsg), "sqlite3_exec raperture: " + view_index);
+        tmp = "";
+      }
+      else if(tmp == "diagnostics")
+      {
+        Diagnostics* elem = new Diagnostics(name);
+        sql = "select monitor from "  + dbs[dbs_indx] + ".diagnostics where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        if(std::atoi(tmp.c_str()) > 0)
+          elem->SetMonitorOn();
+
+        r_linac.AddElement(elem);
+
+        msstr.str("");
+        msstr << model_index++;
+        sql = "update " + dbs[dbs_indx] + ".diagnostics set model_index = " + msstr.str() + " where view_index = " + view_index;
+        SQLCheck(sqlite3_exec(db_conn, sql.c_str(), NULL, NULL, &errmsg), "sqlite3_exec drift: " + view_index);
+        tmp = "";
+      }
+      else if(tmp == "buncher")
+      {
+        Buncher* elem = new Buncher(name);
+        sql = "select voltage_model from " + dbs[dbs_indx] + ".buncher where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetVoltage(std::atof(tmp.c_str()));
+
+        sql = "select frequency_model from " + dbs[dbs_indx] + ".buncher where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetFrequency(std::atof(tmp.c_str()));
+
+        sql = "select phase_model from " + dbs[dbs_indx] + ".buncher where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetPhase(std::atof(tmp.c_str()));
+
+        sql = "select aperture_model from " + dbs[dbs_indx] + ".buncher where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetAperture(std::atof(tmp.c_str()));
+
+        sql = "select on_off from " + dbs[dbs_indx] + ".buncher where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        if(std::atoi(tmp.c_str()) > 0)
+          elem->TurnOn();
+
+        r_linac.AddElement(elem);
+
+        msstr.str("");
+        msstr << model_index++;
+        sql = "update " + dbs[dbs_indx] + ".buncher set model_index = " + msstr.str() + " where view_index = " + view_index;
+        SQLCheck(sqlite3_exec(db_conn, sql.c_str(), NULL, NULL, &errmsg), "sqlite3_exec buncher: " + view_index);
+        tmp = "";
+      }
+      else if(tmp == "dipole")
+      {
+        Dipole* elem = new Dipole(name);
+        sql = "select rho_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetRadius(std::atof(tmp.c_str()));
+
+        sql = "select angle_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetAngle(std::atof(tmp.c_str()));
+
+        sql = "select edge_angle1_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetEdgeAngleIn(std::atof(tmp.c_str()));
+
+        sql = "select edge_angle2_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetEdgeAngleOut(std::atof(tmp.c_str()));
+
+        sql = "select half_gap_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetHalfGap(std::atof(tmp.c_str()));
+
+        sql = "select k1_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetK1(std::atof(tmp.c_str()));
+
+        sql = "select k2_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetK2(std::atof(tmp.c_str()));
+
+        sql = "select field_index_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetFieldIndex(std::atof(tmp.c_str()));
+
+        sql = "select kenergy_model from " + dbs[dbs_indx] + ".dipole where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetKineticEnergy(std::atof(tmp.c_str()));
+
+        r_linac.AddElement(elem);
+
+        msstr.str("");
+        msstr << model_index++;
+        sql = "update " + dbs[dbs_indx] + ".dipole set model_index = " + msstr.str() + " where view_index = " + view_index;
+        SQLCheck(sqlite3_exec(db_conn, sql.c_str(), NULL, NULL, &errmsg), "sqlite3_exec dipole: " + view_index);
+        tmp = "";
+      }
+      else if(tmp == "spch_comp")
+      { 
+        SpaceChargeCompensation* elem = new SpaceChargeCompensation(name);
+        sql = "select fraction_model from " + dbs[dbs_indx] + ".spch_comp where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetFraction(std::atof(tmp.c_str()));
+        
+        r_linac.AddElement(elem);
+        
+        msstr.str("");
+        msstr << model_index++;
+        sql = "update " + dbs[dbs_indx] + ".spch_comp set model_index = " + msstr.str() + " where view_index = " + view_index;
+        SQLCheck(sqlite3_exec(db_conn, sql.c_str(), NULL, NULL, &errmsg), "sqlite3_exec spch: " + view_index);
+        tmp = "";
+      }
+      else if (tmp == "steerer") 
+      {
+        Steerer* elem = new Steerer(name);
+        sql = "select bl_h_model from " + dbs[dbs_indx] + ".steerer where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetIntegratedFieldHorizontal(std::atof(tmp.c_str()));
+        sql = "select bl_v_model from " + dbs[dbs_indx] + ".steerer where view_index = " + view_index;
+        tmp = GetDataFromDB(db_conn, sql.c_str());
+        elem->SetIntegratedFieldVertical(std::atof(tmp.c_str()));
+        r_linac.AddElement(elem);
+
+        msstr.str("");
+        msstr << model_index++;
+        sql = "update " + dbs[dbs_indx] + ".steerer set model_index = " + msstr.str() + " where view_index = " + view_index;
+        SQLCheck(sqlite3_exec(db_conn, sql.c_str(), NULL, NULL, &errmsg), "sqlite3_exec steerer: "+view_index);
         tmp = "";
       }
     }

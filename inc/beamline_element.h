@@ -51,14 +51,14 @@ public:
   bool IsIn() const;
   double GetApertureXLeft() const;
   double GetApertureXRight() const;
-  double GetApertureYLeft() const;
-  double GetApertureYRight() const;
+  double GetApertureYTop() const;
+  double GetApertureYBottom() const;
   void SetIn();
   void SetOut();
   void SetApertureXLeft(double);
   void SetApertureXRight(double);
-  void SetApertureYLeft(double);
-  void SetApertureYRight(double);
+  void SetApertureYTop(double);
+  void SetApertureYBottom(double);
   void Accept(Visitor*);
   void Print() const;
 private:
@@ -104,6 +104,13 @@ class Dipole: public BeamLineElement
 public:
   Dipole(std::string);
   ~Dipole();
+  DipoleParameter* GetParameters() const;
+  DipoleParameter* GetParametersOnDevice() const;
+  double GetRadius() const;
+  double GetAngle() const;
+  double GetEdgeAngleIn() const;
+  double GetEdgeAngleOut() const;
+  double GetKineticEnergy() const;
   void SetRadius(double);
   void SetAngle(double);
   void SetEdgeAngleIn(double);
@@ -153,6 +160,11 @@ public:
   double GetEnergyOut() const;
   double GetRFAmplitude() const;
   double GetPhaseShift() const;
+  void SetLength(double r_length)
+  {
+    BeamLineElement::SetLength(r_length);
+    param_h_->length = r_length;
+  }
   void SetFrequency(double);
   void SetCellLengthOverBetaLambda(double);
   void SetRFAmplitude(double);
@@ -307,12 +319,12 @@ double ApertureRectangular::GetApertureXRight() const
   return aperture_x_right_;
 }
 inline
-double ApertureRectangular::GetApertureYLeft() const
+double ApertureRectangular::GetApertureYTop() const
 {
   return aperture_y_left_;
 }
 inline
-double ApertureRectangular::GetApertureYRight() const
+double ApertureRectangular::GetApertureYBottom() const
 {
   return aperture_y_right_;
 }
@@ -337,12 +349,12 @@ void ApertureRectangular::SetApertureXRight(double r_aper)
   aperture_x_right_ = r_aper;
 }
 inline
-void ApertureRectangular::SetApertureYLeft(double r_aper)
+void ApertureRectangular::SetApertureYTop(double r_aper)
 {
   aperture_y_left_ = r_aper;
 }
 inline
-void ApertureRectangular::SetApertureYRight(double r_aper)
+void ApertureRectangular::SetApertureYBottom(double r_aper)
 {
   aperture_y_right_ = r_aper;
 }
@@ -391,6 +403,41 @@ inline
 void Buncher::SetPhase(double r_ph)
 {
   phase_ = r_ph;
+}
+inline
+double Dipole::GetRadius() const
+{
+  return param_h_->radius;
+}
+inline
+double Dipole::GetAngle() const
+{
+  return param_h_->angle;
+}
+inline
+double Dipole::GetEdgeAngleIn() const
+{
+  return param_h_->edge_angle_in;
+}
+inline
+double Dipole::GetEdgeAngleOut() const
+{
+  return param_h_->edge_angle_out;
+}
+inline
+double Dipole::GetKineticEnergy() const
+{
+  return param_h_->kinetic_energy;
+}
+inline
+DipoleParameter* Dipole::GetParameters() const
+{
+  return param_h_;
+}
+inline
+DipoleParameter* Dipole::GetParametersOnDevice() const
+{
+  return param_d_;
 }
 inline
 void Dipole::SetRadius(double r_radius)

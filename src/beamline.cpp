@@ -21,6 +21,19 @@ void BeamLine::Print() const
     bl[i]->Print();
 }
 
+void BeamLine::Print(std::string r_start, std::string r_end) const
+{
+  int start_index = 0;
+  if(r_start != "")
+    start_index = GetElementModelIndex(r_start);
+  int end_index = GetSize() - 1;
+  if(r_end != "")
+    end_index = GetElementModelIndex(r_end);
+  for(uint i = start_index; i <= end_index; ++i)
+    bl[i]->Print();
+  
+}
+
 uint BeamLine::GetElementModelIndex(std::string r_name) const throw(BeamLineElementNotFoundException)
 {
   for(uint i = 0; i < bl.size(); ++i)

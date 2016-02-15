@@ -36,6 +36,17 @@ void InitPVObserverList(PVObserverList& r_pvlist, BeamLine& r_bl, DBConnection& 
             else if(pv_type == "rf_amp" || pv_type == "delay") 
               r_pvlist.AddPVObserver(pv, new RFAmplitudePVObserver(pv, db));
           }
+          else if(elem_type == "buncher")
+          {
+            if(pv_type == "buncher_ph") 
+              r_pvlist.AddPVObserver(pv, new BuncherPhasePVObserver(pv, db));
+            else if(pv_type == "buncher_amp")
+              r_pvlist.AddPVObserver(pv, new BuncherAmplitudePVObserver(pv, db));
+            else if(pv_type == "buncher_on_off") 
+              r_pvlist.AddPVObserver(pv, new BuncherOnOffPVObserver(pv, db));
+          }
+          else if(elem_type == "dipole")
+            r_pvlist.AddPVObserver(pv, new DipolePVObserver(pv, db));
           std::cout << "---------- Add PV: " << pv << std::endl;
         }
         // Attach BeamLineElement to the PVObserver

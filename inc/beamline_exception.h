@@ -8,7 +8,7 @@ class BeamLineElementNotFoundException : public std::exception
 public:
   const char* what() const throw()
   {
-    return "Invalid beamline element name, please change it!";
+    return "Invalid beamline element name, please check it!";
   }
 };
 

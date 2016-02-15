@@ -44,9 +44,9 @@ void ApertureRectangular::Print() const
   std::cout << GetName() << ": " << GetType() 
     << ", aper_x_l = " << GetApertureXLeft() 
     << ", aper_x_r = " << GetApertureXRight() 
-    << ", aper_y_l = " << GetApertureYLeft() 
-    << ", aper_y_r = " << GetApertureYRight() 
-    << "in/out = " << (IsIn() ? "in" : "out")
+    << ", aper_y_l = " << GetApertureYTop() 
+    << ", aper_y_r = " << GetApertureYBottom() 
+    << ", in/out = " << (IsIn() ? "in" : "out")
     << std::endl;
 }
 
@@ -68,7 +68,7 @@ void Buncher::Print() const
 }
 
 Diagnostics::Diagnostics(std::string r_name) : 
-  BeamLineElement(r_name, "diagnostics")
+  BeamLineElement(r_name, "Diagnostics")
 {
 }
 
@@ -80,7 +80,7 @@ void Diagnostics::Accept(Visitor* r_visitor)
 void Diagnostics::Print() const
 {
   std::cout << GetName() << ": " << GetType()
-    << "monitor_on/off  = " << (IsMonitorOn() ? "on" : "off") << std::endl;
+    << ", monitor_on/off  = " << (IsMonitorOn() ? "on" : "off") << std::endl;
 }
 
 Dipole::Dipole(std::string r_name) : BeamLineElement(r_name, "Dipole")
@@ -139,7 +139,7 @@ Drift::Drift(std::string r_name) : BeamLineElement(r_name, "Drift")
 void Drift::Print() const
 {
   std::cout << GetName() << ": " << GetType() << ", length = " << GetLength() 
-    << ", aper " << GetAperture() << std::endl;
+    << ", aper = " << GetAperture() << std::endl;
 }
 
 void Drift::Accept(Visitor* r_visitor)
@@ -154,7 +154,7 @@ Quad::Quad(std::string r_name) : BeamLineElement(r_name, "Quad"),
 
 void Quad::Print() const
 {
-  std::cout << GetName() << ": " << GetType() << ", length = " << GetLength() << ", aper "
+  std::cout << GetName() << ": " << GetType() << ", length = " << GetLength() << ", aper = "
     << GetAperture() << ", gradient = " << GetGradient()
     << ", monitor = " << (IsMonitorOn()? "on" : "off")<< std::endl;
 }
@@ -179,7 +179,7 @@ RFGap::~RFGap()
 void RFGap::Print() const
 {
   std::cout << GetName() + ": " << GetType() << ", length = " << GetLength() 
-    << ", aper " << GetAperture() << ", freq = " << param_h_[0].frequency << ", \n"
+    << ", aper = " << GetAperture() << ", freq = " << param_h_[0].frequency << ", \n"
     << "\t cell_len_bl = " << param_h_[0].cell_length_over_beta_lambda 
     << ", amp = " << param_h_[0].amplitude 
     << ", ref_phi = " << param_h_[0].phase_ref << ", \n"
@@ -208,7 +208,7 @@ void RFGap::PrintFromDevice() const
   RFGapParameter* tmp = new RFGapParameter;
   CopyDataFromDevice(tmp, param_d_, 1); 
   std::cout << GetName() + ": " << GetType() << ", length = " << GetLength() 
-    << ", aper " << GetAperture() << ", freq = " << tmp[0].frequency << ", \n"
+    << ", aper = " << GetAperture() << ", freq = " << tmp[0].frequency << ", \n"
     << "\t cell_len_bl = " << tmp[0].cell_length_over_beta_lambda 
     << ", amp = " << tmp[0].amplitude 
     << ", ref_phi = " << tmp[0].phase_ref << ", \n"
