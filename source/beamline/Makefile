@@ -6,7 +6,9 @@ vpath %.cu $(LOC_SRC_DIR)
 
 all:compile
 
-compile:$(LOC_OBJS) $(LOC_CUOBJS)
+prep:
+	@mkdir -p $(LOC_OBJ_DIR)
+compile:prep $(LOC_OBJS) $(LOC_CUOBJS)
 $(LOC_OBJ_DIR)/%.o:%.cpp
 	$(CC) $(CPPFLAGS) $(LOCFLAGS) -c $< -o $@
 $(LOC_OBJ_DIR)/%.cu.o:%.cu

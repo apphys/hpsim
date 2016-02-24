@@ -3,13 +3,10 @@ include ./make_local.mk
 
 all:compile
 
-list:
-	@echo $(EXT_OBJS)
-
 compile:$(TARGETS)
 %:%.cpp 
 	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(PYTHON_LD_FLAGS) $(EPICS_LD_FLAGS) $(EXT_OBJS) -o $@ $^
 clean:
-	@-rm $(TARGETS)
+	@$(foreach t, $(TARGETS), if [ -f $(t) ]; then rm $(t); fi;)
 
 .PHONY: compile clean

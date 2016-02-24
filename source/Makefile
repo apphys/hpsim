@@ -9,7 +9,7 @@ list:
 compile:
 	@for d in $(DIR); \
 	   do \
-	     (cd $$d && (mkdir -p obj) && (if [ -f ./Makefile ] ; then $(MAKE) compile ;fi)); \
+	     (cd $$d && (if [ -f ./Makefile ] ; then $(MAKE) compile ;fi)); \
 	   done
 	@if [ -d ../bin ]; then \
            rm -rf ../bin; fi; 

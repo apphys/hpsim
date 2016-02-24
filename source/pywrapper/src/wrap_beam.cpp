@@ -1,9 +1,9 @@
-#include "wrap_beam.h"
-#include "beam.h"
-#include "cppclass_object.h"
 #include <iostream>
 #include <vector>
 #include <string>
+#include "wrap_beam.h"
+#include "beam.h"
+#include "cppclass_object.h"
 
 #ifdef _cplusplus
 extern "C" {

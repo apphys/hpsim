@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <algorithm>
+//#include <arrayobject.h>
 #include "wrap_beam.h"
 //#include "wrap_beamline.h"
 //#include "wrap_simulator.h"
@@ -539,6 +540,7 @@ static PyMethodDef HPSimModuleMethods[]={
 PyMODINIT_FUNC initHPSim()
 {
   PyObject* module = Py_InitModule("HPSim", HPSimModuleMethods);
+//  import_array();
   initBeam(module);
 //  initDBConnection(module);
 //  initBeamLine(module);
