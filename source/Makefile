@@ -16,7 +16,7 @@ compile:
 	@mkdir ../bin
 
 ../bin/HPSim.so:
-	$(CC) -shared -o $@ $(OBJS)
+	$(CC)  $(LDFLAGS) $(PYTHON_LD_FLAGS) -shared -o $@ $(OBJS)
 
 clean:
 	@for d in $(DIR); \
