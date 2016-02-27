@@ -117,14 +117,23 @@ public:
   uint GetGoodParticleNum() const;
 
   std::vector<double> GetX() const;
+  void GetX(double* r_out);
   std::vector<double> GetXp() const;
+  void GetXp(double* r_out);
   std::vector<double> GetY() const;
+  void GetY(double* r_out);
   std::vector<double> GetYp() const;
+  void GetYp(double* r_out);
   std::vector<double> GetPhi() const;
+  void GetPhi(double* r_out);
   std::vector<double> GetRelativePhi() const;
+  void GetRelativePhi(double* r_out);
   std::vector<double> GetW() const;
+  void GetW(double* r_out);
   std::vector<uint> GetLoss() const;
+  void GetLoss(uint* r_out);
   std::vector<uint> GetLongitudinalLoss() const;
+  void GetLongitudinalLoss(uint* r_out);
   
   void ApplyCut(char, double, double);
 
@@ -205,12 +214,13 @@ private:
   uint* lloss_0; //!< copy of the inital beam longitudinal loss coordinate, used in save and restore beam to initial condition.
   double design_w_0; //!< copy of the design energy, used in save and restore beam to initial condition.
   double freq_0; //!< copy of the frequency, used in save and restore beam to initial condition.
+  double current_0; //!< copy of the current, used in save and restore beam to initial condition.
   std::vector<double*> beam_1; //!< copy of the intermediate beam, x, xp, y, yp, phi, w coordinates, used in save and restore beam to intermediate condition.
   uint* loss_1; //!< copy of the intermediate beam transverse loss coordinate, used in save and restore beam to intermediate condition.
   uint* lloss_1; //!< copy of the intermediate beam longitudinal loss coordinate, used in save and restore beam to intermediate condition.
   double design_w_1; //!< copy of the design energy, used in save and restore beam to intermediate condition.
   double freq_1; //!< copy of the frequency, used in save and restore beam to intermediate condition.
-
+  double current_1; //!< copy of the current, used in save and restore beam to initial condition.
 };
 
 #endif

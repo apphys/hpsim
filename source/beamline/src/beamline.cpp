@@ -33,7 +33,6 @@ void BeamLine::Print(std::string r_start, std::string r_end) const
     end_index = GetElementModelIndex(r_end);
   for(uint i = start_index; i <= end_index; ++i)
     bl[i]->Print();
-  
 }
 
 uint BeamLine::GetElementModelIndex(std::string r_name) const throw(BeamLineElementNotFoundException)
@@ -86,4 +85,27 @@ const BeamLineElement* BeamLine::operator[](std::string r_name) const
     if(bl[i]->GetName() == r_name)
       return bl[i];
   return NULL;
+}
+
+std::vector<std::string> BeamLine::GetElementNames(std::string r_start, std::string r_end, std::string r_type) const
+{
+  std::vector<std::string> rlt;
+  int start_index = 0;
+  if(r_start != "")
+    start_index = GetElementModelIndex(r_start);
+  int end_index = GetSize() - 1;
+  if(r_end != "")
+    end_index = GetElementModelIndex(r_end);
+  if(r_type == "")
+  {
+    for(uint i = start_index; i <= end_index; ++i)
+      rlt.push_back(GetElementName(i));
+  }
+  else
+  {
+    for(uint i = start_index; i <= end_index; ++i)
+      if(bl[i]->GetType() == r_type)
+        rlt.push_back(GetElementName(i));
+  }
+  return rlt;
 }

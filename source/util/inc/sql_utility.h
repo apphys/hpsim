@@ -30,7 +30,6 @@ public:
   void PrintLibs() const;
   void ClearModelIndex();
   std::vector<std::string> GetEPICSChannels() const;
-  double GetAperture(uint);
   sqlite3* db_conn;
   std::vector<std::string> dbs;
   std::vector<std::string> db_addrs;

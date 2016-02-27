@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <Python.h>
+#include <arrayobject.h>
 #include "wrap_beam.h"
 #include "beam.h"
 #include "cppclass_object.h"
@@ -438,16 +440,14 @@ static PyObject* BeamGetX(PyObject* self, PyObject* args)
   std::string option_str = std::string(option);
   if(option_str != "good" && option_str != "lost" && option_str != "all")
   {
-    std::cerr << "Beam::get_x(): invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
+    std::cerr << "Beam::get_x() error: invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
     return NULL;
   }
   CPPClassObject* cppclass_obj = (CPPClassObject*)self;
   Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
   beam->UpdateLoss();
-  std::vector<uint> loss_arr = beam->GetLoss();
-  std::vector<double> w_arr = beam->GetX();
-  uint loss_num = beam->GetLossNum();
   uint all_num = beam->num_particle;
+  uint loss_num = beam->GetLossNum();
   uint arr_sz;
   if(option_str == "all")
      arr_sz = all_num;
@@ -455,31 +455,42 @@ static PyObject* BeamGetX(PyObject* self, PyObject* args)
     arr_sz = all_num - loss_num;
   else 
     arr_sz = loss_num;
-  PyObject *lst = PyList_New(arr_sz);
-  if (!lst)
-      return NULL;
-  uint cnt = 0;
-  for (int i = 0; i < all_num; i++) 
+
+  int dim[1];
+  dim[0] = arr_sz;
+  PyArrayObject* lst = (PyArrayObject*)PyArray_FromDims(1, dim, NPY_DOUBLE);
+  if(lst == NULL)
   {
-    if(option_str == "all")
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, i, num);   
-    }
-    if(option_str == "good" && loss_arr[i] == 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
-    if(option_str == "lost" && loss_arr[i] != 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
+    std::cerr << "Beam::get_x() error: PyArray_FromDims() failed to create a numpy array!" << std::endl;
+    return NULL;
   }
-  return lst;
+  
+  if(option_str == "all")
+    beam->GetX((double*)lst->data);
+  else
+  {
+    double* xarr = new double[all_num];
+    uint* larr = new uint[all_num];
+    beam->GetX(xarr);
+    beam->GetLoss(larr);
+    double* lstdata = (double*)lst->data;
+    uint cnt = 0; 
+    if(option_str == "good")
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] == 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    else // "lost"
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] != 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    delete [] xarr;
+    delete [] larr; 
+  }
+  return Py_BuildValue("O", lst);
 }
 
 PyDoc_STRVAR(get_xp__doc__,
@@ -497,16 +508,14 @@ static PyObject* BeamGetXp(PyObject* self, PyObject* args)
   std::string option_str = std::string(option);
   if(option_str != "good" && option_str != "lost" && option_str != "all")
   {
-    std::cerr << "Beam::get_xp(): invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
+    std::cerr << "Beam::get_xp() error: invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
     return NULL;
   }
   CPPClassObject* cppclass_obj = (CPPClassObject*)self;
   Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
   beam->UpdateLoss();
-  std::vector<uint> loss_arr = beam->GetLoss();
-  std::vector<double> w_arr = beam->GetXp();
-  uint loss_num = beam->GetLossNum();
   uint all_num = beam->num_particle;
+  uint loss_num = beam->GetLossNum();
   uint arr_sz;
   if(option_str == "all")
      arr_sz = all_num;
@@ -514,31 +523,42 @@ static PyObject* BeamGetXp(PyObject* self, PyObject* args)
     arr_sz = all_num - loss_num;
   else 
     arr_sz = loss_num;
-  PyObject *lst = PyList_New(arr_sz);
-  if (!lst)
-      return NULL;
-  uint cnt = 0;
-  for (int i = 0; i < all_num; i++) 
+
+  int dim[1];
+  dim[0] = arr_sz;
+  PyArrayObject* lst = (PyArrayObject*)PyArray_FromDims(1, dim, NPY_DOUBLE);
+  if(lst == NULL)
   {
-    if(option_str == "all")
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, i, num);   
-    }
-    if(option_str == "good" && loss_arr[i] == 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
-    if(option_str == "lost" && loss_arr[i] != 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
+    std::cerr << "Beam::get_xp() error: PyArray_FromDims() failed to create a numpy array!" << std::endl;
+    return NULL;
   }
-  return lst;
+  
+  if(option_str == "all")
+    beam->GetXp((double*)lst->data);
+  else
+  {
+    double* xarr = new double[all_num];
+    uint* larr = new uint[all_num];
+    beam->GetXp(xarr);
+    beam->GetLoss(larr);
+    double* lstdata = (double*)lst->data;
+    uint cnt = 0; 
+    if(option_str == "good")
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] == 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    else // "lost"
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] != 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    delete [] xarr;
+    delete [] larr; 
+  }
+  return Py_BuildValue("O", lst);
 }
 
 PyDoc_STRVAR(get_y__doc__,
@@ -556,16 +576,14 @@ static PyObject* BeamGetY(PyObject* self, PyObject* args)
   std::string option_str = std::string(option);
   if(option_str != "good" && option_str != "lost" && option_str != "all")
   {
-    std::cerr << "Beam::get_y(): invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
+    std::cerr << "Beam::get_y() error: invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
     return NULL;
   }
   CPPClassObject* cppclass_obj = (CPPClassObject*)self;
   Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
   beam->UpdateLoss();
-  std::vector<uint> loss_arr = beam->GetLoss();
-  std::vector<double> w_arr = beam->GetY();
-  uint loss_num = beam->GetLossNum();
   uint all_num = beam->num_particle;
+  uint loss_num = beam->GetLossNum();
   uint arr_sz;
   if(option_str == "all")
      arr_sz = all_num;
@@ -573,36 +591,47 @@ static PyObject* BeamGetY(PyObject* self, PyObject* args)
     arr_sz = all_num - loss_num;
   else 
     arr_sz = loss_num;
-  PyObject *lst = PyList_New(arr_sz);
-  if (!lst)
-      return NULL;
-  uint cnt = 0;
-  for (int i = 0; i < all_num; i++) 
+
+  int dim[1];
+  dim[0] = arr_sz;
+  PyArrayObject* lst = (PyArrayObject*)PyArray_FromDims(1, dim, NPY_DOUBLE);
+  if(lst == NULL)
   {
-    if(option_str == "all")
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, i, num);   
-    }
-    if(option_str == "good" && loss_arr[i] == 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
-    if(option_str == "lost" && loss_arr[i] != 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
+    std::cerr << "Beam::get_y() error: PyArray_FromDims() failed to create a numpy array!" << std::endl;
+    return NULL;
   }
-  return lst;
+  
+  if(option_str == "all")
+    beam->GetY((double*)lst->data);
+  else
+  {
+    double* xarr = new double[all_num];
+    uint* larr = new uint[all_num];
+    beam->GetY(xarr);
+    beam->GetLoss(larr);
+    double* lstdata = (double*)lst->data;
+    uint cnt = 0; 
+    if(option_str == "good")
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] == 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    else // "lost"
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] != 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    delete [] xarr;
+    delete [] larr; 
+  }
+  return Py_BuildValue("O", lst);
 }
 
 PyDoc_STRVAR(get_yp__doc__,
 "get_yp() -> list(float)\n\n"
-"Get the yp coordinates of the beam."
+"Get the y coordinates of the beam."
 );
 static PyObject* BeamGetYp(PyObject* self, PyObject* args)
 {
@@ -615,16 +644,14 @@ static PyObject* BeamGetYp(PyObject* self, PyObject* args)
   std::string option_str = std::string(option);
   if(option_str != "good" && option_str != "lost" && option_str != "all")
   {
-    std::cerr << "Beam::get_yp(): invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
+    std::cerr << "Beam::get_yp() error: invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
     return NULL;
   }
   CPPClassObject* cppclass_obj = (CPPClassObject*)self;
   Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
   beam->UpdateLoss();
-  std::vector<uint> loss_arr = beam->GetLoss();
-  std::vector<double> w_arr = beam->GetYp();
-  uint loss_num = beam->GetLossNum();
   uint all_num = beam->num_particle;
+  uint loss_num = beam->GetLossNum();
   uint arr_sz;
   if(option_str == "all")
      arr_sz = all_num;
@@ -632,31 +659,42 @@ static PyObject* BeamGetYp(PyObject* self, PyObject* args)
     arr_sz = all_num - loss_num;
   else 
     arr_sz = loss_num;
-  PyObject *lst = PyList_New(arr_sz);
-  if (!lst)
-      return NULL;
-  uint cnt = 0;
-  for (int i = 0; i < all_num; i++) 
+
+  int dim[1];
+  dim[0] = arr_sz;
+  PyArrayObject* lst = (PyArrayObject*)PyArray_FromDims(1, dim, NPY_DOUBLE);
+  if(lst == NULL)
   {
-    if(option_str == "all")
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, i, num);   
-    }
-    if(option_str == "good" && loss_arr[i] == 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
-    if(option_str == "lost" && loss_arr[i] != 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
+    std::cerr << "Beam::get_yp() error: PyArray_FromDims() failed to create a numpy array!" << std::endl;
+    return NULL;
   }
-  return lst;
+  
+  if(option_str == "all")
+    beam->GetYp((double*)lst->data);
+  else
+  {
+    double* xarr = new double[all_num];
+    uint* larr = new uint[all_num];
+    beam->GetYp(xarr);
+    beam->GetLoss(larr);
+    double* lstdata = (double*)lst->data;
+    uint cnt = 0; 
+    if(option_str == "good")
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] == 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    else // "lost"
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] != 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    delete [] xarr;
+    delete [] larr; 
+  }
+  return Py_BuildValue("O", lst);
 }
 
 PyDoc_STRVAR(get_phi__doc__,
@@ -690,17 +728,8 @@ static PyObject* BeamGetPhi(PyObject* self, PyObject* args)
   CPPClassObject* cppclass_obj = (CPPClassObject*)self;
   Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
   beam->UpdateLoss();
-  std::vector<uint> loss_arr = beam->GetLoss();
-  std::vector<double> p_arr;
-  if(option_str2 == "absolute")
-    p_arr = beam->GetPhi();
-  else
-  {
-    beam->UpdateRelativePhi();
-    p_arr = beam->GetRelativePhi();
-  }
-  uint loss_num = beam->GetLossNum();
   uint all_num = beam->num_particle;
+  uint loss_num = beam->GetLossNum();
   uint arr_sz;
   if(option_str == "all")
      arr_sz = all_num;
@@ -708,31 +737,52 @@ static PyObject* BeamGetPhi(PyObject* self, PyObject* args)
     arr_sz = all_num - loss_num;
   else 
     arr_sz = loss_num;
-  PyObject *lst = PyList_New(arr_sz);
-  if (!lst)
-      return NULL;
-  uint cnt = 0;
-  for (int i = 0; i < all_num; i++) 
+  int dim[1];
+  dim[0] = arr_sz;
+  PyArrayObject* lst = (PyArrayObject*)PyArray_FromDims(1, dim, NPY_DOUBLE);
+  if(lst == NULL)
   {
-    if(option_str == "all")
-    {
-      PyObject* num = PyFloat_FromDouble(p_arr[i]);
-      PyList_SET_ITEM(lst, i, num);   
-    }
-    if(option_str == "good" && loss_arr[i] == 0)
-    {
-      PyObject* num = PyFloat_FromDouble(p_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
-    if(option_str == "lost" && loss_arr[i] != 0)
-    {
-      PyObject* num = PyFloat_FromDouble(p_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
+    std::cerr << "Beam::get_phi() error: PyArray_FromDims() failed to create a numpy array!" << std::endl;
+    return NULL;
   }
-  return lst;
+  
+  if(option_str2 == "relative")
+    beam->UpdateRelativePhi();
+
+  if(option_str == "all")
+  {
+    if(option_str2 == "absolute")
+      beam->GetPhi((double*)lst->data);
+    else
+      beam->GetRelativePhi((double*)lst->data);
+  }
+  else
+  {
+    double* xarr = new double[all_num];
+    uint* larr = new uint[all_num];
+    if(option_str2 == "absolute")
+      beam->GetPhi(xarr);
+    else
+      beam->GetRelativePhi(xarr);
+    beam->GetLoss(larr);
+    double* lstdata = (double*)lst->data;
+    uint cnt = 0; 
+    if(option_str == "good")
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] == 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    else // "lost"
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] != 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    delete [] xarr;
+    delete [] larr; 
+  }
+  return Py_BuildValue("O", lst);
 }
 
 PyDoc_STRVAR(get_w__doc__,
@@ -750,16 +800,14 @@ static PyObject* BeamGetW(PyObject* self, PyObject* args)
   std::string option_str = std::string(option);
   if(option_str != "good" && option_str != "lost" && option_str != "all")
   {
-    std::cerr << "Beam::get_w(): invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
+    std::cerr << "Beam::get_w() error: invalid option:" << option_str << ", pick from (\"good\", \"lost\", \"all\") !" << std::endl;
     return NULL;
   }
   CPPClassObject* cppclass_obj = (CPPClassObject*)self;
   Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
   beam->UpdateLoss();
-  std::vector<uint> loss_arr = beam->GetLoss();
-  std::vector<double> w_arr = beam->GetW();
-  uint loss_num = beam->GetLossNum();
   uint all_num = beam->num_particle;
+  uint loss_num = beam->GetLossNum();
   uint arr_sz;
   if(option_str == "all")
      arr_sz = all_num;
@@ -767,31 +815,42 @@ static PyObject* BeamGetW(PyObject* self, PyObject* args)
     arr_sz = all_num - loss_num;
   else 
     arr_sz = loss_num;
-  PyObject *lst = PyList_New(arr_sz);
-  if (!lst)
-      return NULL;
-  uint cnt = 0;
-  for (int i = 0; i < all_num; i++) 
+
+  int dim[1];
+  dim[0] = arr_sz;
+  PyArrayObject* lst = (PyArrayObject*)PyArray_FromDims(1, dim, NPY_DOUBLE);
+  if(lst == NULL)
   {
-    if(option_str == "all")
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, i, num);   
-    }
-    if(option_str == "good" && loss_arr[i] == 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
-    if(option_str == "lost" && loss_arr[i] != 0)
-    {
-      PyObject* num = PyFloat_FromDouble(w_arr[i]);
-      PyList_SET_ITEM(lst, cnt, num);   
-      ++cnt;
-    }
+    std::cerr << "Beam::get_w() error: PyArray_FromDims() failed to create a numpy array!" << std::endl;
+    return NULL;
   }
-  return lst;
+  
+  if(option_str == "all")
+    beam->GetW((double*)lst->data);
+  else
+  {
+    double* xarr = new double[all_num];
+    uint* larr = new uint[all_num];
+    beam->GetW(xarr);
+    beam->GetLoss(larr);
+    double* lstdata = (double*)lst->data;
+    uint cnt = 0; 
+    if(option_str == "good")
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] == 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    else // "lost"
+    {
+      for(int i = 0; i < all_num; ++i)
+	if(larr[i] != 0)
+	  lstdata[cnt++] = xarr[i];	
+    }
+    delete [] xarr;
+    delete [] larr; 
+  }
+  return Py_BuildValue("O", lst);
 }
 
 PyDoc_STRVAR(get_losses__doc__,
@@ -812,34 +871,29 @@ static PyObject* BeamGetLoss(PyObject* self, PyObject* args)
     std::cerr << "Beam::get_losses(): invalid option:" << option_str << ", pick from (\"t\", \"l\") !" << std::endl;
     return NULL;
   }
-
   CPPClassObject* cppclass_obj = (CPPClassObject*)self;
   Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
-  std::vector<uint> array;
+  uint arr_sz = beam->num_particle;
+  int dim[1];
+  dim[0] = arr_sz;
+  PyArrayObject* lst = (PyArrayObject*)PyArray_FromDims(1, dim, NPY_UINT);
+  if(lst == NULL)
+  {
+    std::cerr << "Beam::get_losses() error: PyArray_FromDims() failed to create a numpy array!" << std::endl;
+    return NULL;
+  }
+  uint* lstdata = (uint*)lst->data;
   if (option_str == "t")
   {
     beam->UpdateLoss();
-    array = beam->GetLoss();
+    beam->GetLoss(lstdata);
   }
   else 
   {
     beam->UpdateLongitudinalLoss();
-    array = beam->GetLongitudinalLoss();
+    beam->GetLongitudinalLoss(lstdata);
   }
-  PyObject *lst = PyList_New(beam->num_particle);
-  if (!lst)
-      return NULL;
-  for (int i = 0; i < beam->num_particle; i++) 
-  {
-    PyObject *num = PyLong_FromUnsignedLong(array[i]);
-    if (!num) 
-    {
-      Py_DECREF(lst);
-      return NULL;
-    }
-    PyList_SET_ITEM(lst, i, num);   // reference to num stolen
-  }
-  return lst;
+  return Py_BuildValue("O", lst);
 }
 
 PyDoc_STRVAR(get_avg_x__doc__,
@@ -1328,7 +1382,6 @@ static PyMethodDef BeamMethods[] = {
   {"save_intermediate_beam", BeamSaveIntermediate, METH_VARARGS, save_intermediate_beam__doc__},
   {"restore_initial_beam", BeamRestoreInitial, METH_VARARGS, restore_initial_beam__doc__},
   {"restore_intermediate_beam", BeamRestoreIntermediate, METH_VARARGS, restore_intermediate_beam__doc__},
-//  {"print_simple", BeamPrintSimple, METH_VARARGS, "PrintSimple routine in Beam"},
   {"print_to", BeamPrintTo, METH_VARARGS, print_to__doc__},
   {"set_ref_w", BeamSetRefEnergy, METH_VARARGS, set_ref_w__doc__},
   {"set_ref_phi", BeamSetRefPhase, METH_VARARGS, set_ref_phi__doc__},
@@ -1413,6 +1466,7 @@ static PyTypeObject Beam_Type = {
 
 PyMODINIT_FUNC initBeam(PyObject* module)
 {
+  import_array();
   if(PyType_Ready(&Beam_Type) < 0) return;
   Py_INCREF(&Beam_Type);
   PyModule_AddObject(module, "Beam", (PyObject*)&Beam_Type);

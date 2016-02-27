@@ -14,7 +14,7 @@ __device__ uint num_on_mesh;
 //__constant__ SpaceChargeParam d_scheff_param;
 __device__ SpaceChargeParam d_scheff_param;
 
-/*! \todo If dz > beta_lambda, set it to 0.99bl ?*/
+/*! TODO If dz > beta_lambda, set it to 0.99bl ?*/
 __global__
 void UpdateScheffMeshSizeKernel(double* r_partial_r, double* r_partial_z,
   double r_freq, double r_beta, double r_coef = 1.0)
@@ -91,7 +91,7 @@ void UpdateFldTbl1Kernel(double2* r_fld_tbl1, double r_freq, double r_beta,
       xi = -xi;
     }
   }
-
+ // 1/(2*pi^2*epsilon)= 5721.67m*mev/coul
   double c1 = 5721.67*r_current_ov_mc2/(r_freq*1e6*(double)r_num_part);
   r_fld_tbl1[cnt].x = c1*er1;
   r_fld_tbl1[cnt].y = c1*ez1;
@@ -461,6 +461,7 @@ void UpdateFldTbl2Kernel0(float2* r_fld_tbl2,
     atomicAdd(&(r_fld_tbl2[fld2_indx].y), tmpz);
   }
 }
+
 /*
 // every thread would be a mesh point
 // threads in the same block share the same rp

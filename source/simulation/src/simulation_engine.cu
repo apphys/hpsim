@@ -209,8 +209,8 @@ extern "C"
     //cudaProfilerStart();
     SimulateRFGapFirstHalfKernel<<<grid_size, gc_blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp,
       beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, phi_in, rfparam, r_gap->GetLength());
-//    if(param->space_charge_on)
-//      spch_tmp->Start(beam_tmp, r_gap->GetLength());
+    if(param->space_charge_on)
+      spch_tmp->Start(beam_tmp, r_gap->GetLength());
     SimulateRFGapSecondHalfKernel<<<grid_size, gc_blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp,
       beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, phi_out, rfparam, r_gap->GetLength(), ccl_cell_num++);
     //cudaProfilerStop();

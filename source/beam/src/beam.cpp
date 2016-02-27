@@ -566,6 +566,7 @@ void Beam::SaveInitialBeam()
   SaveBeam(beam_0, loss_0, lloss_0);
   design_w_0 = design_w;
   freq_0 = freq;
+  current_0 = current;
 }
 
 /*!
@@ -581,6 +582,7 @@ void Beam::SaveIntermediateBeam()
   SaveBeam(beam_1, loss_1, lloss_1);
   design_w_1 = design_w;
   freq_1 = freq;
+  current_1 = current;
 }
 
 /*! 
@@ -613,6 +615,7 @@ void Beam::RestoreInitialBeam()
   RestoreBeam(beam_0, loss_0, lloss_0);
   design_w = design_w_0;
   freq = freq_0;
+  current = current_0;
   UpdateAvgPhi(true);
   UpdateRelativePhi(true);
 }
@@ -627,6 +630,7 @@ void Beam::RestoreIntermediateBeam()
   RestoreBeam(beam_1, loss_1, lloss_1); 
   design_w = design_w_1;
   freq = freq_1;
+  current = current_1;
   UpdateAvgPhi(true);
   UpdateRelativePhi(true);
 }
@@ -1104,11 +1108,29 @@ std::vector<double> Beam::GetRelativePhi() const
 }
 
 /*!
+ * \brief get the relative phase coordinates (array)
+ * \param r_out[out] Output array pointer
+ */
+void Beam::GetRelativePhi(double* r_out)
+{
+  CopyArrayFromDevice(phi_r, r_out, num_particle);
+}
+
+/*!
  * \brief get the x coordinates (array)
  */
 std::vector<double> Beam::GetX() const
 {
   return GetArrayFromDevice(x, num_particle);
+}
+
+/*!
+ * \brief get the x coordinates (array)
+ * \param r_out[out] Output array pointer
+ */
+void Beam::GetX(double* r_out)
+{
+  CopyArrayFromDevice(x, r_out, num_particle);
 }
 
 /*!
@@ -1120,11 +1142,29 @@ std::vector<double> Beam::GetXp() const
 }
 
 /*!
+ * \brief get the xp coordinates (array)
+ * \param r_out[out] Output array pointer
+ */
+void Beam::GetXp(double* r_out)
+{
+  CopyArrayFromDevice(xp, r_out, num_particle);
+}
+
+/*!
  * \brief get the y coordinates (array)
  */
 std::vector<double> Beam::GetY() const
 {
   return GetArrayFromDevice(y, num_particle);
+}
+
+/*!
+ * \brief get the y coordinates (array)
+ * \param r_out[out] Output array pointer
+ */
+void Beam::GetY(double* r_out)
+{
+  CopyArrayFromDevice(y, r_out, num_particle);
 }
 
 /*!
@@ -1134,6 +1174,16 @@ std::vector<double> Beam::GetYp() const
 {
   return GetArrayFromDevice(yp, num_particle);
 }
+
+/*!
+ * \brief get the yp coordinates (array)
+ * \param r_out[out] Output array pointer
+ */
+void Beam::GetYp(double* r_out)
+{
+  CopyArrayFromDevice(yp, r_out, num_particle);
+}
+
 /*!
  * \brief get the absolute phase coordinates (array)
  */
@@ -1141,6 +1191,16 @@ std::vector<double> Beam::GetPhi() const
 {
   return GetArrayFromDevice(phi, num_particle);
 }
+
+/*!
+ * \brief get the absolute phase coordinates (array)
+ * \param r_out[out] Output array pointer
+ */
+void Beam::GetPhi(double* r_out)
+{
+  CopyArrayFromDevice(phi, r_out, num_particle);
+}
+
 /*!
  * \brief get the kinetic energy coordinates (array)
  */
@@ -1150,11 +1210,30 @@ std::vector<double> Beam::GetW() const
 }
 
 /*!
+ * \brief get the kinetic energy coordinates (array)
+ * \param r_out[out] Output array pointer
+ */
+void Beam::GetW(double* r_out)
+{
+  CopyArrayFromDevice(w, r_out, num_particle);
+}
+
+/*!
  * \brief get the transverse loss coordinates (array)
  */
 std::vector<uint> Beam::GetLoss() const
 {
   return GetArrayFromDevice(loss, num_particle);
+}
+
+/*!
+ * \brief get the transverse loss coordinates (array)
+ *
+ * \param r_out[out] Output array pointer
+ */
+void Beam::GetLoss(uint* r_out)
+{
+  return CopyArrayFromDevice(loss, r_out, num_particle);
 }
 
 /*!
@@ -1167,6 +1246,20 @@ std::vector<uint> Beam::GetLoss() const
 std::vector<uint> Beam::GetLongitudinalLoss() const
 {
   return GetArrayFromDevice(lloss, num_particle);
+}
+
+/*!
+ * \brief get the longitudinal loss coordinates (array)
+ *
+ * \param r_out[out] Output array pointer
+ *
+ * This function doesn't automatically update the longitudinal loss
+ * coordinates, call UpdateLongitudinalLoss() before calling this
+ * function.
+ */
+void Beam::GetLongitudinalLoss(uint* r_out)
+{
+  return CopyArrayFromDevice(lloss, r_out, num_particle);
 }
 
 /*!

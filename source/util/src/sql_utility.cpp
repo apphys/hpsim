@@ -322,35 +322,3 @@ std::vector<std::string> DBConnection::GetEPICSChannels() const
   }
   return rt;
 }
-
-double DBConnection::GetAperture(uint r_elem_indx)
-{
-  uint dbs_indx = 0;
-  std::string sql;
-  std::ostringstream osstr;
-  osstr << r_elem_indx;
-  std::string elem_indx_str = osstr.str();
-  while(dbs_indx < dbs.size())
-  {
-    sql = "select name from " + dbs[dbs_indx] + ".linac where model_index = " + 
-         elem_indx_str + " and (model_type = 'quad' or model_type = 'caperture')"; 
-    std::string data = GetDataFromDB(db_conn, sql.c_str());
-    if (data == "")
-    {
-      ++dbs_indx;
-      continue;
-    }
-    if (MatchCaseInsensitive(data, "Q"))
-      sql = "select aperture_model from " + dbs[dbs_indx] + ".quad where name = '" + data + "'";
-    else if (MatchCaseInsensitive(data, "BA"))
-      sql = "select aperture_model from " + dbs[dbs_indx] + ".caperture where name = '" + data + "'";
-    else
-      std::cerr << "DBConnnection::GetAperture() error: cann't get apertures for elements other than quad and caperture." << std::endl;
-    data = GetDataFromDB(db_conn, sql.c_str());
-    return std::atof(data.c_str());
-  }
-
-  if (dbs_indx >= dbs.size())
-    return 0.0;
-}
-

@@ -16,9 +16,14 @@ int main()
   Beam beam("TAEM01_input_beam_64K.dat");
 //  beam.InitBeamFromFile("TAEM01_input_beam_64K.dat");
 
+  Scheff scheff(32, 128/2, 3);
+  scheff.SetAdjBunchCutoffW(0.8);
+  scheff.SetInterval(0.1);
+  scheff.SetMeshSizeCutoffW(40.0);
+
   SimulationEngine se;
-  se.InitEngine(&beam, &bl);
-  se.Simulate();//"01QM00U", "01QM08");
+  se.InitEngine(&beam, &bl, &scheff);
+  se.Simulate();//"01QM00U", "01RG01");
   beam.PrintToFile("end.txt", "");
   //se.Simulate("01QM00U", "02DR02");
   

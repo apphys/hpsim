@@ -3,7 +3,7 @@ LOC_INC_DIR=$(LOC_PATH)/inc
 LOC_SRC_DIR=$(LOC_PATH)/src
 LOC_OBJ_DIR=$(LOC_PATH)/obj
 
-EXT_FOLDER=util beam
+EXT_FOLDER=util beam beamline simulation server
 EXT_INC_DIR=$(addprefix $(PROJECT_ROOT)/,$(addsuffix /inc,$(EXT_FOLDER)))
 EXT_INC_FLAGS=$(addprefix -I,$(EXT_INC_DIR))
 

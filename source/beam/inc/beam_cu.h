@@ -61,4 +61,9 @@ std::vector<T> GetArrayFromDevice(T* r_arr, uint r_num)
   return rt; 
 }
 
+template<typename T>
+void CopyArrayFromDevice(T* r_src, T* r_out, uint r_num)
+{
+  cudaMemcpy(r_out, r_src, sizeof(T)*r_num, cudaMemcpyDeviceToHost);
+}
 #endif

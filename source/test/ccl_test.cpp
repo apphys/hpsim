@@ -17,8 +17,13 @@ int main()
   Beam beam;
   beam.InitBeamFromFile("Hm_clz_64k.txt");
 
+  Scheff scheff(32, 128/2, 3);
+  scheff.SetAdjBunchCutoffW(0.8);
+  scheff.SetInterval(0.1);
+  scheff.SetMeshSizeCutoffW(40.0);
+
   SimulationEngine se;
-  se.InitEngine(&beam, &bl);
+  se.InitEngine(&beam, &bl, &scheff);
   se.Simulate();//"CLZ", "06DT");//"05RG101");
   beam.PrintToFile("end.txt", "");
   //se.Simulate("01QM00U", "02DR02");

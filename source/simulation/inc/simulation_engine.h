@@ -14,7 +14,7 @@
  *  and strategy pattern to use different SpaceCharge methods.
  *
  */
-class SimulationEngine : public Visitor, PyWrapper
+class SimulationEngine : public Visitor, public PyWrapper
 {
 public:
   /*!
