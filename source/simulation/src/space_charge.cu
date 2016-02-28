@@ -27,12 +27,15 @@ namespace
 // using just pointer instead of pointer to pointer, mem alloc 
 // and init would not work. Must use pointer to pointer
 void Initialize(SpaceChargeParam r_param, 
+		double2** r_fld_tbl1, 
 #ifdef DOUBLE_PRECISION
-                    double** r_bin_tbl, 
+		double2** r_fld_tbl2,
+		double** r_bin_tbl
 #else
-                    float** r_bin_tbl, 
+		float2** r_fld_tbl2,
+		float** r_bin_tbl 
 #endif
-                    double2** r_fld_tbl1, float2** r_fld_tbl2)
+)
 {
   nr = r_param.nx;
   nz = r_param.nz;
@@ -49,18 +52,24 @@ void Initialize(SpaceChargeParam r_param,
   cudaMalloc((void**)r_fld_tbl1, sz);
   cudaMemset(*r_fld_tbl1, 0.0, sz);
 
+#ifdef DOUBLE_PRECISION
+  sz = (nz+1)*(nr+1)*sizeof(double2);
+#else
   sz = (nz+1)*(nr+1)*sizeof(float2);
+#endif
   cudaMalloc((void**)r_fld_tbl2, sz);
   cudaMemset(*r_fld_tbl2, 0.0, sz);
 }
 
-void FreeMeshTables(
+void FreeMeshTables(double2* r_fld_tbl1, 
 #ifdef DOUBLE_PRECISION
-  double* r_bin_tbl, 
+		    double2* r_fld_tbl2,
+		    double* r_bin_tbl
 #else
-  float* r_bin_tbl, 
+		    float2* r_fld_tbl2,
+		    float* r_bin_tbl 
 #endif
-  double2* r_fld_tbl1, float2* r_fld_tbl2)
+)
 {
   cudaFree(r_bin_tbl);
   cudaFree(r_fld_tbl1);
@@ -79,9 +88,9 @@ void SetParameters(Beam* r_beam, uint r_nr, uint r_nz, double r_frac, uint r_adj
 
 void ResetBinTbl(
 #ifdef DOUBLE_PRECISION
-  double* r_bin_tbl
+		 double* r_bin_tbl
 #else
-  float* r_bin_tbl
+		 float* r_bin_tbl
 #endif
 )
 {
@@ -93,9 +102,19 @@ void ResetBinTbl(
   cudaMemset(r_bin_tbl, 0.0, sz);
 }
 
-void ResetFldTbl(float2* r_fld_tbl2)
+void ResetFldTbl(
+#ifdef DOUBLE_PRECISION
+		 double2* r_fld_tbl2
+#else
+		 float2* r_fld_tbl2
+#endif
+)
 {
+#ifdef DOUBLE_PRECISION
+  uint sz = (nz+1)*(nr+1)*sizeof(double2);
+#else
   uint sz = (nz+1)*(nr+1)*sizeof(float2);
+#endif
   cudaMemset(r_fld_tbl2, 0.0, sz);
 }
 
@@ -105,7 +124,7 @@ void UpdateMeshKernelCall()
   {
     beam->UpdateMaxRPhi();
     UpdateScheffMeshSizeKernel<<<1, 1>>>(beam->r_max, NULL, freq, beta);
-//    UpdateScheffMeshSizeKernel<<<1, 1>>>(beam->r_max, beam->abs_phi_max, freq, beta);
+    //UpdateScheffMeshSizeKernel<<<1, 1>>>(beam->r_max, beam->abs_phi_max, freq, beta);
   }
   else
   {
@@ -118,11 +137,11 @@ void UpdateMeshKernelCall()
 
 void UpdateTblsKernelCall(double2* r_fld_tbl1, 
 #ifdef DOUBLE_PRECISION
-  double* r_bin_tbl
+			  double* r_bin_tbl
 #else
-  float* r_bin_tbl
+			  float* r_bin_tbl
 #endif
-  )
+)
 {
   cudaStream_t stream1, stream2;
   cudaStreamCreate(&stream1);
@@ -134,64 +153,53 @@ void UpdateTblsKernelCall(double2* r_fld_tbl1,
   uint gridy = nr + 1;
   dim3 grid(gridx, gridy, 1); // 4 = 32/8 (rs), 33(rp) is the receiving point r.
   dim3 blk(blkx, blky, 1); // 32(nr) source point r, 8 is to make sure thread num < 1024 
-//  std::cout << "1st fldtbl size: blck = (" << blkx << ", " << blky << ", 1), grid = (" << gridx << ", " << gridy << ", 1)" << std::endl;
-//  cudaProfilerStart();
+  //cudaProfilerStart();
   UpdateFldTbl1Kernel<<<grid, blk, 0, stream1>>>(r_fld_tbl1, freq, beta, 
     beam->num_particle, beam->current*frac/beam->mass, adj_bunch);
-//  cudaProfilerStop();
+  //cudaProfilerStop();
   // update the bin table
   InitNumOnMesh<<<1, 1, 0, stream2>>>();
   uint grid_size = beam->grid_size;
   uint blck_size = beam->blck_size;
-//  cudaProfilerStart();
+  //cudaProfilerStart();
   cudaEvent_t start, stop;
-//  StartTimer(&start, &stop);
+  //StartTimer(&start, &stop);
   DistributeParticleKernel<<<grid_size, blck_size/4, 0, stream2>>>(
     r_bin_tbl, beam->x, beam->y, beam->phi_r, beam->loss, beam->lloss, beam->x_avg_good, 
     beam->y_avg_good, beam->phi_avg_r, beam->x_sig_good, beam->y_sig_good, beam->num_particle, 
     beta, freq);
-//  PrintBinTbl(r_bin_tbl, nz*nr, "aa.dat");
-//  StopTimer(&start, &stop, "DistributeParticleKernel: ");
-//  cudaProfilerStop();
+  //PrintBinTbl(r_bin_tbl, nz*nr, "aa.dat");
+  //StopTimer(&start, &stop, "DistributeParticleKernel: ");
+  //cudaProfilerStop();
   cudaStreamDestroy(stream1);
   cudaStreamDestroy(stream2);
 }
 
-
-//#ifdef _DEBUG
-void PrintFinalFldTbl(float2* r_tbl)
-{
-  uint sz = (nr+1)*(nz+1);
-  float2* h_tbl = new float2[sz];
-  cudaMemcpy(h_tbl, r_tbl, sz*sizeof(float2), cudaMemcpyDeviceToHost);
-  std::ofstream tout("final_fld_tbl.dat");
-  tout << std::setprecision(10);
-  for(int i = 0; i < sz; ++i)
-    tout << i << "\t" << h_tbl[i].x << "\t" << h_tbl[i].y << std::endl;
-  tout.close();
-  delete [] h_tbl;
-}
-//#endif
-
-void UpdateFinalFldTblKernelCall(float2* r_fld_tbl2, 
+void UpdateFinalFldTblKernelCall(
 #ifdef DOUBLE_PRECISION
-                                 double* r_bin_tbl, 
+				 double2* r_fld_tbl2,
+				 double* r_bin_tbl, 
 #else
-                                 float* r_bin_tbl, 
+				 float2* r_fld_tbl2, 
+				 float* r_bin_tbl, 
 #endif
-                                 double2* r_fld_tbl1)
+				 double2* r_fld_tbl1)
 {
   uint blk = nz + 1;
   uint grid = nr + 1;
-//  cudaProfilerStart();
+  //cudaProfilerStart();
+#ifdef DOUBLE_PRECISION
+  UpdateFldTbl2KernelDouble<<<nr + 2, 1024>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
+#else
   if(nr*nz <= 12*1024)
     UpdateFldTbl2Kernel<<<nr + 2, 1024, nr*nz*sizeof(float)>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
   else
     UpdateFldTbl2Kernel0<<<nr + 2, 1024>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
-//  cudaProfilerStop();
+#endif
+  //cudaProfilerStop();
 
-//  UpdateFldTbl2Kernel_OldVersion<<<grid, blk>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
-//  UpdateFldTbl2Kernel4<<<2*(nr+1)+1, 1024, nr*nz*sizeof(float)>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
+  //UpdateFldTbl2Kernel_OldVersion<<<grid, blk>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
+  //UpdateFldTbl2Kernel4<<<2*(nr+1)+1, 1024, nr*nz*sizeof(float)>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
 #ifdef _DEBUG
   cudaThreadSynchronize();
   std::cout << "done final fld tbl" << std::endl;  
@@ -199,20 +207,27 @@ void UpdateFinalFldTblKernelCall(float2* r_fld_tbl2,
 #endif
 }
 
-void KickBeamKernelCall(float2* r_fld_tbl2, double r_length, double r_ratio_r, double r_ratio_z, 
-  double r_ratio_q, double r_ratio_g)
+void KickBeamKernelCall(
+#ifdef DOUBLE_PRECISION
+			double2* r_fld_tbl2,
+#else
+			float2* r_fld_tbl2,
+#endif
+			double r_length, double r_ratio_r, double r_ratio_z, 
+			double r_ratio_q, double r_ratio_g
+) 
 {
   uint grid_size = beam->grid_size;
   uint blck_size = beam->blck_size/4;
-//  cudaProfilerStart();
-//  ApplySpchKickKernelV2<<<grid_size, blck_size, 32*64*sizeof(double2)>>>(r_beam->x, r_beam->y, 
+  //cudaProfilerStart();
+  //ApplySpchKickKernelV2<<<grid_size, blck_size, 32*64*sizeof(double2)>>>(r_beam->x, r_beam->y, 
   ApplySpchKickKernel<<<grid_size, blck_size>>>(beam->x, beam->y, 
     beam->phi_r, beam->xp, beam->yp, beam->w, beam->loss, beam->lloss, 
     beam->x_avg_good, beam->y_avg_good, beam->phi_avg_r, beam->x_sig_good, 
     beam->y_sig_good, beam->mass, beam->num_particle, beam->current*frac, 
     freq, beta, adj_bunch, r_length, r_fld_tbl2, r_ratio_r, r_ratio_z, 
     r_ratio_q, r_ratio_g);
-//  cudaProfilerStop();
+  //cudaProfilerStop();
 #ifdef _DEBUG
   cudaThreadSynchronize();
   std::cout << "done kick" << std::endl;  
@@ -265,43 +280,19 @@ void PrintBinTbl(float* r_tbl, uint sz, std::string r_file)
 }
 #endif
 
-//----------------------------------------------------------------------------------------------------
-//void UpdateFldTbl1KernelCall(double2* r_fld_tbl1, Beam* r_beam, double r_freq, 
-//    double r_beta, uint r_nr, uint r_nz, double r_frac)
-//{
-//  // r_nz must be smaller than 512, 2^n
-//  uint blkx = r_nz;
-//  uint blky = (512/r_nz < r_nr) ? 512/r_nz : r_nr;
-//  uint gridx = r_nr/blky;
-//  uint gridy = r_nr+1;
-//  dim3 grid(gridx, gridy, 1); // 4 = 32/8 (rs), 33(rp) is the receiving point r.
-//  dim3 blk(blkx, blky, 1); // 32(nr) source point r, 8 is to make sure thread num < 1024 
-//  UpdateFldTbl1Kernel<<<grid, blk>>>(r_fld_tbl1, r_freq, r_beta, 
-//    r_beam->num_particle, r_beam->current*r_frac/r_beam->mass);
-//#ifdef _DEBUG
-//  cudaThreadSynchronize();
-//  std::cout << "done 1st fld tbl" << std::endl;  
-//  std::cout << "FldTbl1----------- grid (" << gridx << ", " << gridy << ", " << "1 ) " << std::endl; 
-//  std::cout << "FldTbl1----------- blck (" << blkx << ", " << blky << ", " << "1 ) " << std::endl; 
-//  std::cout << "beam current = " << r_beam->current << ", mass = " << r_beam->mass << std::endl;
-//  PrintFldTbl1(r_fld_tbl1, r_nr, r_nz);
-//#endif
-//}
-//void DistributeParticleKernelCall(float* r_bin_tbl, Beam* r_beam, 
-//  double r_freq, double r_beta, uint r_sz)
-//{
-//  InitNumOnMesh<<<1, 1>>>();
-//  uint grid_size = r_beam->grid_size;
-//  uint blck_size = r_beam->blck_size;
-//  DistributeParticleKernel<<<grid_size, blck_size>>>(r_bin_tbl, r_beam->x, 
-//    r_beam->y, r_beam->phi, r_beam->loss, r_beam->x_avg, r_beam->y_avg, 
-//    r_beam->phi_avg, r_beam->x_sig, r_beam->y_sig, r_beam->num_particle, 
-//    r_beta, r_freq);
-//#ifdef _DEBUG
-//  cudaThreadSynchronize();
-//  std::cout << "done distribute " << std::endl;  
-//  PrintBinTbl(r_bin_tbl, r_sz, "aa.dat");
-//#endif
-//}
+#ifdef _DEBUG
+void PrintFinalFldTbl(float2* r_tbl)
+{
+  uint sz = (nr+1)*(nz+1);
+  float2* h_tbl = new float2[sz];
+  cudaMemcpy(h_tbl, r_tbl, sz*sizeof(float2), cudaMemcpyDeviceToHost);
+  std::ofstream tout("final_fld_tbl.dat");
+  tout << std::setprecision(10);
+  for(int i = 0; i < sz; ++i)
+    tout << i << "\t" << h_tbl[i].x << "\t" << h_tbl[i].y << std::endl;
+  tout.close();
+  delete [] h_tbl;
+}
+#endif
 
 

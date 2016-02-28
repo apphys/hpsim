@@ -12,12 +12,12 @@ Scheff::Scheff(uint r_nr, uint r_nz, int r_adj_bunch)
   param.nx = r_nr;
   param.nz = r_nz;
   param.ny = 0;
-  Initialize(param, &d_bin_tbl_, &d_fld_tbl1_, &d_fld_tbl2_);
+  Initialize(param, &d_fld_tbl1_, &d_fld_tbl2_, &d_bin_tbl_);
 }
 
 Scheff::~Scheff()
 {
-  FreeMeshTables(d_bin_tbl_, d_fld_tbl1_, d_fld_tbl2_);
+  FreeMeshTables(d_fld_tbl1_, d_fld_tbl2_, d_bin_tbl_);
   std::cout << "Scheff is freed." << std::endl;
 }
 
@@ -25,15 +25,13 @@ void Scheff::SetMeshSize(uint r_nx, uint r_nz, uint r_ny)
 {
   if (r_nx != nx_ || r_nz != nz_)
   {
-    FreeMeshTables(d_bin_tbl_, d_fld_tbl1_, d_fld_tbl2_);
-//    std::cout << "------ Scheff::SetMeshSize, delete old tble"<<std::endl;
+    FreeMeshTables(d_fld_tbl1_, d_fld_tbl2_, d_bin_tbl_);
     nx_ = r_nx; nz_ = r_nz;
     SpaceChargeParam param;
     param.nx = r_nx;
     param.nz = r_nz;
     param.ny = 0;
-    Initialize(param, &d_bin_tbl_, &d_fld_tbl1_, &d_fld_tbl2_);
-//    std::cout << "------ Scheff::SetMeshSize, init new tble: [" << r_nx << ", " << r_nz << "]." <<std::endl;
+    Initialize(param, &d_fld_tbl1_, &d_fld_tbl2_, &d_bin_tbl_);
   }
 }
 

@@ -117,11 +117,12 @@ private:
   // for dim, the first num is what the consecutive elems share 
 #ifdef DOUBLE_PRECISION
   double* d_bin_tbl_;
+  double2* d_fld_tbl2_; // nz*nr
 #else
   float* d_bin_tbl_;    // nz*nr 
+  float2* d_fld_tbl2_; // nz*nr
 #endif
   double2* d_fld_tbl1_; // (nr+1)*nr*nz
-  float2* d_fld_tbl2_; // nz*nr
 };
 
 #endif

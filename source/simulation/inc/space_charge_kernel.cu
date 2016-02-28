@@ -462,6 +462,109 @@ void UpdateFldTbl2Kernel0(float2* r_fld_tbl2,
   }
 }
 
+// Every block is for one rp
+// block : 64 * 16
+// grid  : 33 + 1
+// no use of shared mem 
+__global__
+void UpdateFldTbl2KernelDouble(double2* r_fld_tbl2, 
+                         double* r_bin_tbl, 
+                         double2* r_fld_tbl1)
+{
+  uint fld_sz = d_scheff_param.nx*d_scheff_param.nz;
+  uint readid = threadIdx.x;
+  if(blockIdx.x < gridDim.x - 1)
+  {
+    uint bin_block_num = blockDim.x / d_scheff_param.nz;
+    uint bin_block_sz = fld_sz / bin_block_num;
+    uint bin_block_id = threadIdx.x / d_scheff_param.nz;
+    uint bin_start = bin_block_id * bin_block_sz;
+    uint bin_end = bin_start + bin_block_sz;
+
+    uint zp = threadIdx.x % d_scheff_param.nz; // 0-63
+    uint rp = blockIdx.x; // 0-32
+    uint fld2_indx = zp*(d_scheff_param.nx+1)+rp;
+
+    double tmpx = 0.0, tmpz = 0.0;
+    for(uint bin_indx = bin_start; bin_indx < bin_end; ++bin_indx)
+    {
+      double bin_val = r_bin_tbl[bin_indx];
+      if( bin_val == 0.0)
+        continue;
+      uint rs = bin_indx % d_scheff_param.nx;
+      uint zs = bin_indx / d_scheff_param.nx;
+      double sign = 1.0;
+      uint dz;
+      if(zs >= zp)
+      {
+        dz = zs-zp; sign = -1.0;
+      }
+      else
+        dz = zp-zs-1; 
+
+      uint fld1_indx = dz + rs*d_scheff_param.nz + rp * fld_sz;
+      double2 fld1_val = r_fld_tbl1[fld1_indx];
+      tmpx += bin_val * fld1_val.x;
+      tmpz += sign * bin_val * fld1_val.y; 
+    }
+    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
+    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+  }
+  else // last block
+  {
+    uint bin_block_num = blockDim.x / d_scheff_param.nx;
+    uint bin_block_sz = fld_sz / bin_block_num;
+    uint bin_block_id = threadIdx.x / d_scheff_param.nx;
+    uint bin_start = bin_block_id * bin_block_sz;
+    uint bin_end = bin_start + bin_block_sz;
+
+    uint zp = d_scheff_param.nz;
+    uint rp = threadIdx.x % d_scheff_param.nx; 
+    uint fld2_indx = zp*(d_scheff_param.nx+1)+rp; 
+
+    double tmpx = 0.0, tmpz = 0.0;
+    for(uint bin_indx = bin_start; bin_indx < bin_end; ++bin_indx)
+    {
+      double bin_val = r_bin_tbl[bin_indx];
+      if(bin_val == 0.0)
+        continue;
+      uint rs = bin_indx % d_scheff_param.nx;
+      uint zs = bin_indx / d_scheff_param.nx;
+      uint dz = zp-zs-1; // zp > zs for sure
+
+      uint fld1_indx = dz + rs*d_scheff_param.nz + fld_sz * rp; 
+      double2 fld1_val = r_fld_tbl1[fld1_indx];
+      tmpx += bin_val * fld1_val.x;
+      tmpz += bin_val * fld1_val.y;
+    }
+    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
+    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+    // for the last mesh point
+    zp = d_scheff_param.nz;
+    rp = d_scheff_param.nx;
+    fld2_indx = zp*(d_scheff_param.nx+1)+rp;
+    tmpx = 0.0, tmpz = 0.0;
+    uint cnt = fld_sz / blockDim.x;   
+    for(int i = 0; i < cnt; ++i)
+    {
+      uint bin_indx = threadIdx.x + i * blockDim.x;
+      double bin_val = r_bin_tbl[bin_indx];
+      if(bin_val == 0.0)
+        continue;
+      uint rs = bin_indx % d_scheff_param.nx;
+      uint zs = bin_indx / d_scheff_param.nx;
+      uint dz = zp-zs-1; // zp > zs for sure
+
+      uint fld1_indx = dz + rs*d_scheff_param.nz + fld_sz * rp;
+      double2 fld1_val = r_fld_tbl1[fld1_indx];
+      tmpx += bin_val * fld1_val.x;
+      tmpz += bin_val * fld1_val.y;
+    }
+    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
+    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+  }
+}
+
 /*
 // every thread would be a mesh point
 // threads in the same block share the same rp
@@ -889,7 +992,13 @@ void ApplySpchKickKernel(double* r_x, double* r_y, double* r_phi, double* r_xp,
   double* r_yp, double* r_w, uint* r_loss, uint* r_lloss, double* r_x_avg, double* r_y_avg, 
   double* r_phi_avg, double* r_x_sig, double* r_y_sig, double r_mass, 
   uint r_num_part, double r_current, double r_freq, double r_beta, uint r_adj_bunch,
-  double r_length, float2* r_fld_tbl, double r_ratio_r = 1, double r_ratio_z = 1, 
+  double r_length, 
+#ifdef DOUBLE_PRECISION
+  double2* r_fld_tbl, 
+#else
+  float2* r_fld_tbl, 
+#endif
+  double r_ratio_r = 1, double r_ratio_z = 1, 
   double r_ratio_q = 1, double r_ratio_gm = 1.0)
 {
   uint indx = blockIdx.x*blockDim.x+threadIdx.x;
