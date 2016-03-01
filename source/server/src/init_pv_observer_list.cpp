@@ -2,7 +2,7 @@
 #include "init_pv_observer_list.h"
 
 
-void InitPVObserverList(PVObserverList& r_pvlist, BeamLine& r_bl, DBConnection& r_dbcon)
+void InitPVObserverList(PVObserverList& r_pvlist, BeamLine& r_bl, DBConnection& r_dbcon, bool r_verbose)
 {
   std::vector<std::string> dbs = r_dbcon.dbs;
   sqlite3* db_conn = r_dbcon.db_conn;
@@ -47,13 +47,15 @@ void InitPVObserverList(PVObserverList& r_pvlist, BeamLine& r_bl, DBConnection& 
           }
           else if(elem_type == "dipole")
             r_pvlist.AddPVObserver(pv, new DipolePVObserver(pv, db));
-          std::cout << "---------- Add PV: " << pv << std::endl;
+	  if(r_verbose)
+	    std::cout << "---------- Add PV: " << pv << std::endl;
         }
         // Attach BeamLineElement to the PVObserver
         if(elem_type != "rf_module" && r_bl[elem_name] != NULL)
         {
             r_pvlist.AttachBeamLineElementToPVObserver(pv, r_bl[elem_name]);
-            std::cout << "Attach " << elem_name << " to " << pv << std::endl;
+	    if(r_verbose)
+	      std::cout << "Attach " << elem_name << " to " << pv << std::endl;
         }
         else if (elem_type == "rf_module")
         {
@@ -62,7 +64,8 @@ void InitPVObserverList(PVObserverList& r_pvlist, BeamLine& r_bl, DBConnection& 
           for(int gp = 0; gp < gap_names.size(); ++gp)
           {
             r_pvlist.AttachBeamLineElementToPVObserver(pv, r_bl[gap_names[gp][0]]);
-            std::cout << "Attach " << gap_names[gp][0] << " to " << pv << std::endl;
+	    if(r_verbose)
+	      std::cout << "Attach " << gap_names[gp][0] << " to " << pv << std::endl;
           }
         }
         else

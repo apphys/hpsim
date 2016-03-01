@@ -2,6 +2,11 @@
 #include "simulation_engine_cu.h"
 #include "timer.h"
 
+SimulationEngine::~SimulationEngine()
+{
+  if(initialized_)
+    Cleanup();
+}
 /*!
  * \brief Initialize the simulation setting
  * \param r_beam Beam*
@@ -28,6 +33,8 @@ void SimulationEngine::InitEngine(Beam* r_beam, BeamLine* r_bl,
   d_const.mass = r_beam->mass;
   d_const.charge = r_beam->charge;
   SetConstOnDevice(&d_const);
+  Init(beam_, beamline_, spch_, param_);
+  initialized_ = true;
 }
 
 /*!
@@ -43,8 +50,7 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
   int end_index = beamline_->GetSize() - 1;
   if(r_end != "")
     end_index = beamline_->GetElementModelIndex(r_end);
-  Init(beam_, beamline_, spch_, param_);
-  
+  Reset(); 
   cudaEvent_t start, stop;  
   StartTimer(&start, &stop);
   for(uint i = 0; i <= end_index; ++i)
@@ -54,7 +60,8 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
     IncreaseBlIndex();
   }
   StopTimer(&start, &stop, "whole Simulation");
-  Cleanup();
+  if(param_.graphics_on)
+    beam_->UpdateStatForPlotting();
 }
 
 //void SimulationEngine::StepSimulate(uint r_id)

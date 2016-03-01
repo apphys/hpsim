@@ -39,7 +39,7 @@ conn = hp.DBConnection("../db/offline-ccl.db")
 bl = hp.BeamLine(conn)
 sim = hp.Simulator(beam=beam, beamline=bl)
 sim.simulate('', '')
-#beam.print_to('end.txt')
+beam.print_to('end.txt')
 
 #prof(beam)
 

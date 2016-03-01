@@ -5,6 +5,7 @@ extern "C"
 {
   void SetConstOnDevice(SimulationConstOnDevice*);
   void Init(Beam*, BeamLine*, SpaceCharge*, SimulationParam&);
+  void Reset();
   void Cleanup();
   void IncreaseBlIndex();
   void StepSimulationKernelCall(Beam*, BeamLine*, SpaceCharge*, SimulationParam&, uint);

@@ -4,6 +4,6 @@
 #include "pv_observer_list.h"
 #include "sql_utility.h"
 
-void InitPVObserverList(PVObserverList&, BeamLine&, DBConnection&);
+void InitPVObserverList(PVObserverList&, BeamLine&, DBConnection&, bool r_verbose = false);
 
 #endif

@@ -417,8 +417,8 @@ static PyObject* GetDbModel(PyObject* self, PyObject* args)
 
 static PyMethodDef HPSimModuleMethods[]={
   {"set_gpu", (PyCFunction)SetGPU, METH_VARARGS, set_gpu__doc__}, 
-//  {"set_db_epics", (PyCFunction)SetDbEPICS, METH_VARARGS, set_db_epics__doc__}, 
-//  {"set_db_model", (PyCFunction)SetDbModel, METH_VARARGS, set_db_model__doc__}, 
+  {"set_db_epics", (PyCFunction)SetDbEPICS, METH_VARARGS, set_db_epics__doc__}, 
+  {"set_db_model", (PyCFunction)SetDbModel, METH_VARARGS, set_db_model__doc__}, 
   {"get_db_epics", (PyCFunction)GetDbEPICS, METH_VARARGS, get_db_epics__doc__}, 
   {"get_db_model", (PyCFunction)GetDbModel, METH_VARARGS, get_db_model__doc__}, 
   {NULL}

@@ -21,6 +21,7 @@ public:
    * \brief Constructor
    */
   SimulationEngine() : PyWrapper() {}
+  ~SimulationEngine();
   void InitEngine(Beam*, BeamLine*, SpaceCharge* r_spch = NULL, 
           bool r_graph_on = false, PlotData* r_plot_data = NULL);
   void SetSimulationParam(SimulationParam& r_param)
@@ -58,6 +59,7 @@ private:
   BeamLine* beamline_;
   SpaceCharge* spch_;
   SimulationParam param_;
+  bool initialized_;
 };
 
 #endif

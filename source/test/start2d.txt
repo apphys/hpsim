@@ -1,0 +1,5 @@
+db: ../../db/online-tbtd.db ../../db/online-201.db 
+beam: ./TBDB02_input_beam_64k.dat
+start: TBDB02
+end: 04QM30 
+server: on
