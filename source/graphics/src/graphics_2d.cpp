@@ -380,8 +380,8 @@ int Plot2D::InitPlot()
   /*!
    * /todo fix CreateShader graph_2d.v.glsl file path
    */
-  if((vs = CreateShader("../graphics/src/graph_2d.v.glsl", GL_VERTEX_SHADER))==0) return 0;
-  if((fs = CreateShader("../graphics/src/graph_2d.f.glsl", GL_FRAGMENT_SHADER))==0) return 0;
+  if((vs = CreateShader(std::string(GetProjectTopDir() + "/source/graphics/src/graph_2d.v.glsl").c_str(), GL_VERTEX_SHADER))==0) return 0;
+  if((fs = CreateShader(std::string(GetProjectTopDir() + "/source/graphics/src/graph_2d.f.glsl").c_str(), GL_FRAGMENT_SHADER))==0) return 0;
   program = glCreateProgram();
   glAttachShader(program, vs);
   glAttachShader(program, fs);
@@ -424,8 +424,8 @@ int Plot2D::InitPlot()
   /*!
    * /todo fix CreateShader graph_2d_nonuniform_color.v.glsl file path
    */
-  if((nvs = CreateShader("../graphics/src/graph_2d_nonuniform_color.v.glsl", GL_VERTEX_SHADER))==0) return 0;
-  if((nfs = CreateShader("../graphics/src/graph_2d_nonuniform_color.f.glsl", GL_FRAGMENT_SHADER))==0) return 0;
+  if((nvs = CreateShader(std::string(GetProjectTopDir() + "/source/graphics/src/graph_2d_nonuniform_color.v.glsl").c_str(), GL_VERTEX_SHADER))==0) return 0;
+  if((nfs = CreateShader(std::string(GetProjectTopDir() + "/source/graphics/src/graph_2d_nonuniform_color.f.glsl").c_str(), GL_FRAGMENT_SHADER))==0) return 0;
   program_varying_color = glCreateProgram();
   glAttachShader(program_varying_color, nvs);
   glAttachShader(program_varying_color, nfs);

@@ -9,6 +9,7 @@
 #include "glew.h"
 #endif
 #include <GL/glut.h>
+#include <string>
 
 extern GLfloat yellow[];
 extern GLfloat white[];
@@ -29,5 +30,7 @@ uint CreateVBO(uint r_sz);
 float Lerp(float r_a, float r_b, float r_t);
 void ColorRamp(float r_t, float* r_r);
 void ColorRampWhiteBackGround(float r_t, float* r_r, double);
+std::string GetProjectTopDir();
+
 
 #endif

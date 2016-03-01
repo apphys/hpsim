@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
+#include <string>
+#include <cstring>
+#include <unistd.h>
 #include "graphics_common_func.h"
 
 GLfloat yellow[4] = {1.0, 1.0, 0.0, 1.0};
@@ -170,7 +172,6 @@ void ColorRampWhiteBackGround(float r_t, float* r_r, double r_max)
   r_r[1] = Lerp(c[i][1], c[i+1][1], u);
   r_r[2] = Lerp(c[i][2], c[i+1][2], u);
 }
-
 /*
 void ColorRampWhiteBackGround(float r_t, float* r_r, double r_max)
 {
@@ -192,3 +193,17 @@ void ColorRampWhiteBackGround(float r_t, float* r_r, double r_max)
   }
 }
 */
+
+std::string GetProjectTopDir()
+{
+  const int PATH_MAX = 512;
+  char buff[PATH_MAX];
+  std::string path;
+  if(getcwd(buff, PATH_MAX) != 0)
+    path = std::string(buff);
+  size_t found = path.find("hpsim");
+  size_t found1 = path.find_first_of("/", found);
+  return path.substr(0, found1);
+}
+
+
