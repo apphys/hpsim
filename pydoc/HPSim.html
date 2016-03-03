@@ -1,0 +1,39 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module HPSim</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>HPSim</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/Shared/git-repo/hpsim/bin/HPSim.so">/home/Shared/git-repo/hpsim/bin/HPSim.so</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-get_db_epics"><strong>get_db_epics</strong></a>(...)</dt><dd><tt><a href="#-get_db_epics">get_db_epics</a>(pv_name,&nbsp;DBConnection)-&gt;&nbsp;<br>
+&nbsp;<br>
+Get&nbsp;a&nbsp;EPICS&nbsp;channel&nbsp;value&nbsp;from&nbsp;the&nbsp;db.</tt></dd></dl>
+ <dl><dt><a name="-get_db_model"><strong>get_db_model</strong></a>(...)</dt><dd><tt><a href="#-get_db_model">get_db_model</a>(record_name,&nbsp;field_name,&nbsp;DBConnection)&nbsp;-&gt;<br>
+&nbsp;<br>
+Get&nbsp;a&nbsp;model&nbsp;parameter&nbsp;value&nbsp;from&nbsp;the&nbsp;db.</tt></dd></dl>
+ <dl><dt><a name="-get_element_list"><strong>get_element_list</strong></a>(...)</dt><dd><tt><a href="#-get_element_list">get_element_list</a>(bl&nbsp;=&nbsp;BeamLine,&nbsp;start&nbsp;=&nbsp;start_element&nbsp;(optional),&nbsp;end&nbsp;=&nbsp;end_element&nbsp;(optional),&nbsp;type&nbsp;=&nbsp;element_type&nbsp;(optional))&nbsp;-&gt;<br>
+&nbsp;<br>
+Get&nbsp;a&nbsp;list&nbsp;of&nbsp;element&nbsp;names&nbsp;in&nbsp;the&nbsp;range&nbsp;of&nbsp;[start,&nbsp;end]&nbsp;(inclusive).&nbsp;type&nbsp;can&nbsp;be&nbsp;'ApertureC'&nbsp;'ApertureR',&nbsp;'Buncher',&nbsp;'Diagnostics',&nbsp;'Dipole',&nbsp;'Quad',&nbsp;'RFGap-DTL',&nbsp;'RFGap-CCL',&nbsp;'Rotation',&nbsp;'SpchComp'</tt></dd></dl>
+ <dl><dt><a name="-set_db_epics"><strong>set_db_epics</strong></a>(...)</dt><dd><tt><a href="#-set_db_epics">set_db_epics</a>(pv_name,&nbsp;value,&nbsp;DBConnection,&nbsp;BeamLine)&nbsp;-&gt;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;epics&nbsp;channel&nbsp;(PV)&nbsp;value.</tt></dd></dl>
+ <dl><dt><a name="-set_db_model"><strong>set_db_model</strong></a>(...)</dt><dd><tt><a href="#-set_db_model">set_db_model</a>(record_name,&nbsp;field_name,&nbsp;value,&nbsp;DBConnection,&nbsp;BeamLine)&nbsp;-&gt;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;model&nbsp;parameter&nbsp;in&nbsp;the&nbsp;db.</tt></dd></dl>
+ <dl><dt><a name="-set_gpu"><strong>set_gpu</strong></a>(...)</dt><dd><tt><a href="#-set_gpu">set_gpu</a>(device_id)&nbsp;-&gt;<br>
+&nbsp;<br>
+Set&nbsp;which&nbsp;gpu&nbsp;to&nbsp;use&nbsp;for&nbsp;the&nbsp;simulation.&nbsp;Use&nbsp;"nvidia-smi"&nbsp;for&nbsp;more&nbsp;info.</tt></dd></dl>
+</td></tr></table>
+</body></html>

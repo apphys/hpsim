@@ -34,7 +34,7 @@ private:
 class ApertureCircular: public BeamLineElement
 {
 public:
-  ApertureCircular(std::string);
+  ApertureCircular(std::string); // type_ = "ApertureC"
   bool IsIn() const;
   void SetIn();
   void SetOut();
@@ -47,7 +47,7 @@ private:
 class ApertureRectangular: public BeamLineElement
 {
 public:
-  ApertureRectangular(std::string);
+  ApertureRectangular(std::string); // type_ = "ApertureR"
   bool IsIn() const;
   double GetApertureXLeft() const;
   double GetApertureXRight() const;
@@ -72,7 +72,7 @@ private:
 class Buncher: public BeamLineElement
 {
 public:
-  Buncher(std::string);
+  Buncher(std::string); // type_ = "Buncher"
   bool IsOn() const;
   double GetVoltage() const;
   double GetFrequency() const;
@@ -94,7 +94,7 @@ private:
 class Diagnostics: public BeamLineElement
 {
 public:
-  Diagnostics(std::string);
+  Diagnostics(std::string); // type_ = "Diagnostics"
   void Print() const;
   void Accept(Visitor*); 
 };
@@ -102,7 +102,7 @@ public:
 class Dipole: public BeamLineElement
 {
 public:
-  Dipole(std::string);
+  Dipole(std::string); // type_ = "Dipole"
   ~Dipole();
   DipoleParameter* GetParameters() const;
   DipoleParameter* GetParametersOnDevice() const;
@@ -139,7 +139,7 @@ public:
 class Quad : public BeamLineElement
 {
 public:
-  Quad(std::string);
+  Quad(std::string); // type_ = "Quad"
   double GetGradient() const;
   void SetGradient(double); 
   void Print() const;
@@ -151,7 +151,7 @@ private:
 class RFGap: public BeamLineElement
 {
 public:
-  RFGap(std::string, std::string); // type = "RFGap-DTL" or "RFGap-CCL"
+  RFGap(std::string, std::string); // type_ = "RFGap-DTL" or "RFGap-CCL"
   ~RFGap();
   RFGapParameter* GetParameters() const;
   RFGapParameter* GetParametersOnDevice() const;
@@ -202,7 +202,7 @@ private:
 class Rotation: public BeamLineElement
 {
 public:
-  Rotation(std::string);
+  Rotation(std::string); // type_ = "Rotation"
   double GetAngle() const;
   void SetAngle(double);
   void Print() const;
@@ -214,7 +214,7 @@ private:
 class SpaceChargeCompensation: public BeamLineElement
 {
 public:
-  SpaceChargeCompensation(std::string);
+  SpaceChargeCompensation(std::string); // type_ = "SpchComp"
   double GetFraction() const;
   void SetFraction(double);
   void Accept(Visitor*);
@@ -226,7 +226,7 @@ private:
 class Steerer: public BeamLineElement
 {
 public:
-  Steerer(std::string);
+  Steerer(std::string); // type_ = "Steerer"
   double GetIntegratedFieldHorizontal() const;
   double GetIntegratedFieldVertical() const;
   void SetIntegratedFieldHorizontal(double);

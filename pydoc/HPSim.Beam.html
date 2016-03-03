@@ -1,0 +1,209 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: class Beam</title>
+</head><body bgcolor="#f0f0f8">
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><strong>HPSim.Beam</strong> = <a name="HPSim.Beam">class Beam</a>(<a href="__builtin__.html#object">object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Beam(file&nbsp;=&nbsp;filename)<br>
+Beam(mass&nbsp;=&nbsp;particle_mass,&nbsp;charge&nbsp;=&nbsp;particle_charge,&nbsp;current&nbsp;=&nbsp;beam_current,&nbsp;num&nbsp;=&nbsp;particle_number)<br>
+&nbsp;<br>
+Beam&nbsp;class.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Beam-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HPSim.Beam-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;help(type(x))&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<dl><dt><a name="Beam-apply_cut"><strong>apply_cut</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-apply_cut">apply_cut</a>(axis,&nbsp;min,&nbsp;max)&nbsp;-&gt;&nbsp;<br>
+axis&nbsp;:&nbsp;"x"&nbsp;or&nbsp;"y"&nbsp;or&nbsp;"p"&nbsp;or&nbsp;"w"<br>
+&nbsp;<br>
+Cut&nbsp;the&nbsp;beam&nbsp;along&nbsp;an&nbsp;axis.&nbsp;Only&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;within&nbsp;the&nbsp;range&nbsp;[min,&nbsp;max]&nbsp;can&nbsp;pass.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_avg_phi"><strong>get_avg_phi</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_avg_phi">get_avg_phi</a>(option(optional))&nbsp;-&gt;&nbsp;float<br>
+option:&nbsp;"absolute"&nbsp;(default)&nbsp;or&nbsp;"relative"&nbsp;or&nbsp;"longitudinal_good"<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;center&nbsp;of&nbsp;the&nbsp;beam&nbsp;in&nbsp;phi.&nbsp;<br>
+With&nbsp;"absolute"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;absolute&nbsp;phase&nbsp;of&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"relative"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;relative&nbsp;phase&nbsp;(relative&nbsp;to&nbsp;reference&nbsp;particle's&nbsp;phase)&nbsp;of&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost.&nbsp;<br>
+With&nbsp;"longitudinal_good"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;absolute&nbsp;phase&nbsp;of&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;in&nbsp;bucket&nbsp;(not&nbsp;lost&nbsp;neither&nbsp;transversely&nbsp;nor&nbsp;longitudinally).</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_avg_w"><strong>get_avg_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_avg_w">get_avg_w</a>(option(optional))&nbsp;-&gt;&nbsp;float<br>
+option:&nbsp;"transverse_good"&nbsp;(default)&nbsp;or&nbsp;"longitudinal_good"<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;center&nbsp;of&nbsp;the&nbsp;beam&nbsp;in&nbsp;w.&nbsp;<br>
+With&nbsp;"transverse_good"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"longitudinal_good"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;in&nbsp;bucket&nbsp;(not&nbsp;lost&nbsp;neither&nbsp;transversely&nbsp;nor&nbsp;longitudinally).</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_avg_x"><strong>get_avg_x</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_avg_x">get_avg_x</a>(option(optional))&nbsp;-&gt;&nbsp;float<br>
+option:&nbsp;"transverse_good"&nbsp;(default)&nbsp;or&nbsp;"longitudinal_good"<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;center&nbsp;of&nbsp;the&nbsp;beam&nbsp;in&nbsp;x.&nbsp;<br>
+With&nbsp;"transverse_good"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"longitudinal_good"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;in&nbsp;bucket&nbsp;(not&nbsp;lost&nbsp;neither&nbsp;transversely&nbsp;nor&nbsp;longitudinally).</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_avg_y"><strong>get_avg_y</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_avg_y">get_avg_y</a>(option(optional))&nbsp;-&gt;&nbsp;float<br>
+option:&nbsp;"transverse_good"&nbsp;(default)&nbsp;or&nbsp;"longitudinal_good"<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;center&nbsp;of&nbsp;the&nbsp;beam&nbsp;in&nbsp;y.&nbsp;<br>
+With&nbsp;"transverse_good"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"longitudinal_good"&nbsp;option,&nbsp;returns&nbsp;average&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;in&nbsp;bucket&nbsp;(not&nbsp;lost&nbsp;neither&nbsp;transversely&nbsp;nor&nbsp;longitudinally).</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_charge"><strong>get_charge</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_charge">get_charge</a>()&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;charge&nbsp;of&nbsp;the&nbsp;particle.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_current"><strong>get_current</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_current">get_current</a>()&nbsp;-&gt;<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;beam&nbsp;current.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_emittance_x"><strong>get_emittance_x</strong></a>(...)</dt><dd><tt>get_emittance_x__doc__()&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;emittance&nbsp;in&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_emittance_y"><strong>get_emittance_y</strong></a>(...)</dt><dd><tt>get_emittance_y__doc__()&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;emittance&nbsp;in&nbsp;y.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_emittance_z"><strong>get_emittance_z</strong></a>(...)</dt><dd><tt>get_emittance_z__doc__()&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;longitudinal&nbsp;emittance&nbsp;.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_frequency"><strong>get_frequency</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_frequency">get_frequency</a>()&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;frequency&nbsp;of&nbsp;the&nbsp;beamline&nbsp;which&nbsp;the&nbsp;beam&nbsp;is&nbsp;currently&nbsp;in.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_loss_num"><strong>get_loss_num</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_loss_num">get_loss_num</a>()&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;number&nbsp;of&nbsp;particles&nbsp;that&nbsp;are&nbsp;lost&nbsp;transversely.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_losses"><strong>get_losses</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_losses">get_losses</a>()&nbsp;-&gt;&nbsp;list(float)<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;loss&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_mass"><strong>get_mass</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_mass">get_mass</a>()&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;mass&nbsp;of&nbsp;the&nbsp;particle.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_phi"><strong>get_phi</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_phi">get_phi</a>()&nbsp;-&gt;&nbsp;list(float)<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;phi&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_ref_phi"><strong>get_ref_phi</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_ref_phi">get_ref_phi</a>()&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;reference&nbsp;phase&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_ref_w"><strong>get_ref_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_ref_w">get_ref_w</a>()&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;reference&nbsp;energy&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_sig_phi"><strong>get_sig_phi</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_sig_phi">get_sig_phi</a>(option(optional))&nbsp;-&gt;&nbsp;float<br>
+option:&nbsp;"absolute"&nbsp;(default)&nbsp;or&nbsp;"relative"&nbsp;or&nbsp;"longitudinal_good"<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;center&nbsp;of&nbsp;the&nbsp;beam&nbsp;in&nbsp;phi.&nbsp;<br>
+With&nbsp;"absolute"&nbsp;option,&nbsp;returns&nbsp;the&nbsp;phase&nbsp;std&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"relative"&nbsp;option,&nbsp;returns&nbsp;the&nbsp;std&nbsp;of&nbsp;the&nbsp;relative&nbsp;phase&nbsp;(relative&nbsp;to&nbsp;the&nbsp;reference&nbsp;phase)&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"longitudinal_good"&nbsp;option,&nbsp;returns&nbsp;std&nbsp;of&nbsp;the&nbsp;absolute&nbsp;phase&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;in&nbsp;bucket&nbsp;(not&nbsp;lost&nbsp;neither&nbsp;transversely&nbsp;nor&nbsp;longitudinally).</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_sig_w"><strong>get_sig_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_sig_w">get_sig_w</a>(option(optional))&nbsp;-&gt;&nbsp;float<br>
+option:&nbsp;"transverse_good"&nbsp;(default)&nbsp;or&nbsp;"longitudinal_good"<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;center&nbsp;of&nbsp;the&nbsp;beam&nbsp;in&nbsp;w.&nbsp;<br>
+With&nbsp;"transverse_good"&nbsp;option,&nbsp;returns&nbsp;std&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"longitudinal_good"&nbsp;option,&nbsp;returns&nbsp;std&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;in&nbsp;bucket&nbsp;(not&nbsp;lost&nbsp;neither&nbsp;transversely&nbsp;nor&nbsp;longitudinally).</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_sig_x"><strong>get_sig_x</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_sig_x">get_sig_x</a>(option(optional))&nbsp;-&gt;&nbsp;float<br>
+option:&nbsp;"transverse_good"&nbsp;(default)&nbsp;or&nbsp;"longitudinal_good"<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;center&nbsp;of&nbsp;the&nbsp;beam&nbsp;in&nbsp;x.&nbsp;<br>
+With&nbsp;"transverse_good"&nbsp;option,&nbsp;returns&nbsp;std&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"longitudinal_good"&nbsp;option,&nbsp;returns&nbsp;std&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;in&nbsp;bucket&nbsp;(not&nbsp;lost&nbsp;neither&nbsp;transversely&nbsp;nor&nbsp;longitudinally).</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_sig_y"><strong>get_sig_y</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_sig_y">get_sig_y</a>(option(optional))&nbsp;-&gt;&nbsp;float<br>
+option:&nbsp;"transverse_good"&nbsp;(default)&nbsp;or&nbsp;"longitudinal_good"<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;center&nbsp;of&nbsp;the&nbsp;beam&nbsp;in&nbsp;y.&nbsp;<br>
+With&nbsp;"transverse_good"&nbsp;option,&nbsp;returns&nbsp;std&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;not&nbsp;lost&nbsp;transversely&nbsp;(might&nbsp;be&nbsp;lost&nbsp;longitudinally).&nbsp;<br>
+With&nbsp;"longitudinal_good"&nbsp;option,&nbsp;returns&nbsp;std&nbsp;using&nbsp;the&nbsp;particles&nbsp;that&nbsp;are&nbsp;in&nbsp;bucket&nbsp;(not&nbsp;lost&nbsp;neither&nbsp;transversely&nbsp;nor&nbsp;longitudinally).</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_size"><strong>get_size</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_size">get_size</a>()&nbsp;-&gt;&nbsp;int<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;nunber&nbsp;of&nbsp;particles&nbsp;in&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_w"><strong>get_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_w">get_w</a>()&nbsp;-&gt;&nbsp;list(float)<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;w&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_x"><strong>get_x</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_x">get_x</a>()&nbsp;-&gt;&nbsp;list(float)<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;x&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_xp"><strong>get_xp</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_xp">get_xp</a>()&nbsp;-&gt;&nbsp;list(float)<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;xp&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_y"><strong>get_y</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_y">get_y</a>()&nbsp;-&gt;&nbsp;list(float)<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;y&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-get_yp"><strong>get_yp</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-get_yp">get_yp</a>()&nbsp;-&gt;&nbsp;list(float)<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;y&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;beam.</tt></dd></dl>
+
+<dl><dt><a name="Beam-print_to"><strong>print_to</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-print_to">print_to</a>(output_filename,&nbsp;message(optional))&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Output&nbsp;beam&nbsp;distribution&nbsp;into&nbsp;a&nbsp;file.&nbsp;The&nbsp;message&nbsp;(empty&nbsp;by&nbsp;default)&nbsp;will&nbsp;be&nbsp;written&nbsp;on&nbsp;the&nbsp;info&nbsp;(the&nbsp;first)&nbsp;line&nbsp;of&nbsp;the&nbsp;output&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="Beam-restore_initial_beam"><strong>restore_initial_beam</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-restore_initial_beam">restore_initial_beam</a>()&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Restore&nbsp;the&nbsp;beam&nbsp;distribution&nbsp;to&nbsp;its&nbsp;initial&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="Beam-restore_intermediate_beam"><strong>restore_intermediate_beam</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-restore_intermediate_beam">restore_intermediate_beam</a>()&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Restore&nbsp;the&nbsp;beam&nbsp;distribution&nbsp;to&nbsp;its&nbsp;intermediate&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="Beam-save_initial_beam"><strong>save_initial_beam</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-save_initial_beam">save_initial_beam</a>()&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Save&nbsp;the&nbsp;initial&nbsp;beam&nbsp;distribution.</tt></dd></dl>
+
+<dl><dt><a name="Beam-save_intermediate_beam"><strong>save_intermediate_beam</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-save_intermediate_beam">save_intermediate_beam</a>()&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Save&nbsp;the&nbsp;intermediate&nbsp;beam&nbsp;distribution.</tt></dd></dl>
+
+<dl><dt><a name="Beam-set_dc"><strong>set_dc</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-set_dc">set_dc</a>(alph_x,&nbsp;beta_x,&nbsp;emittance_x,&nbsp;alpha_y,&nbsp;beta_y,&nbsp;emittance_y,&nbsp;width_phi,&nbsp;synchronous_phi,&nbsp;synchronous_w,&nbsp;random_seed&nbsp;(optional))&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+set&nbsp;DC&nbsp;beam&nbsp;distribution,&nbsp;input&nbsp;format&nbsp;follows&nbsp;the&nbsp;Parmila&nbsp;standard.</tt></dd></dl>
+
+<dl><dt><a name="Beam-set_distribution"><strong>set_distribution</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-set_distribution">set_distribution</a>(x,&nbsp;xp,&nbsp;y,&nbsp;yp,&nbsp;phi,&nbsp;w,&nbsp;loss)&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+set/change&nbsp;beam&nbsp;distribution.</tt></dd></dl>
+
+<dl><dt><a name="Beam-set_frequency"><strong>set_frequency</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-set_frequency">set_frequency</a>(frequency)&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;frequency&nbsp;of&nbsp;the&nbsp;beamline&nbsp;that&nbsp;the&nbsp;beam&nbsp;is&nbsp;in.</tt></dd></dl>
+
+<dl><dt><a name="Beam-set_ref_phi"><strong>set_ref_phi</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-set_ref_phi">set_ref_phi</a>(beam_reference_phase)&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;reference&nbsp;phase&nbsp;for&nbsp;simulation.&nbsp;Mostly&nbsp;used&nbsp;for&nbsp;plotting&nbsp;purpose.</tt></dd></dl>
+
+<dl><dt><a name="Beam-set_ref_w"><strong>set_ref_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-set_ref_w">set_ref_w</a>(beam_reference_energy)&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;reference&nbsp;energy&nbsp;for&nbsp;simulation.&nbsp;Mostly&nbsp;used&nbsp;for&nbsp;plotting&nbsp;purpose.</tt></dd></dl>
+
+<dl><dt><a name="Beam-set_waterbag"><strong>set_waterbag</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-set_waterbag">set_waterbag</a>(alph_x,&nbsp;beta_x,&nbsp;emittance_x,&nbsp;alpha_y,&nbsp;beta_y,&nbsp;emittance_y,&nbsp;alpha_z,&nbsp;beta_z,&nbsp;emittance_z,&nbsp;phi,&nbsp;w,&nbsp;frequency,&nbsp;random_seed&nbsp;(optional))&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+set&nbsp;waterbag&nbsp;beam&nbsp;distribution,&nbsp;input&nbsp;format&nbsp;follows&nbsp;the&nbsp;Parmila&nbsp;standard.</tt></dd></dl>
+
+<dl><dt><a name="Beam-translate"><strong>translate</strong></a>(...)</dt><dd><tt><a href="#HPSim.Beam-translate">translate</a>(axis,&nbsp;val)&nbsp;-&gt;<br>
+axis&nbsp;:&nbsp;"x"&nbsp;or&nbsp;"xp"&nbsp;or&nbsp;"y"&nbsp;or&nbsp;"yp"&nbsp;or&nbsp;"phi"&nbsp;or&nbsp;"w"<br>
+&nbsp;<br>
+Shift&nbsp;the&nbsp;beam&nbsp;along&nbsp;an&nbsp;axis.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HPSim.Beam-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+</td></tr></table>
+</body></html>

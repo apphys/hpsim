@@ -49,59 +49,6 @@ static PyObject* SetGPU(PyObject* self, PyObject* args)
   return Py_None;
 }
 
-////old
-//PyDoc_STRVAR(set_db_epics_old__doc__,
-//"set_db_epics(pv_name, value, DBConnection, BeamLine) ->\n\n"
-//"Set the epics channel (PV) value."
-//);
-//static PyObject* SetDbEPICSOld(PyObject* self, PyObject* args)
-//{
-//  char* pv;
-//  char* value;
-//  PyObject* py_beamline, *py_dbconnection; 
-//  if(!PyArg_ParseTuple(args, "ssOO", &pv, &value, &py_dbconnection, &py_beamline))
-//  {
-//    std::cerr << "set_db_epics needs a pv, a value, a db connection,and a beamline as args!" << std::endl;
-//    return NULL;
-//  }
-//  std::cout << "set_db_epics(): pv = " << std::string(pv) << ", value = " << value << std::endl;
-//  PyObject* py_beamline_type = getHPSimType("BeamLine");
-//  PyObject* py_dbconnection_type = getHPSimType("DBConnection");
-//  if(PyObject_IsInstance(py_beamline, py_beamline_type) && 
-//     PyObject_IsInstance(py_dbconnection, py_dbconnection_type))
-//  {
-//    DBConnection* dbconn = (DBConnection*)((CPPClassObject*)py_dbconnection)->cpp_obj;
-//    Updater* up = new Updater(std::string(pv));
-//    up->SetDBconn(dbconn->db_conn);
-//    int dbs_sz = (dbconn->dbs).size();
-//    int dbs_indx = 0; 
-//    std::string sql;
-//    std::string id_str = "";
-//    while(dbs_indx < dbs_sz && id_str == "")
-//    {
-//      sql = "select id from " + (dbconn->dbs)[dbs_indx] + ".epics_channel where lcs_name = '" + std::string(pv) + "'";
-//      id_str = GetDataFromDB(dbconn->db_conn, sql.c_str());
-//      ++dbs_indx;
-//    }           
-//    if(id_str != "")
-//    {
-//      --dbs_indx; 
-//      up->SetDB((dbconn->dbs)[dbs_indx]);
-//      BeamLine* beamline = (BeamLine*)((CPPClassObject*)py_beamline)->cpp_obj;
-//      up->SetBeamLine(beamline->GetHostBeamLinePtr());
-//      up->SetValue(std::string(value));
-//      up->UpdateDB();
-//      up->UpdateModel();
-//      delete up;
-//    }
-//    else
-//      std::cerr << "Error in set_db_epics : can't find lcs_name " << std::string(pv) << std::endl;
-//  }// if PyObject_IsInstance
-//
-//  Py_INCREF(Py_None);
-//  return Py_None;
-//}
-
 PyDoc_STRVAR(set_db_epics__doc__,
 "set_db_epics(pv_name, value, DBConnection, BeamLine) ->\n\n"
 "Set the epics channel (PV) value."
@@ -415,12 +362,45 @@ static PyObject* GetDbModel(PyObject* self, PyObject* args)
   return Py_None;
 }
 
+PyDoc_STRVAR(get_element_list__doc__, 
+"get_element_list(bl = BeamLine, start = start_element (optional), end = end_element (optional), type = element_type (optional)) ->\n\n"
+"Get a list of element names in the range of [start, end] (inclusive). type can be 'ApertureC' 'ApertureR', 'Buncher', 'Diagnostics', 'Dipole', 'Drift', 'Quad', 'RFGap-DTL', 'RFGap-CCL', 'Rotation', 'SpchComp' "
+);
+static PyObject* GetElementList(PyObject* self, PyObject* args, PyObject* kwds)
+{
+  char* start_name = "", *end_name = "", *type = "";
+  PyObject* py_beamline; 
+  static char *kwlist[] = {"bl", "start", "end", "type", NULL};
+  if(!PyArg_ParseTupleAndKeywords(args, kwds, "O|sss", kwlist, &py_beamline, &start_name, &end_name, &type))
+  {
+    std::cerr << "get_element_list() needs at least a BeamLine as its arg. "
+      "optional(start element name, end element name, element type)" << std::endl;
+    return NULL;
+  }
+  PyObject* py_beamline_type = getHPSimType("BeamLine");
+  if(PyObject_IsInstance(py_beamline, py_beamline_type))
+  {
+    BeamLine* beamline = (BeamLine*)((CPPClassObject*)py_beamline)->cpp_obj;
+    std::vector<std::string> names = beamline->GetElementNames(std::string(start_name), std::string(end_name), std::string(type));
+    if(!names.empty())
+    {
+      PyObject* elem_lst = PyList_New(names.size());
+      for(int i = 0; i < names.size(); ++i)
+        PyList_SetItem(elem_lst, i, PyString_FromString(names[i].c_str()));
+      return elem_lst;
+    }
+  }
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 static PyMethodDef HPSimModuleMethods[]={
   {"set_gpu", (PyCFunction)SetGPU, METH_VARARGS, set_gpu__doc__}, 
   {"set_db_epics", (PyCFunction)SetDbEPICS, METH_VARARGS, set_db_epics__doc__}, 
   {"set_db_model", (PyCFunction)SetDbModel, METH_VARARGS, set_db_model__doc__}, 
   {"get_db_epics", (PyCFunction)GetDbEPICS, METH_VARARGS, get_db_epics__doc__}, 
   {"get_db_model", (PyCFunction)GetDbModel, METH_VARARGS, get_db_model__doc__}, 
+  {"get_element_list", (PyCFunction)GetElementList, METH_VARARGS|METH_KEYWORDS, get_element_list__doc__}, 
   {NULL}
 };
 

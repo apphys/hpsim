@@ -1,0 +1,79 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: class SpaceCharge</title>
+</head><body bgcolor="#f0f0f8">
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><strong>HPSim.SpaceCharge</strong> = <a name="HPSim.SpaceCharge">class SpaceCharge</a>(<a href="__builtin__.html#object">object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>SpaceCharge(nr&nbsp;=&nbsp;grid_number_r,&nbsp;nz&nbsp;=&nbsp;grid_number_z,&nbsp;interval&nbsp;=&nbsp;max_drift_length_without_kick&nbsp;(optional),&nbsp;adj_bunch&nbsp;=&nbsp;number_adjacent_bunches&nbsp;(optional),&nbsp;type&nbsp;=&nbsp;routine_name&nbsp;(optional))<br>
+nr:&nbsp;number&nbsp;of&nbsp;grids&nbsp;in&nbsp;r&nbsp;direction.<br>
+nz:&nbsp;number&nbsp;of&nbsp;grids&nbsp;in&nbsp;z&nbsp;direction.<br>
+interval:&nbsp;the&nbsp;maximum&nbsp;drift&nbsp;length&nbsp;without&nbsp;a&nbsp;space&nbsp;charge&nbsp;kick,&nbsp;default&nbsp;=&nbsp;0.01m.<br>
+adj_bunch:&nbsp;number&nbsp;of&nbsp;adjacent&nbsp;bunches&nbsp;used&nbsp;in&nbsp;low&nbsp;energy&nbsp;transport,&nbsp;default&nbsp;0.<br>
+type:&nbsp;"scheff"&nbsp;(default)<br>
+&nbsp;<br>
+The&nbsp;SpaceCharge&nbsp;class.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="SpaceCharge-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HPSim.SpaceCharge-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;help(type(x))&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-get_adj_bunch"><strong>get_adj_bunch</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-get_adj_bunch">get_adj_bunch</a>()&nbsp;-&gt;&nbsp;float&nbsp;<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;number&nbsp;of&nbsp;adjacent&nbsp;bunches&nbsp;used&nbsp;in&nbsp;low&nbsp;energy&nbsp;transport.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-get_adj_bunch_cutoff_w"><strong>get_adj_bunch_cutoff_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-get_adj_bunch_cutoff_w">get_adj_bunch_cutoff_w</a>()&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;cutoff&nbsp;energy&nbsp;of&nbsp;the&nbsp;beam&nbsp;at&nbsp;which&nbsp;the&nbsp;simulation&nbsp;swiches&nbsp;to&nbsp;not&nbsp;using&nbsp;adjacent&nbsp;bunchs&nbsp;and&nbsp;calculate&nbsp;the&nbsp;mash&nbsp;region&nbsp;using&nbsp;3*sigmas.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-get_interval"><strong>get_interval</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-get_interval">get_interval</a>()&nbsp;-&gt;&nbsp;float&nbsp;<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;maximum&nbsp;drift&nbsp;length&nbsp;without&nbsp;a&nbsp;space&nbsp;charge&nbsp;kick.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-get_mesh_size"><strong>get_mesh_size</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-get_mesh_size">get_mesh_size</a>()&nbsp;-&gt;&nbsp;list(float,&nbsp;float)<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;2D&nbsp;mesh&nbsp;size.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-get_mesh_size_cutoff_w"><strong>get_mesh_size_cutoff_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-get_mesh_size_cutoff_w">get_mesh_size_cutoff_w</a>()&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;cutoff&nbsp;energy&nbsp;of&nbsp;the&nbsp;beam&nbsp;at&nbsp;which&nbsp;the&nbsp;mesh&nbsp;sizes&nbsp;will&nbsp;change&nbsp;nr&nbsp;=&nbsp;nr/2,&nbsp;nz&nbsp;=&nbsp;nz/2,&nbsp;interval&nbsp;=&nbsp;interval&nbsp;*&nbsp;4.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-get_remesh_threshold"><strong>get_remesh_threshold</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-get_remesh_threshold">get_remesh_threshold</a>()&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;remesh&nbsp;threshold&nbsp;value,&nbsp;default&nbsp;=&nbsp;0.05.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-set_adj_bunch"><strong>set_adj_bunch</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-set_adj_bunch">set_adj_bunch</a>(number_adjacent_bunch)-&gt;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;number&nbsp;of&nbsp;adjacent&nbsp;bunches&nbsp;used&nbsp;in&nbsp;low&nbsp;energy&nbsp;transport.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-set_adj_bunch_cutoff_w"><strong>set_adj_bunch_cutoff_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-set_adj_bunch_cutoff_w">set_adj_bunch_cutoff_w</a>(energy)-&gt;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;cutoff&nbsp;energy&nbsp;of&nbsp;the&nbsp;beam&nbsp;at&nbsp;which&nbsp;the&nbsp;simulation&nbsp;swiches&nbsp;to&nbsp;not&nbsp;using&nbsp;adjacent&nbsp;bunchs&nbsp;and&nbsp;calculate&nbsp;the&nbsp;mash&nbsp;region&nbsp;using&nbsp;3*sigmas.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-set_interval"><strong>set_interval</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-set_interval">set_interval</a>(max_drift_length_without_kick)-&gt;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;the&nbsp;maximum&nbsp;drift&nbsp;length&nbsp;without&nbsp;a&nbsp;space&nbsp;charge&nbsp;kick.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-set_mesh_size"><strong>set_mesh_size</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-set_mesh_size">set_mesh_size</a>(nr&nbsp;=&nbsp;grid_number_r,&nbsp;nz&nbsp;=&nbsp;grid_number_z)-&gt;<br>
+nr:&nbsp;number&nbsp;of&nbsp;grids&nbsp;in&nbsp;r&nbsp;direction.<br>
+nz:&nbsp;number&nbsp;of&nbsp;grids&nbsp;in&nbsp;z&nbsp;direction.<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;mesh.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-set_mesh_size_cutoff_w"><strong>set_mesh_size_cutoff_w</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-set_mesh_size_cutoff_w">set_mesh_size_cutoff_w</a>(energy)&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;cutoff&nbsp;energy&nbsp;of&nbsp;the&nbsp;beam&nbsp;at&nbsp;which&nbsp;the&nbsp;mesh&nbsp;sizes&nbsp;will&nbsp;change&nbsp;nr&nbsp;=&nbsp;nr/2,&nbsp;nz&nbsp;=&nbsp;nz/2,&nbsp;interval&nbsp;=&nbsp;interval&nbsp;*&nbsp;4.</tt></dd></dl>
+
+<dl><dt><a name="SpaceCharge-set_remesh_threshold"><strong>set_remesh_threshold</strong></a>(...)</dt><dd><tt><a href="#HPSim.SpaceCharge-set_remesh_threshold">set_remesh_threshold</a>(value)&nbsp;-&gt;&nbsp;<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;remesh&nbsp;threshold&nbsp;value,&nbsp;default&nbsp;=&nbsp;0.05.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HPSim.SpaceCharge-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+</td></tr></table>
+</body></html>
