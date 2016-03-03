@@ -82,17 +82,20 @@ static PyObject* BeamLinePrintRange(PyObject* self, PyObject* args)
 }
 
 PyDoc_STRVAR(get_element_names__doc__,
-"get_element_names(start_element(optional), end_element(optional), type(optional))->\n\n"
-"Return a list of beamline element names in the range of [start, end] (inclusive). "
-"If no start_element is specified, it will start from the beginning of the beamline. "
-"If no end_element is specified, it will "
+"get_element_names(start=start_element(optional), end=end_element(optional), type=type(optional))->\n\n"
+"Return a list of beamline element names in the range of [start, end] (inclusive). \n"
+"If no start_element is specified, it will start from the beginning of the beamline. \n"
+"If no end_element is specified, it will end at the last element of the beamline. \n"
+"type can be 'ApertureC' 'ApertureR', 'Buncher', 'Diagnostics', 'Dipole', 'Drift', 'Quad',\n"
+" 'RFGap-DTL', 'RFGap-CCL', 'Rotation', 'SpchComp' "
 );
-static PyObject* BeamLineGetElementNames(PyObject* self, PyObject* args)
+static PyObject* BeamLineGetElementNames(PyObject* self, PyObject* args, PyObject* kwds)
 {
   CPPClassObject* cppclass_obj = (CPPClassObject*)self;
   BeamLine* bl = (BeamLine*)(cppclass_obj->cpp_obj); 
   char* start_elem = "", *end_elem = "",  *type = "";
-  if(!PyArg_ParseTuple(args, "|sss", &start_elem, &end_elem, &type))
+  static char *kwlist[] = {"start", "end", "type", NULL};
+  if(!PyArg_ParseTupleAndKeywords(args, kwds, "|sss", kwlist, &start_elem, &end_elem, &type))
     return NULL;
   std::vector<std::string> names = bl->GetElementNames(start_elem, end_elem,type);
   if(!names.empty())
@@ -108,7 +111,7 @@ static PyObject* BeamLineGetElementNames(PyObject* self, PyObject* args)
 static PyMethodDef BeamLineMethods[] = {
   {"print_out", BeamLinePrint, METH_VARARGS, print_out__doc__},
   {"print_range", BeamLinePrintRange, METH_VARARGS, print_range__doc__},
-  {"get_element_names", BeamLineGetElementNames, METH_VARARGS, get_element_names__doc__},
+  {"get_element_names", (PyCFunction)BeamLineGetElementNames, METH_VARARGS|METH_KEYWORDS, get_element_names__doc__},
   {NULL}
 };
 

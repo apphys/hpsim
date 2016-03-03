@@ -16,9 +16,13 @@ The&nbsp;BeamLine&nbsp;class.<br>&nbsp;</tt></td></tr>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="BeamLine-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HPSim.BeamLine-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;help(type(x))&nbsp;for&nbsp;signature</tt></dd></dl>
 
-<dl><dt><a name="BeamLine-get_element_names"><strong>get_element_names</strong></a>(...)</dt><dd><tt><a href="#HPSim.BeamLine-get_element_names">get_element_names</a>(start_element(optional),&nbsp;end_element(optional),&nbsp;type(optional))-&gt;<br>
+<dl><dt><a name="BeamLine-get_element_names"><strong>get_element_names</strong></a>(...)</dt><dd><tt><a href="#HPSim.BeamLine-get_element_names">get_element_names</a>(start=start_element(optional),&nbsp;end=end_element(optional),&nbsp;type=type(optional))-&gt;<br>
 &nbsp;<br>
-Return&nbsp;a&nbsp;list&nbsp;of&nbsp;beamline&nbsp;element&nbsp;names&nbsp;in&nbsp;the&nbsp;range&nbsp;of&nbsp;[start,&nbsp;end]&nbsp;(inclusive).&nbsp;If&nbsp;no&nbsp;start_element&nbsp;is&nbsp;specified,&nbsp;it&nbsp;will&nbsp;start&nbsp;from&nbsp;the&nbsp;beginning&nbsp;of&nbsp;the&nbsp;beamline.&nbsp;If&nbsp;no&nbsp;end_element&nbsp;is&nbsp;specified,&nbsp;it&nbsp;will</tt></dd></dl>
+Return&nbsp;a&nbsp;list&nbsp;of&nbsp;beamline&nbsp;element&nbsp;names&nbsp;in&nbsp;the&nbsp;range&nbsp;of&nbsp;[start,&nbsp;end]&nbsp;(inclusive).&nbsp;<br>
+If&nbsp;no&nbsp;start_element&nbsp;is&nbsp;specified,&nbsp;it&nbsp;will&nbsp;start&nbsp;from&nbsp;the&nbsp;beginning&nbsp;of&nbsp;the&nbsp;beamline.&nbsp;<br>
+If&nbsp;no&nbsp;end_element&nbsp;is&nbsp;specified,&nbsp;it&nbsp;will&nbsp;end&nbsp;at&nbsp;the&nbsp;last&nbsp;element&nbsp;of&nbsp;the&nbsp;beamline.&nbsp;<br>
+type&nbsp;can&nbsp;be&nbsp;'ApertureC'&nbsp;'ApertureR',&nbsp;'Buncher',&nbsp;'Diagnostics',&nbsp;'Dipole',&nbsp;'Drift',&nbsp;'Quad',<br>
+&nbsp;'RFGap-DTL',&nbsp;'RFGap-CCL',&nbsp;'Rotation',&nbsp;'SpchComp'</tt></dd></dl>
 
 <dl><dt><a name="BeamLine-print_out"><strong>print_out</strong></a>(...)</dt><dd><tt><a href="#HPSim.BeamLine-print_out">print_out</a>()-&gt;<br>
 &nbsp;<br>

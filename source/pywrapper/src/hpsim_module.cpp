@@ -361,7 +361,7 @@ static PyObject* GetDbModel(PyObject* self, PyObject* args)
   Py_INCREF(Py_None);
   return Py_None;
 }
-
+/*
 PyDoc_STRVAR(get_element_list__doc__, 
 "get_element_list(bl = BeamLine, start = start_element (optional), end = end_element (optional), type = element_type (optional)) ->\n\n"
 "Get a list of element names in the range of [start, end] (inclusive). type can be 'ApertureC' 'ApertureR', 'Buncher', 'Diagnostics', 'Dipole', 'Drift', 'Quad', 'RFGap-DTL', 'RFGap-CCL', 'Rotation', 'SpchComp' "
@@ -393,6 +393,7 @@ static PyObject* GetElementList(PyObject* self, PyObject* args, PyObject* kwds)
   Py_INCREF(Py_None);
   return Py_None;
 }
+*/
 
 static PyMethodDef HPSimModuleMethods[]={
   {"set_gpu", (PyCFunction)SetGPU, METH_VARARGS, set_gpu__doc__}, 
@@ -400,7 +401,7 @@ static PyMethodDef HPSimModuleMethods[]={
   {"set_db_model", (PyCFunction)SetDbModel, METH_VARARGS, set_db_model__doc__}, 
   {"get_db_epics", (PyCFunction)GetDbEPICS, METH_VARARGS, get_db_epics__doc__}, 
   {"get_db_model", (PyCFunction)GetDbModel, METH_VARARGS, get_db_model__doc__}, 
-  {"get_element_list", (PyCFunction)GetElementList, METH_VARARGS|METH_KEYWORDS, get_element_list__doc__}, 
+  //{"get_element_list", (PyCFunction)GetElementList, METH_VARARGS|METH_KEYWORDS, get_element_list__doc__}, 
   {NULL}
 };
 

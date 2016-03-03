@@ -18,4 +18,5 @@ bl = hp.BeamLine(conn)
 #hp.set_db_epics('01TM001L01', '0', conn, bl)
 #bl.print_range('01RG01', '01RG02')
 
-print hp.get_element_list(bl, '01RG01', '', 'Drift')
+#print hp.get_element_list(bl, '01RG01', '', 'Drift')
+print bl.get_element_names('01RG01', '', type='Quad')
