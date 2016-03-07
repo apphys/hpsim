@@ -1642,8 +1642,8 @@ void Beam::ShiftW(double r_val)
 void Beam::ChangeFrequency(double r_freq)
 {
   current *= r_freq/freq;
-  std::cout << "Change beam frequency from " << freq << " to " << r_freq << ", ratio = " << r_freq/freq 
-    << ", current change to " << current << std::endl;
+  std::cout << "beam frequency changed from " << freq << " to " << r_freq << ", ratio = " << r_freq/freq 
+    << ", current changed to " << current << std::endl;
   ChangeFrequnecyKernelCall(this, r_freq/freq);
   freq = r_freq;
   UpdateAvgPhi();

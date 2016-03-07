@@ -323,7 +323,13 @@ static PyObject* BeamSetFrequency(PyObject* self, PyObject* args)
   }
   if(!PyArg_ParseTuple(args, "d:SetFrequency", &freq))
     return NULL;
-  beam->freq = freq;
+  if (beam->freq == 0)
+  {
+    beam->freq = freq;
+    std::cout << "Beam frequency initialized to " << freq << std::endl;
+  }
+  else
+    beam->ChangeFrequency(freq);
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -426,7 +432,7 @@ static PyObject* BeamGetSize(PyObject* self, PyObject* args)
 }
 
 PyDoc_STRVAR(get_x__doc__,
-"get_x() -> list(float)\n\n"
+"get_x() -> numpy.array(float)\n\n"
 "Get the x coordinates of the beam."
 );
 static PyObject* BeamGetX(PyObject* self, PyObject* args)
@@ -494,7 +500,7 @@ static PyObject* BeamGetX(PyObject* self, PyObject* args)
 }
 
 PyDoc_STRVAR(get_xp__doc__,
-"get_xp() -> list(float)\n\n"
+"get_xp() -> numpy.array(float)\n\n"
 "Get the xp coordinates of the beam."
 );
 static PyObject* BeamGetXp(PyObject* self, PyObject* args)
@@ -562,7 +568,7 @@ static PyObject* BeamGetXp(PyObject* self, PyObject* args)
 }
 
 PyDoc_STRVAR(get_y__doc__,
-"get_y() -> list(float)\n\n"
+"get_y() -> numpy.array(float)\n\n"
 "Get the y coordinates of the beam."
 );
 static PyObject* BeamGetY(PyObject* self, PyObject* args)
@@ -630,7 +636,7 @@ static PyObject* BeamGetY(PyObject* self, PyObject* args)
 }
 
 PyDoc_STRVAR(get_yp__doc__,
-"get_yp() -> list(float)\n\n"
+"get_yp() -> numpy.array(float)\n\n"
 "Get the y coordinates of the beam."
 );
 static PyObject* BeamGetYp(PyObject* self, PyObject* args)
@@ -698,7 +704,7 @@ static PyObject* BeamGetYp(PyObject* self, PyObject* args)
 }
 
 PyDoc_STRVAR(get_phi__doc__,
-"get_phi() -> list(float)\n\n"
+"get_phi() -> numpy.array(float)\n\n"
 "Get the phi coordinates of the beam."
 );
 static PyObject* BeamGetPhi(PyObject* self, PyObject* args)
@@ -786,7 +792,7 @@ static PyObject* BeamGetPhi(PyObject* self, PyObject* args)
 }
 
 PyDoc_STRVAR(get_w__doc__,
-"get_w() -> list(float)\n\n"
+"get_w() -> numpy.array(float)\n\n"
 "Get the w coordinates of the beam."
 );
 static PyObject* BeamGetW(PyObject* self, PyObject* args)
@@ -854,7 +860,7 @@ static PyObject* BeamGetW(PyObject* self, PyObject* args)
 }
 
 PyDoc_STRVAR(get_losses__doc__,
-"get_losses() -> list(float)\n\n"
+"get_losses() -> numpy.array(float)\n\n"
 "Get the loss coordinates of the beam."
 );
 static PyObject* BeamGetLoss(PyObject* self, PyObject* args)
@@ -1361,18 +1367,20 @@ static PyObject* BeamApplyCut(PyObject* self, PyObject* args)
   return Py_None;
 }
 
-//static PyObject* BeamInitPhiAvgWithLloss(PyObject* self, PyObject* args)
-//{
-//  if(!PyArg_ParseTuple(args, ""))
-//  {
-//    std::cerr << "Beam::init_phi_avg_with_lloss needs no args!" << std::endl;
-//    return NULL;
-//  }
-//  CPPClassObject* cppclass_obj = (CPPClassObject*)self;
-//  Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
-//  beam->InitPhiAvgGood();
-//  return Py_None;
-//}
+/*
+static PyObject* BeamInitPhiAvgWithLloss(PyObject* self, PyObject* args)
+{
+  if(!PyArg_ParseTuple(args, ""))
+  {
+    std::cerr << "Beam::init_phi_avg_with_lloss needs no args!" << std::endl;
+    return NULL;
+  }
+  CPPClassObject* cppclass_obj = (CPPClassObject*)self;
+  Beam* beam = (Beam*)(cppclass_obj->cpp_obj); 
+  beam->InitPhiAvgGood();
+  return Py_None;
+}
+*/
 
 static PyMethodDef BeamMethods[] = {
   {"set_distribution", BeamSetDistribution, METH_VARARGS, set_distribution__doc__},

@@ -9,4 +9,6 @@ int main()
   beam.UpdateLoss();
   uint lossnum2 = beam.GetLossNum();
   std::cout << "Beam loss num = " << lossnum2 << std::endl;
+  beam.ChangeFrequency(beam.freq*4);
+  beam.PrintToFile("Hm.out");
 }
