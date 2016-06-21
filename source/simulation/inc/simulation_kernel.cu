@@ -798,7 +798,8 @@ void SimulateSecondHalfDipoleKernel(double* r_x, double* r_y, double* r_phi,
 __global__
 void SimulateBuncherKernel(double* r_x, double* r_y, double* r_phi, 
   double* r_xp, double* r_yp, double* r_w, uint* r_loss, double r_w_ref,
-  double r_freq, double r_voltage, double r_phase, double r_aper, uint r_elem_indx)
+  double r_freq, double r_voltage, double r_phase, double r_aper, 
+  double r_freq_ratio, uint r_elem_indx)
 {
   uint index = blockIdx.x*blockDim.x+threadIdx.x;
   uint stride = blockDim.x*gridDim.x;
@@ -810,7 +811,7 @@ void SimulateBuncherKernel(double* r_x, double* r_y, double* r_phi,
       double y = r_y[index];
       double xp = r_xp[index];
       double yp = r_yp[index];
-      double phi = r_phi[index];
+      double phi = r_phi[index] * r_freq_ratio;
       double w = r_w[index];
       double r2 = x*x + y*y;
       double aper2 = r_aper * r_aper;
@@ -857,4 +858,5 @@ void SimulateBuncherKernel(double* r_x, double* r_y, double* r_phi,
     index += stride;
   }
 }
+
 #endif

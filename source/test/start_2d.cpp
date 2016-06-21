@@ -47,7 +47,7 @@ std::vector<std::string> putpvs;
 
 void InitCUDA()
 {
-  cudaGLSetGLDevice(2); // must appear before cudaGraphicsGLRegisterBuffer and glut init
+  cudaGLSetGLDevice(0); // must appear before cudaGraphicsGLRegisterBuffer and glut init
   cudaDeviceProp devprop;
   cudaGetDeviceProperties(&devprop, 0);
   std::cout << "Continuous mode using " << devprop.name << std::endl; 
@@ -162,36 +162,39 @@ void Idle()
     beam.RestoreInitialBeam();
     engine.Simulate(start_elem, end_elem);
 
-    std::vector<std::vector<double> > vals;
-    std::vector<double> loss = gldata.loss_ratio.GetValue();
-    std::vector<double> xavg = gldata.xavg.GetValue();
-    std::vector<double> xsig = gldata.xsig.GetValue();
-    std::vector<double> xpavg = gldata.xpavg.GetValue();
-    std::vector<double> xpsig = gldata.xpsig.GetValue();
-    std::vector<double> xemit = gldata.xemit.GetValue();
-    std::vector<double> yavg = gldata.yavg.GetValue();
-    std::vector<double> ysig = gldata.ysig.GetValue();
-    std::vector<double> ypavg = gldata.ypavg.GetValue();
-    std::vector<double> ypsig = gldata.ypsig.GetValue();
-    std::vector<double> yemit = gldata.yemit.GetValue();
-    std::vector<double> tmp;
-    for(int i = 0; i < putpvs.size(); ++i)
+    if(!putpvs.empty())
     {
-      tmp.assign(16, 0.0);
-      tmp[0] = loss[i];
-      tmp[1] = xavg[i];
-      tmp[2] = xsig[i];
-      tmp[3] = xpavg[i];
-      tmp[4] = xpsig[i];
-      tmp[5] = xemit[i];
-      tmp[6] = yavg[i];
-      tmp[7] = ysig[i];
-      tmp[8] = ypavg[i];
-      tmp[9] = ypsig[i];
-      tmp[10] = yemit[i];
-      vals.push_back(tmp);
+      std::vector<std::vector<double> > vals;
+      std::vector<double> loss = gldata.loss_ratio.GetValue();
+      std::vector<double> xavg = gldata.xavg.GetValue();
+      std::vector<double> xsig = gldata.xsig.GetValue();
+      std::vector<double> xpavg = gldata.xpavg.GetValue();
+      std::vector<double> xpsig = gldata.xpsig.GetValue();
+      std::vector<double> xemit = gldata.xemit.GetValue();
+      std::vector<double> yavg = gldata.yavg.GetValue();
+      std::vector<double> ysig = gldata.ysig.GetValue();
+      std::vector<double> ypavg = gldata.ypavg.GetValue();
+      std::vector<double> ypsig = gldata.ypsig.GetValue();
+      std::vector<double> yemit = gldata.yemit.GetValue();
+      std::vector<double> tmp;
+      for(int i = 0; i < putpvs.size(); ++i)
+      {
+	tmp.assign(16, 0.0);
+	tmp[0] = loss[i];
+	tmp[1] = xavg[i];
+	tmp[2] = xsig[i];
+	tmp[3] = xpavg[i];
+	tmp[4] = xpsig[i];
+	tmp[5] = xemit[i];
+	tmp[6] = yavg[i];
+	tmp[7] = ysig[i];
+	tmp[8] = ypavg[i];
+	tmp[9] = ypsig[i];
+	tmp[10] = yemit[i];
+	vals.push_back(tmp);
+      }
+      EPICSPut(putpvs, vals);
     }
-    EPICSPut(putpvs, vals);
   }
   for(uint i = 0; i < glwins.size(); ++i)
   {
@@ -203,7 +206,7 @@ void Idle()
 
 void Cleanup()
 {
-  beam.PrintToFile("beam.out");
+  //beam.PrintToFile("beam.out");
   std::cout << "------------------------------" << std::endl;
   std::cout << "Cleaning up ..." << std::endl;
   if(!server_stop_flag)
@@ -275,7 +278,9 @@ int main(int argc, char* argv[])
     ostr << i;
     dbcon1.AttachDB(setting.db[i], "db" + ostr.str());
   }
-  dbcon1.LoadLib("../../db/lib/libsqliteext.so");
+//  dbcon1.LoadLib("../../db/lib/libsqliteext.so");
+  for(int i = 0; i < setting.libdb.size(); ++i)
+    dbcon1.LoadLib(setting.libdb[i]);
   dbcon1.ClearModelIndex();
 
   GenerateBeamLine(bl, &dbcon1);
@@ -295,7 +300,7 @@ int main(int argc, char* argv[])
 //  beam.freq = 201.25;
   beam.InitBeamFromFile(setting.beam);
   beam.SaveInitialBeam();
-  beam.PrintToFile("dist_out.dat", "@TADB1");
+  //beam.PrintToFile("dist_out.dat", "@TADB1");
 
   gldata.Resize(monitor_num);
   

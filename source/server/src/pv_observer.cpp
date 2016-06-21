@@ -234,6 +234,10 @@ void DipolePVObserver::AttachBeamLineElement(BeamLineElement* r_elem)
 {
   if(Dipole* dipole = dynamic_cast<Dipole*>(r_elem))
     dipole_.push_back(dipole);
+  else if(ApertureRectangular* aper = dynamic_cast<ApertureRectangular*>(r_elem))
+    aperture_r_.push_back(aper);
+  else if(Drift* drift = dynamic_cast<Drift*>(r_elem))
+    drift_.push_back(drift);
   else
   {
     std::cerr << "Cann't attach " << r_elem->GetName() 
@@ -247,6 +251,10 @@ std::vector<std::string> DipolePVObserver::GetBeamLineElementNames() const
   std::vector<std::string> rlt(dipole_.size(), "");
   for(int i = 0; i < dipole_.size(); ++i)
     rlt[i] = dipole_[i]->GetName(); 
+  for(int i = 0; i < aperture_r_.size(); ++i)
+    rlt[i] = aperture_r_[i]->GetName();
+  for(int i = 0; i < drift_.size(); ++i)
+    rlt[i] = drift_[i]->GetName();
   return rlt; 
 }
 
@@ -255,7 +263,7 @@ void DipolePVObserver::UpdateModel()
   for(int i = 0; i < dipole_.size(); ++i)
   {
     std::string sql = "select rho_model, angle_model, edge_angle1_model, edge_angle2_model, kenergy_model from " 
-          + GetDB() + ".dipole where name = '" + dipole_[i]->GetName() + "'";
+	  + GetDB() + ".dipole where name = '" + dipole_[i]->GetName() + "'";
     std::vector<std::vector<std::string> > data = GetQueryResults(GetDBconn(), sql.c_str());
     if(!data.empty())
     {
@@ -266,8 +274,33 @@ void DipolePVObserver::UpdateModel()
       dipole_[i]->SetKineticEnergy(std::atof(data[0][4].c_str()));
     }
     else
-      std::cerr << "DipolePVObserver::UpdateModel() failed,  "
-        "for dipole : " << dipole_[i]->GetName() << std::endl;
+      std::cerr << "DipolePVObserver::UpdateModel() failed, "
+	"for dipole : " << dipole_[i]->GetName() << std::endl;
+  }
+  for(int i = 0; i < aperture_r_.size(); ++i)
+  {
+    std::string sql = "select aperture_xl_model, aperture_xr_model from " + 
+       GetDB() + ".raperture where name = '" + aperture_r_[i]->GetName() + "'";
+    std::vector<std::vector<std::string> > data = GetQueryResults(GetDBconn(), sql.c_str());
+    if(!data.empty())
+    {
+      aperture_r_[i]->SetApertureXLeft(std::atof(data[0][0].c_str()));
+      aperture_r_[i]->SetApertureXRight(std::atof(data[0][1].c_str()));
+    }
+    else
+      std::cerr << "DipolePVObserver::UpdateModel() failed, "
+	"for rectangular aperture : " << aperture_r_[i]->GetName()<< std::endl;
+  }
+  for(int i = 0; i < drift_.size(); ++i)
+  {
+    std::string sql = "select length_model from " + GetDB() + ".drift where name = '" +
+	drift_[i]->GetName() + "'";
+    std::vector<std::vector<std::string> > data = GetQueryResults(GetDBconn(), sql.c_str());
+    if(!data.empty())
+      drift_[i]->SetLength(std::atof(data[0][0].c_str()));
+    else
+      std::cerr << "DipolePVObserver::UpdateModel() failed, "
+	"for drift : " << drift_[i]->GetName()<< std::endl;
   }
 }
 

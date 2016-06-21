@@ -28,6 +28,7 @@ public:
   {
     param_ = r_param;
   }
+  void ResetEngine();
   void Simulate(std::string r_start = "", std::string r_end = "");
 //  void StepSimulate(uint r_id);
   SpaceCharge* GetSpchPtr() const

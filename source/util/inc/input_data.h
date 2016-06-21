@@ -8,6 +8,7 @@ struct InputData
 {
   std::string beam;
   std::vector<std::string> db;
+  std::vector<std::string> libdb;
   std::string start;
   std::string end;
   bool server_off;

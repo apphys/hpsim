@@ -7,7 +7,7 @@ extern "C"
   void Init(Beam*, BeamLine*, SpaceCharge*, SimulationParam&);
   void Reset();
   void Cleanup();
-  void IncreaseBlIndex();
+  void UpdateBlIndex(uint);
   void StepSimulationKernelCall(Beam*, BeamLine*, SpaceCharge*, SimulationParam&, uint);
   void SimulateApertureCircular(ApertureCircular*);
   void SimulateApertureRectangular(ApertureRectangular*);

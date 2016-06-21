@@ -35,8 +35,13 @@ void SimulationEngine::InitEngine(Beam* r_beam, BeamLine* r_bl,
   SetConstOnDevice(&d_const);
   Init(beam_, beamline_, spch_, param_);
   initialized_ = true;
+  Reset(); 
 }
 
+void SimulationEngine::ResetEngine()
+{
+  Reset();
+}
 /*!
  * \brief Simulate inclusively from an element to another.
  * \param r_start Name of the start element
@@ -50,14 +55,15 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
   int end_index = beamline_->GetSize() - 1;
   if(r_end != "")
     end_index = beamline_->GetElementModelIndex(r_end);
-  Reset(); 
   cudaEvent_t start, stop;  
   StartTimer(&start, &stop);
   for(uint i = 0; i <= end_index; ++i)
   {
     if (i >= start_index || (*beamline_)[i]->GetType() == "SpchComp")
+    {
+      UpdateBlIndex(i);
       (*beamline_)[i]->Accept(this);
-    IncreaseBlIndex();
+    }
   }
   StopTimer(&start, &stop, "whole Simulation");
   if(param_.graphics_on)

@@ -32,6 +32,13 @@ InputData ProcessInputFile(std::string r_file)
         exit(-1);
       }
     }
+    if(StartWithPattern(tmp, "libdb"))
+    {
+      rlt.libdb = Split(tmp);       
+      std::cout << "DB external libraries: " ;
+      std::copy(rlt.libdb.begin(), rlt.libdb.end(), std::ostream_iterator<std::string>(std::cout, "  "));
+      std::cout << std::endl;
+    }
     if(StartWithPattern(tmp, "beam"))
     {
       std::vector<std::string> beam_tmp = Split(tmp); 

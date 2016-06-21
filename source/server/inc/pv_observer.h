@@ -108,6 +108,8 @@ public:
 protected:
   virtual void UpdateModel();
   std::vector<Dipole*> dipole_;
+  std::vector<ApertureRectangular*> aperture_r_;
+  std::vector<Drift*> drift_;
 };
 
 inline

@@ -44,8 +44,8 @@ void ApertureRectangular::Print() const
   std::cout << GetName() << ": " << GetType() 
     << ", aper_x_l = " << GetApertureXLeft() 
     << ", aper_x_r = " << GetApertureXRight() 
-    << ", aper_y_l = " << GetApertureYTop() 
-    << ", aper_y_r = " << GetApertureYBottom() 
+    << ", aper_y_t = " << GetApertureYTop() 
+    << ", aper_y_b = " << GetApertureYBottom() 
     << ", in/out = " << (IsIn() ? "in" : "out")
     << std::endl;
 }

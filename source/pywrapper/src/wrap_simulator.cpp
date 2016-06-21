@@ -60,6 +60,17 @@ static void SimulatorDel(CPPClassObject* self)
   self->ob_type->tp_free((PyObject*) self);
 }
 
+PyDoc_STRVAR(reset__doc__,
+"reset()->\n\n"
+"Reset the simulator for new simulations."
+);
+static PyObject* SimulatorReset(PyObject* self, PyObject* args)
+{
+  CPPClassObject* cppclass_obj = (CPPClassObject*)self;
+  SimulationEngine* engine = (SimulationEngine*)(cppclass_obj->cpp_obj); 
+  engine->ResetEngine();
+}
+
 PyDoc_STRVAR(simulate__doc__,
 "simulate(start_element, end_element)->\n\n"
 "Simulate the beam in the beamline range [start_element, end_element] (inclusive)."
@@ -110,6 +121,7 @@ static PyObject* SetSpaceCharge(PyObject* self, PyObject* args)
 }
 
 static PyMethodDef SimulatorMethods[] = {
+  {"reset", SimulatorReset, METH_VARARGS, simulate__doc__},
   {"simulate", SimulatorStart, METH_VARARGS, simulate__doc__},
   {"set_space_charge", SetSpaceCharge, METH_VARARGS, set_space_charge__doc__},
   {NULL, NULL}

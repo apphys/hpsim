@@ -2,7 +2,7 @@ import sqlite3 as lite
 from subprocess import call
 import os
 
-dbfiles = ['online-201.db']
+dbfiles = ['hb16-tbtd.db', 'hb16-dtl.db']
 
 for df in dbfiles:
   con = lite.connect(df)
