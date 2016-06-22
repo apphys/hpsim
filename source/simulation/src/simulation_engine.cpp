@@ -1,3 +1,4 @@
+#include <limits>
 #include "simulation_engine.h"
 #include "simulation_engine_cu.h"
 #include "timer.h"
@@ -35,7 +36,8 @@ void SimulationEngine::InitEngine(Beam* r_beam, BeamLine* r_bl,
   SetConstOnDevice(&d_const);
   Init(beam_, beamline_, spch_, param_);
   initialized_ = true;
-  Reset(); 
+  prev_end_element_index_ = std::numeric_limits<uint>::max();
+  //Reset(); 
 }
 
 void SimulationEngine::ResetEngine()
@@ -55,16 +57,17 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
   int end_index = beamline_->GetSize() - 1;
   if(r_end != "")
     end_index = beamline_->GetElementModelIndex(r_end);
+  if(start_index < prev_end_element_index_) 
+    Reset();
+  prev_end_element_index_ = end_index;
   cudaEvent_t start, stop;  
   StartTimer(&start, &stop);
   for(uint i = 0; i <= end_index; ++i)
-  {
     if (i >= start_index || (*beamline_)[i]->GetType() == "SpchComp")
     {
       UpdateBlIndex(i);
       (*beamline_)[i]->Accept(this);
     }
-  }
   StopTimer(&start, &stop, "whole Simulation");
   if(param_.graphics_on)
     beam_->UpdateStatForPlotting();

@@ -61,6 +61,7 @@ private:
   SpaceCharge* spch_;
   SimulationParam param_;
   bool initialized_;
+  int prev_end_element_index_;
 };
 
 #endif
