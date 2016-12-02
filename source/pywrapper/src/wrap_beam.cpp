@@ -56,7 +56,7 @@ static void BeamDel(CPPClassObject* self)
 }
 
 PyDoc_STRVAR(set_distribution__doc__,
-"set_distribution(x, xp, y, yp, phi, w, loss) -> \n\n"
+"set_distribution(x, xp, y, yp, phi, w, loss, lloss) -> \n\n"
 "set/change beam distribution.");
 static PyObject* BeamSetDistribution(PyObject* self, PyObject* args)
 {
@@ -96,16 +96,18 @@ static PyObject* BeamSetDistribution(PyObject* self, PyObject* args)
     w_c[i] = PyFloat_AsDouble(PyList_GetItem(w, i)); 
   }
   std::vector<uint>* loss_ptr = NULL, *lloss_ptr = NULL;
+  std::vector<uint> loss_c;
+  std::vector<uint> lloss_c;
   if(loss != NULL)
   {
-    std::vector<uint> loss_c(len, 0);
+    loss_c.resize(len, 0);
     for(int i = 0; i < PyList_Size(x); ++i) 
       loss_c[i] = (uint) PyInt_AsLong(PyList_GetItem(loss, i)); 
     loss_ptr = &loss_c;
   }
   if(lloss != NULL)
   {
-    std::vector<uint> lloss_c(len, 0);
+    lloss_c.resize(len, 0);
     for(int i = 0; i < PyList_Size(x); ++i) 
       lloss_c[i] = (uint) PyInt_AsLong(PyList_GetItem(loss, i)); 
     lloss_ptr = &lloss_c;

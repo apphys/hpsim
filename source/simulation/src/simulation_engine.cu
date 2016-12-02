@@ -42,20 +42,6 @@ extern "C"
       cudaMemcpyAsync((param->plot_data->loss_local).d_ptr + monitor_num, &loss_local_h, sizeof(double), cudaMemcpyHostToDevice, 0);
       cudaMemcpyAsync((param->plot_data->loss_ratio).d_ptr + monitor_num, &loss_ratio_h, sizeof(double), cudaMemcpyHostToDevice, 0);
       beam_tmp->UpdateEmittance();
-//      cudaMemcpy((param->plot_data->xavg).d_ptr + monitor_num, beam_tmp->x_avg, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->xsig).d_ptr + monitor_num, beam_tmp->x_sig, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->xpavg).d_ptr + monitor_num, beam_tmp->xp_avg, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->xpsig).d_ptr + monitor_num, beam_tmp->xp_sig, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->yavg).d_ptr + monitor_num, beam_tmp->y_avg, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->ysig).d_ptr + monitor_num, beam_tmp->y_sig, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->ypavg).d_ptr + monitor_num, beam_tmp->yp_avg, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->ypsig).d_ptr + monitor_num, beam_tmp->yp_sig, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->phiavg).d_ptr + monitor_num, beam_tmp->phi_avg_r, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->phisig).d_ptr + monitor_num, beam_tmp->phi_sig_r, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->wsig).d_ptr + monitor_num, beam_tmp->w_sig, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->xemit).d_ptr + monitor_num, beam_tmp->x_emit, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->yemit).d_ptr + monitor_num, beam_tmp->y_emit, sizeof(double), cudaMemcpyDeviceToDevice);
-//      cudaMemcpy((param->plot_data->zemit).d_ptr + monitor_num, beam_tmp->z_emit, sizeof(double), cudaMemcpyDeviceToDevice);
 
       cudaMemcpyAsync((param->plot_data->xavg).d_ptr + monitor_num, beam_tmp->x_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
       cudaMemcpyAsync((param->plot_data->xsig).d_ptr + monitor_num, beam_tmp->x_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
@@ -93,10 +79,6 @@ extern "C"
   void UpdateBlIndex(uint i)
   {
     cur_id = i;
-    //std::cout << "--- Sim Report ---" << std::endl;
-    //std::cout << "cur_id = " << cur_id << std::endl;
-    //std::cout << "ccl_cell_num = " << ccl_cell_num << std::endl;
-    //std::cout << "design_w = " << design_w << std::endl;
   }
 
   void Reset()
@@ -124,7 +106,6 @@ extern "C"
 
   void SimulateDrift(Drift* r_drift)
   {
-    //std::cout << r_drift->GetName() << ", " << cur_id << std::endl;
     int num_spch_kicks = 1;
     double length = r_drift->GetLength();
     if(param->space_charge_on)
@@ -147,7 +128,6 @@ extern "C"
 
   void SimulateQuad(Quad* r_quad)
   {
-    //std::cout << r_quad->GetName() << ", " << cur_id << std::endl;
     SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, 
       beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, r_quad->GetLength(),
       r_quad->GetAperture(), r_quad->GetGradient(), cur_id);
@@ -162,7 +142,6 @@ extern "C"
 
   void PrepSimulateRFGap(RFGap* r_gap)
   {
-    // asyn copy to a device pointer made the simulation 20 times faster for DTL!
     cudaMemcpyAsync(rfparam, r_gap->GetParametersOnDevice(), sizeof(RFGapParameter), 
                     cudaMemcpyDeviceToDevice, 0);
     // check frequency change
@@ -264,7 +243,7 @@ extern "C"
       phi_in = 0.5 * (cur_phase + prev_gap->GetRefPhase());
       phi_out = 0.5 * (cur_phase + next_gap->GetRefPhase());
     }
-//    std::cout << "phi_in = " << phi_in <<", phi_out = " << phi_out << std::endl;
+
     int gc_blck_size = blck_size/4 > 1 ? blck_size/4 : blck_size;
     int gc_grid_size = grid_size/2 > 1 ? grid_size/2 : grid_size;
 
@@ -282,20 +261,17 @@ extern "C"
 
   void SimulateRotation(Rotation* r_rot)
   {
-    //std::cout << r_rot->GetName() << ", " << cur_id << std::endl;
     SimulateRotationKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->xp, beam_tmp->yp, beam_tmp->loss, r_rot->GetAngle());
   }
   
   void SimulateSpaceChargeCompensation(SpaceChargeCompensation* r_spcomp)
   {
-    //std::cout << r_spcomp->GetName() << ", " << cur_id << std::endl;
     if(param->space_charge_on)
       spch_tmp->SetFraction(r_spcomp->GetFraction());
   }
 
   void SimulateApertureCircular(ApertureCircular* r_aper)
   {
-    //std::cout << r_aper->GetName() << ", " << cur_id << std::endl;
     if(!r_aper->IsIn())
       return;
     beam_tmp->UpdateLoss();
@@ -307,7 +283,6 @@ extern "C"
 
   void SimulateApertureRectangular(ApertureRectangular* r_aper)
   {
-    //std::cout << r_aper->GetName() << ", " << cur_id << std::endl;
     if(!r_aper->IsIn())
       return;
     beam_tmp->UpdateLoss();
@@ -321,7 +296,6 @@ extern "C"
 
   void SimulateDiagnostics(Diagnostics* r_diag)
   {
-    //std::cout << r_diag->GetName() << ", " << cur_id << std::endl;
     if(param->graphics_on && r_diag->IsMonitorOn())
       Update2DPlotData();
   }
@@ -351,7 +325,6 @@ extern "C"
   
   void SimulateDipole(Dipole* r_dipole)
   {
-    //std::cout << r_dipole->GetName() << ", " << cur_id << std::endl;
     cudaMemcpyAsync(dpparam, r_dipole->GetParametersOnDevice(), sizeof(DipoleParameter), cudaMemcpyDeviceToDevice, 0);
     SimulateFirstHalfDipoleKernel<<<grid_size, blck_size/4>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp,
       beam_tmp->yp, beam_tmp->w, beam_tmp->loss, dpparam);

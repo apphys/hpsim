@@ -141,6 +141,7 @@ GetQueryResults(sqlite3* r_db, const char* r_sql)
                     std::string(result[ncols * i + j]) : "");
     rt.push_back(arow); 
   }
+  sqlite3_free_table(result);
   return rt;
 }
 

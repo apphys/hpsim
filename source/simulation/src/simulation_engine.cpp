@@ -37,7 +37,6 @@ void SimulationEngine::InitEngine(Beam* r_beam, BeamLine* r_bl,
   Init(beam_, beamline_, spch_, param_);
   initialized_ = true;
   prev_end_element_index_ = std::numeric_limits<uint>::max();
-  //Reset(); 
 }
 
 void SimulationEngine::ResetEngine()
@@ -73,53 +72,42 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
     beam_->UpdateStatForPlotting();
 }
 
-//void SimulationEngine::StepSimulate(uint r_id)
-//{
-//  StepSimulationKernelCall(beam_, beamline_, spch_, param_, r_id);
-//}
 void SimulationEngine::Visit(ApertureCircular* r_aper)
 {
-//  r_aper->Print();
   SimulateApertureCircular(r_aper);
 }
+
 void SimulationEngine::Visit(ApertureRectangular* r_aper)
 {
-//  r_aper->Print();
   SimulateApertureRectangular(r_aper);
 }
 void SimulationEngine::Visit(Buncher* r_buncher)
 {
-//  r_buncher->Print();
   SimulateBuncher(r_buncher);
 }
 
 void SimulationEngine::Visit(Dipole* r_dipole)
 {
-//  r_dipole->PrintFromDevice();
   SimulateDipole(r_dipole);
 }
 
 void SimulationEngine::Visit(Diagnostics* r_diag)
 {
-//  r_diag->PrintFromDevice();
   SimulateDiagnostics(r_diag);
 }
 
 void SimulationEngine::Visit(Drift* r_drift)
 {
-//  r_drift->Print();
   SimulateDrift(r_drift);
 }
 
 void SimulationEngine::Visit(Quad* r_quad)
 {
-//  r_quad->Print();
   SimulateQuad(r_quad);
 }
 
 void SimulationEngine::Visit(RFGap* r_gap)
 {
-//  r_gap->PrintFromDevice();
   if (r_gap->GetType() == "RFGap-DTL")
     SimulateDTLRFGap(r_gap);
   else if (r_gap->GetType() == "RFGap-CCL")
@@ -128,7 +116,6 @@ void SimulationEngine::Visit(RFGap* r_gap)
 
 void SimulationEngine::Visit(Rotation* r_rot)
 {
-//  r_rot->Print();
   SimulateRotation(r_rot);
 }
 
@@ -139,6 +126,5 @@ void SimulationEngine::Visit(SpaceChargeCompensation* r_spcomp)
 
 void SimulationEngine::Visit(Steerer* r_steerer)
 {
-//  r_steerer->Print();
   SimulateSteerer(r_steerer);
 }

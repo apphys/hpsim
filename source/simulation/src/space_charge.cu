@@ -7,11 +7,11 @@
 #include "beam.h"
 #include "timer.h"
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-//#endif
+#endif
 
 namespace
 {
@@ -124,7 +124,6 @@ void UpdateMeshKernelCall()
   {
     beam->UpdateMaxRPhi();
     UpdateScheffMeshSizeKernel<<<1, 1>>>(beam->r_max, NULL, freq, beta);
-    //UpdateScheffMeshSizeKernel<<<1, 1>>>(beam->r_max, beam->abs_phi_max, freq, beta);
   }
   else
   {
@@ -168,7 +167,6 @@ void UpdateTblsKernelCall(double2* r_fld_tbl1,
     r_bin_tbl, beam->x, beam->y, beam->phi_r, beam->loss, beam->lloss, beam->x_avg_good, 
     beam->y_avg_good, beam->phi_avg_r, beam->x_sig_good, beam->y_sig_good, beam->num_particle, 
     beta, freq);
-  //PrintBinTbl(r_bin_tbl, nz*nr, "aa.dat");
   //StopTimer(&start, &stop, "DistributeParticleKernel: ");
   //cudaProfilerStop();
   cudaStreamDestroy(stream1);
@@ -198,8 +196,6 @@ void UpdateFinalFldTblKernelCall(
 #endif
   //cudaProfilerStop();
 
-  //UpdateFldTbl2Kernel_OldVersion<<<grid, blk>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
-  //UpdateFldTbl2Kernel4<<<2*(nr+1)+1, 1024, nr*nz*sizeof(float)>>>(r_fld_tbl2, r_bin_tbl, r_fld_tbl1);
 #ifdef _DEBUG
   cudaThreadSynchronize();
   std::cout << "done final fld tbl" << std::endl;  
@@ -220,7 +216,6 @@ void KickBeamKernelCall(
   uint grid_size = beam->grid_size;
   uint blck_size = beam->blck_size/4;
   //cudaProfilerStart();
-  //ApplySpchKickKernelV2<<<grid_size, blck_size, 32*64*sizeof(double2)>>>(r_beam->x, r_beam->y, 
   ApplySpchKickKernel<<<grid_size, blck_size>>>(beam->x, beam->y, 
     beam->phi_r, beam->xp, beam->yp, beam->w, beam->loss, beam->lloss, 
     beam->x_avg_good, beam->y_avg_good, beam->phi_avg_r, beam->x_sig_good, 
@@ -243,7 +238,6 @@ void PrintFldTbl1(double2* r_fld_tbl1, uint r_nr, uint r_nz)
   std::ofstream tout("fld_tbl1.dat");
   tout << std::setprecision(16);
 // use when compare with CPU code
-///*
   for(int i = 0; i < r_nr; ++i)  // rs
     for(int j = 0; j < r_nz; ++j)  // zp
       for(int k = 0; k < r_nr+1; ++k)  // rp
@@ -251,7 +245,6 @@ void PrintFldTbl1(double2* r_fld_tbl1, uint r_nr, uint r_nz)
         double2 tmp = h_fld_tbl1[j+i*r_nz+k*r_nz*r_nr];
         tout << i << "\t" << j << "\t" << k << "\t" << tmp.x << "\t" << tmp.y << std::endl;
       }
-//*/
 // the real order of the table
 /*
   for(int i = 0; i < sz; ++i)
