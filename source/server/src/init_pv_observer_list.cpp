@@ -59,7 +59,7 @@ void InitPVObserverList(PVObserverList& r_pvlist, BeamLine& r_bl, DBConnection& 
         }
         else if (elem_type == "rf_module")
         {
-          sql = "select g.name from " + db + ".rf_gap g join rf_module m on m.id = g.module_id where m.name = '" + elem_name + "'";  
+          sql = "select g.name from " + db + ".rf_gap g join " + db + ".rf_module m on m.id = g.module_id where m.name = '" + elem_name + "'";  
           std::vector<std::vector<std::string> > gap_names = GetQueryResults(db_conn, sql.c_str());
           for(int gp = 0; gp < gap_names.size(); ++gp)
           {

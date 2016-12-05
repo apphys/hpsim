@@ -92,6 +92,7 @@ std::string GetDataFromDB(sqlite3* r_db, const char* r_sql)
     "GetDataFromDB():\n" + std::string(r_sql), err); 
   if(nrows > 0 && result[1] != NULL)
     rt = std::string(result[1]);
+  sqlite3_free_table(result);
   return rt;
 }
 
@@ -108,6 +109,7 @@ GetDataArrayFromDB(sqlite3* r_db, const char* r_sql)
     if(result[i] != NULL) 
       rt.push_back(std::string(result[i]));
   }
+  sqlite3_free_table(result);
   return rt;
 }
 
@@ -121,6 +123,7 @@ GetTableColumnNames(sqlite3* r_db, const char* r_sql)
     "GetTableColumnNames():\n" + std::string(r_sql), err); 
   for(int j=0; j < ncols; j++) 
     rt.push_back(std::string(result[j]));
+  sqlite3_free_table(result);
   return rt;
 }
 
@@ -166,6 +169,7 @@ GetDataPairArrayFromDB(sqlite3* r_db, const char* r_sql)
       second_str = "";
     rt.push_back(std::make_pair(first_str, second_str));
   }
+  sqlite3_free_table(result);
   return rt;
 }
 
@@ -195,6 +199,7 @@ std::vector<std::pair<std::string, std::pair<std::string, std::string> > >
     rt.push_back(std::make_pair(first_str, 
       std::make_pair(second_str, third_str)));
   }
+  sqlite3_free_table(result);
   return rt;
 }
 
@@ -323,3 +328,24 @@ std::vector<std::string> DBConnection::GetEPICSChannels() const
   }
   return rt;
 }
+
+/*
+int GetQueryCallback(void *arg, int count, char **data, char **columns)
+{
+  std::vector<std::vector<std::string> >* tb = static_cast<std::vector<std::vector<std::string> >*>(arg);
+  std::vector<std::string> arow;
+  for(int i = 0; i < count; ++i)
+    arow.push_back(std::string(data[i]));
+  tb->push_back(arow);
+  return 0;
+}
+
+std::vector<std::vector<std::string> >
+GetQueryResults2(sqlite3* r_db, const char* r_sql)
+{
+  std::vector<std::vector<std::string> > rt;
+  std::cout << "GetQueryResults2: " << r_sql << std::endl;
+  SQLCheck(sqlite3_exec(r_db, r_sql, GetQueryCallback, &rt, NULL), "GetQueryResults2():\n"+ std::string(r_sql));
+  return rt;
+}
+*/
