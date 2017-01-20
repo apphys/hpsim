@@ -50,8 +50,8 @@ void DotPlot3D::Free()
 void DotPlot3D::InitGL()
 {
   GLuint vshader, fshader;
-  if ((fshader = CreateShader(std::string(GetProjectTopDir() + "/source/graphics/src/graphics_3d.f.glsl").c_str(), GL_FRAGMENT_SHADER)) == 0) exit(-1);
-  if ((vshader = CreateShader(std::string(GetProjectTopDir() + "/source/graphics/src/graphics_3d.v.glsl").c_str(), GL_VERTEX_SHADER))   == 0) exit(-1);
+  if ((fshader = CreateShader(std::string(GetProjectTopDir() + "/src/graphics/src/graphics_3d.f.glsl").c_str(), GL_FRAGMENT_SHADER)) == 0) exit(-1);
+  if ((vshader = CreateShader(std::string(GetProjectTopDir() + "/src/graphics/src/graphics_3d.v.glsl").c_str(), GL_VERTEX_SHADER))   == 0) exit(-1);
 
   GLuint program = glCreateProgram();
   glAttachShader(program, vshader);

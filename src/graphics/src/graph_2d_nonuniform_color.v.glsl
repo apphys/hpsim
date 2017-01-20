@@ -1,4 +1,4 @@
-#version 120
+//#version 120
 
 attribute vec2 coord2d_vc;
 uniform mat4 transform_vc;
