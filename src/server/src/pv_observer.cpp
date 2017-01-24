@@ -24,6 +24,35 @@ void PVObserver::UpdateDB()
   sqlite3_exec(db_conn_, "END TRANSACTION", NULL, NULL, &errmsg);
 }
 
+MasterPVObserver::MasterPVObserver(std::string r_pv, std::string r_db) 
+  : PVObserver(r_pv, r_db)
+{
+}
+
+void MasterPVObserver::AttachBeamLineElement(BeamLineElement* r_elem)
+{
+  std::cerr << "Cannot directly attach element to MasterPVObserver! " << std::endl;
+}
+
+void MasterPVObserver::AttachPVObserver(PVObserver* r_pvo)
+{
+  pvo_.push_back(r_pvo);
+}
+
+void MasterPVObserver::UpdateModel()
+{
+  for(int i = 0; i < pvo_.size(); ++i)
+    pvo_[i]->UpdateModel(); 
+}
+
+std::vector<std::string> MasterPVObserver::GetBeamLineElementNames() const
+{
+  std::vector<std::string> rlt(pvo_.size(), "");
+  for(int i = 0; i < pvo_.size(); ++i)
+    rlt[i] = pvo_[i]->GetPV();
+  return rlt;
+}
+
 QuadPVObserver::QuadPVObserver(std::string r_pv, std::string r_db) 
   : PVObserver(r_pv, r_db)
 {

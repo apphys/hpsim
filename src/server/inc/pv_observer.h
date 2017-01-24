@@ -20,15 +20,28 @@ public:
   void Update(std::string);
   virtual void AttachBeamLineElement(BeamLineElement*) = 0;
   virtual std::vector<std::string> GetBeamLineElementNames() const = 0;
-private:
   void UpdateDB();
   virtual void UpdateModel() = 0;
+private:
   std::string pv_;
   std::string val_;
   std::string db_;
   sqlite3* db_conn_;
 };
-
+///*
+class MasterPVObserver : public PVObserver
+{
+public:
+  // TODO: add name and db
+  MasterPVObserver(std::string, std::string);
+  void AttachBeamLineElement(BeamLineElement*);
+  std::vector<std::string> GetBeamLineElementNames() const;
+  void AttachPVObserver(PVObserver*);
+private:
+  void UpdateModel();
+  std::vector<PVObserver*> pvo_;
+};
+//*/
 class QuadPVObserver : public PVObserver
 {
 public:
