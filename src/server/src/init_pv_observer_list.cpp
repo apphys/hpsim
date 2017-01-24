@@ -24,7 +24,8 @@ void InitPVObserverList(PVObserverList& r_pvlist, BeamLine& r_bl, DBConnection& 
       {
         std::string elem_type = elems_info[j][0];
         std::string elem_name = elems_info[j][1];
-        // first time, create the PVObserver
+        // first time seeing this pv, create the PVObserver
+        // TODO: change this to using find
         if(r_pvlist[pv] == NULL) 
         { 
           if(elem_type == "quad")

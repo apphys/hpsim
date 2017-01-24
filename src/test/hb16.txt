@@ -3,4 +3,4 @@ libdb: ../../db/lib/libsqliteext.so
 beam: ./IPAC15-Hmbeam.txt
 start: TBDB02
 end: 48DT
-server: on
+server: off

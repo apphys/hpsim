@@ -105,6 +105,7 @@ std::vector<std::string> RFPhasePVObserver::GetBeamLineElementNames() const
     rlt[i] = gap_[i]->GetName(); 
   return rlt; 
 }
+
 RFAmplitudePVObserver::RFAmplitudePVObserver(std::string r_pv, std::string r_db)
   : PVObserver(r_pv, r_db)
 {
