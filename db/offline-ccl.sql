@@ -6619,8 +6619,14 @@ INSERT INTO "caperture" VALUES(312, '48BA249', 5827.5, 0.01905, 1, 6514, 'capert
 CREATE VIEW channel_list as
   select view_index, name, model_type, (select lcs_name from epics_channel where id = amplitude_channel) as channel1,
     (select lcs_name from epics_channel where id = phase_channel) as channel2, 
-    (select lcs_name from epics_channel where id = delay_channel) as channel3 from rf_module union
-  select view_index, name, model_type, (select lcs_name from epics_channel where id = channel), null, null from quad;
+    (select lcs_name from epics_channel where id = delay_channel) as channel3,
+    (select lcs_name from epics_channel where id = phase_master_channel) as channel4 from rf_module union
+  select view_index, name, model_type, (select lcs_name from epics_channel where id = channel), null, null, null from quad;
+--CREATE VIEW channel_list as
+--  select view_index, name, model_type, (select lcs_name from epics_channel where id = amplitude_channel) as channel1,
+--    (select lcs_name from epics_channel where id = phase_channel) as channel2, 
+--    (select lcs_name from epics_channel where id = delay_channel) as channel3 from rf_module union
+--  select view_index, name, model_type, (select lcs_name from epics_channel where id = channel), null, null from quad;
 CREATE VIEW linac as 
   select view_index, name, model_type, model_index from quad union
   select view_index, name, model_type, model_index from rf_gap union
