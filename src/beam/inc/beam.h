@@ -29,11 +29,7 @@ typedef unsigned int uint;
  *
  * All the parallel reduction kernels of the beam class uses the algorithm
  * from <br>
- * Mark Harris, "Optimizing Parallel Reduction in CUDA", NIVDIA, 2007 <br>
- * http://developer.download.nvidia.com/compute/cuda/1.1-Beta/x86_website/projects/reduction/doc/reduction.pdf<br>
- *
- * \todo When a particle becomes lost longitudinally mark longitudinal_loss
- * with the index of the beam line element where the particle is lost.
+ * Mark Harris, "Optimizing Parallel Reduction in CUDA", NIVDIA, 2007.
  */
 class Beam : public PyWrapper
 {
@@ -42,7 +38,8 @@ public:
   Beam(std::string r_file);
   Beam(uint r_num, double r_mass, double r_charge, double r_current);
   ~Beam();
-  void AllocateBeam(uint r_num, double r_mass, double r_charge, double r_current);
+  void AllocateBeam(uint r_num, double r_mass, double r_charge, 
+		    double r_current);
   void InitBeamFromFile(std::string r_file);
   void InitBeamFromDistribution(std::vector<double>& r_x, 
       std::vector<double>& r_xp, std::vector<double>& r_y, 
@@ -56,7 +53,6 @@ public:
   void InitDCBeam(double r_ax, double r_bx, double r_ex, 
       double r_ay, double r_by, double r_ey, double r_dphi,
       double r_sync_phi, double r_sync_w, uint r_seed = 0);
-  void SetNumThreadsPerBlock(uint r_blck_size);
   void SaveInitialBeam();
   void SaveIntermediateBeam();
   void RestoreInitialBeam();
@@ -78,7 +74,6 @@ public:
   void UpdateSigPhi();
   void UpdateSigRelativePhi(bool r_good_only = false);
   void UpdateSigW(bool r_good_only = false);
-  //void UpdateSigR();
   void UpdateEmittance();
   void UpdateStatForSpaceCharge();
   void UpdateStatForPlotting();
@@ -88,34 +83,29 @@ public:
   void PrintToFile(std::string r_file, std::string r_msg = ""); 
   void Print(uint r_indx); 
   void PrintSimple(); 
+  void SetNumThreadsPerBlock(uint r_blck_size);
   void SetRefEnergy(double);
   void SetRefPhase(double);
   double GetRefEnergy() const;
   double GetRefPhase() const;
-
   double GetAvgX(bool r_good_only = false) const;
   double GetAvgY(bool r_good_only = false) const;
   double GetAvgPhi(bool r_good_only = false) const;
   double GetAvgRelativePhi() const;
   double GetAvgW(bool r_good_only = false) const;
-
   double GetSigX(bool r_good_only = false) const;
   double GetSigY(bool r_good_only = false) const;
   double GetSigPhi() const;
   double GetSigRelativePhi(bool r_good_only = false) const;
   double GetSigW(bool r_good_only = false) const;
   //double GetSigR() const;
-
   double GetEmittanceX() const;
   double GetEmittanceY() const;
   double GetEmittanceZ() const;
-
   double GetMaxPhi() const;
-
   uint GetLossNum() const;
   uint GetLongitudinalLossNum() const;
   uint GetGoodParticleNum() const;
-
   std::vector<double> GetX() const;
   void GetX(double* r_out);
   std::vector<double> GetXp() const;
@@ -146,7 +136,8 @@ public:
   void ChangeFrequency(double r_freq);
 
   // host data
-  uint num_particle; //!< Number of macro-particles, on host
+  //!< Number of macro-particles, on host
+  uint num_particle; 
   double mass;  //!< Particle rest mass, on host
   double charge; //!< Particle charge, on host
   double current; //!< Beam current, on host in [A]
