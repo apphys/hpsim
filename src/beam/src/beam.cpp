@@ -954,6 +954,12 @@ void Beam::UpdateSigW(bool r_good_only)
     else
       UpdateSigmaOfOneVariableKernelCall(this, w, w_sig);
 }
+/*
+void Beam::UpdateSigR()
+{
+  UpdateSigmaR(this);
+}
+*/
 
 /*!
  * \brief Update transverse and longitudinal emittances
