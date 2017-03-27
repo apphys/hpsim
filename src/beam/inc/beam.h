@@ -1,5 +1,6 @@
 #ifndef BEAM_H
 #define BEAM_H
+
 #include <string>
 #include <vector>
 #include "py_wrapper.h"
