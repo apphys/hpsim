@@ -37,7 +37,8 @@ Beam::Beam() : PyWrapper(), beam_0(std::vector<double*>(6, NULL)),
  *   Mass 938.272<br>
  *   Current 0.0126<br>
  *   Frequency 201.25<br>
- *   0  0  0  0  ref_phase  ref_energy  0  0 <em> // first line is reserved for the refernece particle. </em><br> 
+ *   0  0  0  0  ref_phase  ref_energy  0  0 <em> 
+ *   // first line is reserved for the refernece particle. </em><br> 
  *   x  xp y yp phase energy transver_loss longitudinal_loss<br>
  * </code>
  *
@@ -120,7 +121,8 @@ Beam::~Beam()
  *
  * \callgraph
  */
-void Beam::AllocateBeam(uint r_num, double r_mass, double r_charge, double r_current)
+void Beam::AllocateBeam(uint r_num, double r_mass, double r_charge, 
+  double r_current)
 {
   num_particle = r_num;
   mass = r_mass;
@@ -148,7 +150,7 @@ void Beam::SetNumThreadsPerBlock(uint r_blck_size)
   uint num_thread = NextPow2(num_particle);
   if(num_thread > r_blck_size)
   {
-    grid_size = num_thread/r_blck_size;
+    grid_size = num_thread / r_blck_size;
     blck_size = r_blck_size;
   }
   else
@@ -211,7 +213,8 @@ void Beam::InitBeamFromFile(std::string r_file)
   }
   if(charge_not_found)
   {
-    std::cerr << "Beam input file error: must define charge value! " << std::endl;
+    std::cerr << "Beam input file error: must define charge value! " 
+      << std::endl;
     exit(-1);
   }
   if(mass_not_found)
@@ -221,12 +224,14 @@ void Beam::InitBeamFromFile(std::string r_file)
   }
   if(current_not_found)
   {
-    std::cerr << "Beam input file error: must define current value! " << std::endl;
+    std::cerr << "Beam input file error: must define current value! " 
+      << std::endl;
     exit(-1);
   }
   if(freq_not_found)
   {
-    std::cerr << "Beam input file error: must define frequency value! " << std::endl;
+    std::cerr << "Beam input file error: must define frequency value! " 
+      << std::endl;
     exit(-1);
   }
   input.close(); 
@@ -400,50 +405,53 @@ void Beam::InitWaterbagBeam(double r_ax, double r_bx, double r_ex,
     std::srand(r_seed);
   
   double rsqrt = 1.0;//std::sqrt(1.0/6.0);
-  double gx = (1.0 + r_ax*r_ax)/r_bx;
-  double xmx = std::sqrt(r_ex/gx);
-  double xpmx = std::sqrt(r_ex*gx);
-  double dx = -r_ax/gx;
-  double gy = (1.0 + r_ay*r_ay)/r_by;
-  double ymx = std::sqrt(r_ey/gy);
-  double ypmx = std::sqrt(r_ey*gy);
-  double dy = -r_ay/gy;
-  double gz = (1.0 + r_az*r_az)/r_bz;
-  double zmx = std::sqrt(r_ez/gz);
-  double zpmx = r_ez/zmx;
-  double dz = -r_az/gz;
-  double inpde = 2.0*r_sync_w*zpmx;
-  double wave_len = 29979.2458/r_freq; // in cm
+  double gx = (1.0 + r_ax * r_ax) / r_bx;
+  double xmx = std::sqrt(r_ex / gx);
+  double xpmx = std::sqrt(r_ex * gx);
+  double dx = -r_ax / gx;
+  double gy = (1.0 + r_ay * r_ay) / r_by;
+  double ymx = std::sqrt(r_ey / gy);
+  double ypmx = std::sqrt(r_ey * gy);
+  double dy = -r_ay / gy;
+  double gz = (1.0 + r_az * r_az) / r_bz;
+  double zmx = std::sqrt(r_ez / gz);
+  double zpmx = r_ez / zmx;
+  double dz = -r_az / gz;
+  double inpde = 2.0 * r_sync_w * zpmx;
+  // TODO: change this to CLIGHT 
+  double wave_len = 29979.2458 / r_freq; //  in cm
   freq = r_freq;
-  double gm = r_sync_w/mass + 1.0;
-  double beta = std::sqrt(1.0-1.0/(gm*gm));
+  double gm = r_sync_w / mass + 1.0;
+  double beta = std::sqrt(1.0 - 1.0 / (gm * gm));
 
   for(int i = 0; i < num_particle; ++i)
   {
     double r1 = 1.0, r2 = 1.0, r3 = 1.0, r4 = 1.0, r5 = 1.0, r6 = 1.0;
     do{
       do{
-        r1 = 2.0*std::rand()/RAND_MAX-1.0;
-        r2 = 2.0*std::rand()/RAND_MAX-1.0;
-      }while(r1*r1 + r2*r2 > 1.0);
+        r1 = 2.0 * std::rand() / RAND_MAX - 1.0;
+        r2 = 2.0 * std::rand() / RAND_MAX - 1.0;
+      }while(r1 * r1 + r2 * r2 > 1.0);
       
       do{
-        r3 = 2.0*std::rand()/RAND_MAX-1.0;
-        r4 = 2.0*std::rand()/RAND_MAX-1.0;
-      }while(r3*r3 + r4*r4 > 1.0);
+        r3 = 2.0 * std::rand() / RAND_MAX - 1.0;
+        r4 = 2.0 * std::rand() / RAND_MAX - 1.0;
+      }while(r3 * r3 + r4 * r4 > 1.0);
       do{
-        r5 = 2.0*std::rand()/RAND_MAX-1.0;
-        r6 = 2.0*std::rand()/RAND_MAX-1.0;
-      }while(r5*r5 + r6*r6 > 1.0);
-    }while(r1*r1 + r2*r2 + r3*r3 + r4*r4 + r5*r5 + r6*r6> 1.0);
+        r5 = 2.0 * std::rand() / RAND_MAX - 1.0;
+        r6 = 2.0 * std::rand() / RAND_MAX - 1.0;
+      }while(r5 * r5 + r6 * r6 > 1.0);
+    }while(r1 * r1 + r2 * r2 + r3 * r3 + r4 * r4 + r5 * r5 + r6 * r6> 1.0);
 
-    r1 *= rsqrt; r2 *= rsqrt; r3 *= rsqrt; r4 *= rsqrt; r5 *= rsqrt; r6 *= rsqrt;
-    x_h[i] = 0.01*(r1*xmx + dx*r2*xpmx);
-    xp_h[i] = r2*xpmx;
-    y_h[i] = 0.01*(r3*ymx + dy*r4*ypmx);
-    yp_h[i] = r4*ypmx;
-    phi_h[i] = -(r5*zmx+dz*zpmx*r6)*2.0*M_PI/(beta*wave_len) + r_sync_phi;
-    w_h[i] = 2.0*r_sync_w*zpmx*r6 + r_sync_w;
+    r1 *= rsqrt; r2 *= rsqrt; r3 *= rsqrt; 
+    r4 *= rsqrt; r5 *= rsqrt; r6 *= rsqrt;
+    x_h[i] = 0.01 * (r1 * xmx + dx * r2 * xpmx);
+    xp_h[i] = r2 * xpmx;
+    y_h[i] = 0.01 * (r3 * ymx + dy * r4 * ypmx);
+    yp_h[i] = r4 * ypmx;
+    phi_h[i] = -(r5 * zmx+dz * zpmx * r6) * 2.0 * M_PI / (beta * wave_len) + 
+      r_sync_phi;
+    w_h[i] = 2.0 * r_sync_w * zpmx * r6 + r_sync_w;
   }
   x_h[0] = 0.0; xp_h[0] = 0.0; y_h[0] = 0.0; yp_h[0] = 0.0;
   UpdateBeamOnDevice(this, x_h, xp_h, y_h, yp_h, phi_h, w_h);
@@ -487,37 +495,37 @@ void Beam::InitDCBeam(double r_ax, double r_bx, double r_ex,
     std::srand(r_seed);
   
   double rsqrt = 1.0;//std::sqrt(1.0/6.0);
-  double gx = (1.0 + r_ax*r_ax)/r_bx;
-  double xmx = std::sqrt(r_ex/gx);
-  double xpmx = std::sqrt(r_ex*gx);
-  double dx = -r_ax/gx;
-  double gy = (1.0 + r_ay*r_ay)/r_by;
-  double ymx = std::sqrt(r_ey/gy);
-  double ypmx = std::sqrt(r_ey*gy);
-  double dy = -r_ay/gy;
+  double gx = (1.0 + r_ax * r_ax) / r_bx;
+  double xmx = std::sqrt(r_ex / gx);
+  double xpmx = std::sqrt(r_ex * gx);
+  double dx = -r_ax / gx;
+  double gy = (1.0 + r_ay * r_ay) / r_by;
+  double ymx = std::sqrt(r_ey / gy);
+  double ypmx = std::sqrt(r_ey * gy);
+  double dy = -r_ay / gy;
   for(int i = 0; i < num_particle; ++i)
   {
     double r1 = 1.0, r2 = 1.0, r3 = 1.0, r4 = 1.0, r5 = 1.0;
     do{
       int cnt = 0;
       do{
-        r1 = 2.0*std::rand()/RAND_MAX-1.0;
-        r2 = 2.0*std::rand()/RAND_MAX-1.0;
-      }while(r1*r1 + r2*r2 > 1.0);
+        r1 = 2.0 * std::rand() / RAND_MAX - 1.0;
+        r2 = 2.0 * std::rand() / RAND_MAX - 1.0;
+      }while(r1 * r1 + r2 * r2 > 1.0);
       
       do{
-        r3 = 2.0*std::rand()/RAND_MAX-1.0;
-        r4 = 2.0*std::rand()/RAND_MAX-1.0;
-      }while(r3*r3 + r4*r4 > 1.0);
-    }while(r1*r1 + r2*r2 + r3*r3 + r4*r4 > 1.0);
+        r3 = 2.0 * std::rand() / RAND_MAX - 1.0;
+        r4 = 2.0 * std::rand() / RAND_MAX - 1.0;
+      }while(r3 * r3 + r4 * r4 > 1.0);
+    }while(r1 * r1 + r2 * r2 + r3 * r3 + r4 * r4 > 1.0);
 
     r1 *= rsqrt; r2 *= rsqrt; r3 *= rsqrt; r4 *= rsqrt;
-    r5 = 2.0*(double)(i+1.0)/(double)num_particle-1.0; 
-    x_h[i] = 0.01*(r1*xmx + dx*r2*xpmx);
-    xp_h[i] = r2*xpmx;
-    y_h[i] = 0.01*(r3*ymx + dy*r4*ypmx);
-    yp_h[i] = r4*ypmx;
-    phi_h[i] = r5*r_dphi + r_sync_phi;
+    r5 = 2.0 * (double)(i+1.0) / (double)num_particle - 1.0; 
+    x_h[i] = 0.01 * (r1 * xmx + dx * r2 * xpmx);
+    xp_h[i] = r2 * xpmx;
+    y_h[i] = 0.01 * (r3 * ymx + dy * r4 * ypmx);
+    yp_h[i] = r4 * ypmx;
+    phi_h[i] = r5 * r_dphi + r_sync_phi;
     w_h[i] = r_sync_w;
   }
   x_h[0] = 0.0; xp_h[0] = 0.0; y_h[0] = 0.0; yp_h[0] = 0.0;
@@ -531,7 +539,8 @@ void Beam::InitDCBeam(double r_ax, double r_bx, double r_ex,
 /*!
  * \brief Helper function for saving beam.
  *
- * \param r_beam A vector of arrays where six beam coordinates(x, xp, y, yp, phi, w) will be saved
+ * \param r_beam A vector of arrays where six beam coordinates(x, xp, y, yp, 
+ * 	  phi, w) will be saved
  * \param r_loss An array where transverse loss will be saved
  * \param r_lloss An array where longitudinal loss will be saved
  */
@@ -594,11 +603,13 @@ void Beam::SaveIntermediateBeam()
  * 
  * \callgraph
  */
-void Beam::RestoreBeam(std::vector<double*>& r_beam, uint*& r_loss, uint*& r_lloss)
+void Beam::RestoreBeam(std::vector<double*>& r_beam, uint*& r_loss, 
+  uint*& r_lloss)
 {
   if(r_loss == NULL)
   {
-    std::cerr << "Beam can't be restored because no previous beam has been saved. " << std::endl;
+    std::cerr << "Beam can't be restored because no previous beam has been "
+      "saved. " << std::endl;
     return;
   } 
   UpdateBeamOnDevice(this, r_beam[0], r_beam[1], r_beam[2], r_beam[3], 
@@ -669,7 +680,8 @@ void Beam::PrintToFile(std::string r_file, std::string r_msg)
   uint* loss_h = new uint[num];
   uint* lloss_h = new uint[num];
   uint* num_loss_h = new uint;
-  CopyBeamFromDevice(this, x_h, xp_h, y_h, yp_h, phi_h, w_h, loss_h, lloss_h, num_loss_h);
+  CopyBeamFromDevice(this, x_h, xp_h, y_h, yp_h, phi_h, w_h, loss_h, lloss_h, 
+    num_loss_h);
   std::ofstream out(r_file.c_str());
   out << "Info " << r_msg << std::endl;
   out << "Charge  " << charge << std::endl;
@@ -700,10 +712,11 @@ void Beam::PrintToFile(std::string r_file, std::string r_msg)
  */
 void Beam::PrintSimple()
 {
-  std::cout << "Beam, mass = " << mass << ", charge = " << charge << ", current = " << current << std::endl;
+  std::cout << "Beam, mass = " << mass << ", charge = " << charge << 
+    ", current = " << current << std::endl;
   Print(0);
-  Print(num_particle/2-1);
-  Print(num_particle-2);
+  Print(num_particle / 2 - 1);
+  Print(num_particle - 2);
 }
 
 /*!
@@ -721,10 +734,11 @@ void Beam::Print(uint r_indx)
   double* w_h = new double;
   uint* loss_h = new uint;
   uint* lloss_h = new uint;
-  CopyParticleFromDevice(this, r_indx, x_h, xp_h, y_h, yp_h, phi_h, w_h, loss_h, lloss_h);
+  CopyParticleFromDevice(this, r_indx, x_h, xp_h, y_h, yp_h, phi_h, w_h, 
+    loss_h, lloss_h);
   std::cout << std::setprecision(15) << std::fixed;
-  std::cout << *x_h << "\t" << *xp_h << "\t" << *y_h << "\t" << *yp_h << "\t" 
-    << *phi_h << "\t" << *w_h << "\t" << *loss_h << "\t" << *lloss_h << std::endl;
+  std::cout << *x_h << "\t" << *xp_h << "\t" << *y_h << "\t" << *yp_h << "\t" <<
+    *phi_h << "\t" << *w_h << "\t" << *loss_h << "\t" << *lloss_h << std::endl;
   delete x_h;
   delete xp_h;
   delete y_h;
@@ -795,9 +809,9 @@ void Beam::UpdateAvgYp()
 /*!
  * \brief Update average x
  *
- * \param r_good_only If false(default), use particles that are not transversely lost.
- * 		      Otherwise, use good particles (not lost either transversely nor
- * 		      longitudinally).
+ * \param r_good_only If false(default), use particles that are not 
+ * 	transversely lost. Otherwise, use good particles (not lost 
+ * 	either transversely nor longitudinally).
  */
 void Beam::UpdateAvgX(bool r_good_only)
 {
@@ -810,9 +824,9 @@ void Beam::UpdateAvgX(bool r_good_only)
 /*!
  * \brief Update average y
  *
- * \param r_good_only If false(default), use particles that are not transversely lost.
- * 		      Otherwise, use good particles (not lost either transversely nor
- * 		      longitudinally).
+ * \param r_good_only If false(default), use particles that are not 
+ * 	transversely lost. Otherwise, use good particles (not lost either 
+ * 	transversely nor longitudinally).
  */
 void Beam::UpdateAvgY(bool r_good_only)
 {
@@ -825,9 +839,9 @@ void Beam::UpdateAvgY(bool r_good_only)
 /*!
  * \brief Update average absolute phase 
  *
- * \param r_good_only If false(default), use particles that are not transversely lost.
- * 		      Otherwise, use good particles (not lost either transversely nor
- * 		      longitudinally).
+ * \param r_good_only If false(default), use particles that are not 
+ * 	transversely lost. Otherwise, use good particles (not lost either 
+ * 	transversely nor longitudinally).
  */
 void Beam::UpdateAvgPhi(bool r_good_only)
 {
@@ -840,9 +854,9 @@ void Beam::UpdateAvgPhi(bool r_good_only)
 /*!
  * \brief Update average relative phase 
  *
- * \param r_good_only If false(default), use particles that are not transversely lost.
- * 		      Otherwise, use good particles (not lost either transversely nor
- * 		      longitudinally).
+ * \param r_good_only If false(default), use particles that are not 
+ * 	transversely lost. Otherwise, use good particles (not lost either 
+ * 	transversely nor longitudinally).
  */
 void Beam::UpdateAvgRelativePhi(bool r_good_only)
 {
@@ -855,9 +869,9 @@ void Beam::UpdateAvgRelativePhi(bool r_good_only)
 /*!
  * \brief Update average kinetic energy
  *
- * \param r_good_only If false(default), use particles that are not transversely lost.
- * 		      Otherwise, use good particles (not lost either transversely nor
- * 		      longitudinally).
+ * \param r_good_only If false(default), use particles that are not 
+ * 	transversely lost. Otherwise, use good particles (not lost either 
+ * 	transversely nor longitudinally).
  */
 void Beam::UpdateAvgW(bool r_good_only)
 {
@@ -888,9 +902,9 @@ void Beam::UpdateSigYp()
 /*!
  * \brief Update x std
  *
- * \param r_good_only If false(default), use particles that are not transversely lost.
- * 		      Otherwise, use good particles (not lost either transversely nor
- * 		      longitudinally).
+ * \param r_good_only If false(default), use particles that are not 
+ * 	transversely lost. Otherwise, use good particles (not lost either 
+ * 	transversely nor longitudinally).
  */
 void Beam::UpdateSigX(bool r_good_only)
 {
@@ -903,9 +917,9 @@ void Beam::UpdateSigX(bool r_good_only)
 /*!
  * \brief Update y std
  *
- * \param r_good_only If false(default), use particles that are not transversely lost.
- * 		      Otherwise, use good particles (not lost either transversely nor
- * 		      longitudinally).
+ * \param r_good_only If false(default), use particles that are not 
+ * 	transversely lost. Otherwise, use good particles (not lost 
+ * 	either transversely nor longitudinally).
  */
 void Beam::UpdateSigY(bool r_good_only)
 {
@@ -917,7 +931,8 @@ void Beam::UpdateSigY(bool r_good_only)
 }
 
 /*!
- * \brief Update absolute phase std, with particles that are not transversely lost.
+ * \brief Update absolute phase std, with particles that are not 
+ * 	transversely lost.
  */
 void Beam::UpdateSigPhi()
 {
@@ -927,9 +942,9 @@ void Beam::UpdateSigPhi()
 /*!
 * \brief Update relative phase std
 *
-* \param r_good_only If false(default), use particles that are not transversely lost.
-* 		      Otherwise, use good particles (not lost either transversely nor
-* 		      longitudinally).
+* \param r_good_only If false(default), use particles that are not transversely 
+* 	lost. Otherwise, use good particles (not lost either transversely nor
+* 	longitudinally).
 */
 void Beam::UpdateSigRelativePhi(bool r_good_only)
 {
@@ -942,9 +957,9 @@ void Beam::UpdateSigRelativePhi(bool r_good_only)
 /*!
  * \brief Update kinetic energy std
  *
- * \param r_good_only If false(default), use particles that are not transversely lost.
- * 		      Otherwise, use good particles (not lost either transversely nor
- * 		      longitudinally).
+ * \param r_good_only If false(default), use particles that are not 
+ * 	transversely lost. Otherwise, use good particles (not lost 
+ * 	either transversely nor longitudinally).
  */
 void Beam::UpdateSigW(bool r_good_only)
 {
@@ -979,7 +994,8 @@ void Beam::UpdateEmittance()
 }
 
 /*!
- * \brief Update averages and stds of x, y, and relative phase and average energy.
+ * \brief Update averages and stds of x, y, and relative phase and average 
+ * 	energy.
  *
  * \callgraph
  * \callergraph
@@ -1567,7 +1583,7 @@ void Beam::ApplyCut(char r_coord, double r_min, double r_max)
     cd = w;
   if(coord == 'p')
     cd = phi;
-  CutBeamKernelCall(cd, loss, r_min, r_max, num_particle, grid_size, blck_size); 
+  CutBeamKernelCall(cd, loss, r_min, r_max, num_particle, grid_size, blck_size);
 }
 
 /*!
@@ -1642,9 +1658,10 @@ void Beam::ShiftW(double r_val)
 void Beam::ChangeFrequency(double r_freq)
 {
   current *= r_freq/freq;
-  std::cout << "beam frequency changed from " << freq << " to " << r_freq << ", ratio = " << r_freq/freq 
-    << ", current changed to " << current << std::endl;
-  ChangeFrequnecyKernelCall(this, r_freq/freq);
+  std::cout << "beam frequency changed from " << freq << " to " << r_freq << 
+    ", ratio = " << r_freq / freq << ", current changed to " << 
+    current << std::endl;
+  ChangeFrequnecyKernelCall(this, r_freq / freq);
   freq = r_freq;
   UpdateAvgPhi();
   UpdateRelativePhi();
