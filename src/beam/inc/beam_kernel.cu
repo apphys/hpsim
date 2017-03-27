@@ -5,6 +5,8 @@
  * All the parallel reduction kernels of the beam class uses the algorithm
  * from <br>
  * Mark Harris, "Optimizing Parallel Reduction in CUDA", NIVDIA, 2007 <br>
+ * http://developer.download.nvidia.com/compute/cuda/1.1-Beta/x86_website/projects/reduction/doc/reduction.pdf<br>
+ *
  */
 
 #ifndef BEAM_KERNEL_CU
@@ -72,9 +74,8 @@ __device__ void WarpReduce(volatile T* r_sdata, uint r_tid)
 /*!
  * \brief Calculate the sum of a beam coordinate
  *
- * This version adds multiple elements per thread sequentially.  
- * This reduces the overall cost of the algorithm while keeping the work 
- * complexity O(n) and the step complexity O(log n). 
+ * This version adds multiple elements per thread sequentially.  This reduces the overall
+ * cost of the algorithm while keeping the work complexity O(n) and the step complexity O(log n).
  * (Brent's Theorem optimization)
  *
  * Note, this kernel needs a minimum of 64*sizeof(T) bytes of shared memory.
@@ -114,8 +115,7 @@ void XReduceKernel(T *r_idata, T *r_odata, uint r_sz, uint* r_loss,
         else
           my_sum += r_idata[i];
 
-        // ensure we don't read out of bounds -- this is optimized for powerOf2 
-	// sized arrays
+        // ensure we don't read out of bounds -- this is optimized for powerOf2 sized arrays
         if (i + block_size < r_sz)
           if(r_first_pass_flag)
           {
@@ -207,8 +207,7 @@ void GoodParticleCountReduceKernel(uint* r_idata, uint* r_lloss, uint* r_odata,
       else 
         my_sum += r_idata[i];
 
-      // ensure we don't read out of bounds -- this is optimized away for 
-      // powerOf2 sized arrays
+      // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
       if (i + block_size < r_sz)
       {
         if(r_first_pass_flag)
@@ -264,8 +263,7 @@ void GoodParticleCountReduceKernel(uint* r_idata, uint* r_lloss, uint* r_odata,
  * \param r_idata Input uint array
  * \param r_odata[out] Output result
  * \param r_sz Array size
- * \param r_first_pass_flag If true, reads from r_idata array, otherwise, 
- * 	  skip it.
+ * \param r_first_pass_flag If true, reads from r_idata array, otherwise, skip it.
  */
 template<uint block_size>
 __global__ 
@@ -296,8 +294,7 @@ void LossReduceKernel(uint *r_idata, uint *r_odata, uint r_sz,
       else 
         my_sum += r_idata[i];
 
-      // ensure we don't read out of bounds -- this is optimized away for 
-      // powerOf2 sized arrays
+        // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
       if (i + block_size < r_sz)
       {
         if(r_first_pass_flag)
@@ -415,17 +412,15 @@ void XX2ReduceKernel(T *r_idata, T *r_odata, uint r_sz, uint* r_loss,
           tmploss += r_lloss[i];
         tmpdata = (tmploss == 0 ? tmpdata : 0.0);
         x_sum += tmpdata;
-        x2_sum += tmpdata * tmpdata;
+        x2_sum += tmpdata*tmpdata;
       }
       else
       {
         x_sum += r_idata[i];
-	// in second pass, r_sz = grid_size of the first pass
-        x2_sum += r_idata[i + r_sz];  
+        x2_sum += r_idata[i + r_sz];  // in second pass, r_sz = grid_size of the first pass
       }
 
-      // ensure we don't read out of bounds -- this is optimized away for 
-      // powerOf2 sized arrays
+      // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
       if (i + block_size < r_sz)
         if(r_first_pass_flag)
         {
@@ -435,7 +430,7 @@ void XX2ReduceKernel(T *r_idata, T *r_odata, uint r_sz, uint* r_loss,
             tmploss += r_lloss[i + block_size];
           tmpdata = (tmploss == 0 ? tmpdata : 0.0);
           x_sum += tmpdata;
-          x2_sum += tmpdata * tmpdata;
+          x2_sum += tmpdata*tmpdata;
         }
         else
         {
@@ -495,8 +490,7 @@ void XX2ReduceKernel(T *r_idata, T *r_odata, uint r_sz, uint* r_loss,
 
 template <class T, uint block_size>
 __global__ 
-void RR2ReduceKernel(T *r_idatax, T* r_idatay, T *r_odata, uint r_sz, 
-  uint* r_loss, uint r_first_pass_flag)
+void RR2ReduceKernel(T *r_idatax, T* r_idatay, T *r_odata, uint r_sz, uint* r_loss, uint r_first_pass_flag)
 {
     T *sdata = SharedMemory<T>();
 
@@ -526,7 +520,7 @@ void RR2ReduceKernel(T *r_idatax, T* r_idatay, T *r_odata, uint r_sz,
         tmploss = r_loss[i];
         if(tmploss == 0)
         {
-          tmpr2 = tmpx * tmpx + tmpy * tmpy; 
+          tmpr2 = tmpx*tmpx + tmpy*tmpy; 
           r_sum += sqrt(tmpr2);
           r2_sum += tmpr2;
         }
@@ -534,12 +528,10 @@ void RR2ReduceKernel(T *r_idatax, T* r_idatay, T *r_odata, uint r_sz,
       else
       {
         r_sum += r_idatax[i];
-        // in second pass, r_sz = grid_size of the first pass
-        r2_sum += r_idatax[i + r_sz]; 
+        r2_sum += r_idatax[i + r_sz];  // in second pass, r_sz = grid_size of the first pass
       }
 
-      // ensure we don't read out of bounds -- this is optimized for 
-      // powerOf2 sized arrays
+      // ensure we don't read out of bounds -- this is optimized for powerOf2 sized arrays
       if (i + block_size < r_sz)
         if(r_first_pass_flag)
         {
@@ -548,7 +540,7 @@ void RR2ReduceKernel(T *r_idatax, T* r_idatay, T *r_odata, uint r_sz,
           tmploss = r_loss[i + block_size];
           if(tmploss == 0)
           {
-            tmpr2 = tmpx * tmpx + tmpy * tmpy; 
+            tmpr2 = tmpx*tmpx + tmpy*tmpy; 
             r_sum += sqrt(tmpr2);
             r2_sum += tmpr2;
           }
@@ -611,8 +603,7 @@ void RR2ReduceKernel(T *r_idatax, T* r_idatay, T *r_odata, uint r_sz,
 
 template <class T, uint block_size>
 __global__ 
-void XYReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2, 
-  uint r_sz, uint* r_loss, uint r_first_pass_flag)
+void XYReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2, uint r_sz, uint* r_loss, uint r_first_pass_flag)
 {
     T *sdata = SharedMemory<T>();
 
@@ -652,8 +643,7 @@ void XYReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
         y_sum += r_idata2[i]; 
       }
 
-      // ensure we don't read out of bounds -- this is optimized away for 
-      // powerOf2 sized arrays
+      // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
       if (i + block_size < r_sz)
         if(r_first_pass_flag)
         {
@@ -727,51 +717,40 @@ __device__ void WarpReduceMax2(volatile T* r_sdata, uint r_tid, uint r_stride)
 {
   if(block_size >= 64) 
   {
-    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid + 32] ? 
-		    r_sdata[r_tid + 32] : r_sdata[r_tid];
-    r_sdata[r_tid+r_stride] = r_sdata[r_tid + r_stride] < 
-      r_sdata[r_tid + r_stride + 32] ? r_sdata[r_tid + r_stride + 32] : 
-      r_sdata[r_tid + r_stride];
+    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid+32] ? r_sdata[r_tid+32] : 
+                      r_sdata[r_tid];
+    r_sdata[r_tid+r_stride] = r_sdata[r_tid+r_stride] < r_sdata[r_tid+r_stride+32] ? 
+                        r_sdata[r_tid+r_stride+32] : r_sdata[r_tid+r_stride];
   }
   if(block_size >= 32) 
   {
-    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid + 16] ? 
-		    r_sdata[r_tid + 16] : r_sdata[r_tid];
-    r_sdata[r_tid+r_stride] = r_sdata[r_tid + r_stride] < 
-      r_sdata[r_tid + r_stride + 16] ? r_sdata[r_tid + r_stride + 16] : 
-      r_sdata[r_tid + r_stride];
+    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid+16] ? r_sdata[r_tid+16] : r_sdata[r_tid];
+    r_sdata[r_tid+r_stride] = r_sdata[r_tid+r_stride] < r_sdata[r_tid+r_stride+16] ? 
+                        r_sdata[r_tid+r_stride+16] : r_sdata[r_tid+r_stride];
   }
   if(block_size >= 16) 
   {
-    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid + 8] ? r_sdata[r_tid + 8] : 
-		     r_sdata[r_tid];
-    r_sdata[r_tid+r_stride] = r_sdata[r_tid + r_stride] < 
-      r_sdata[r_tid + r_stride + 8] ? r_sdata[r_tid + r_stride + 8] : 
-      r_sdata[r_tid + r_stride];
+    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid+8] ? r_sdata[r_tid+8] : r_sdata[r_tid];
+    r_sdata[r_tid+r_stride] = r_sdata[r_tid+r_stride] < r_sdata[r_tid+r_stride+8] ? 
+                        r_sdata[r_tid+r_stride+8] : r_sdata[r_tid+r_stride];
   }
   if(block_size >= 8) 
   {
-    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid + 4] ? r_sdata[r_tid + 4] : 
-		     r_sdata[r_tid];
-    r_sdata[r_tid+r_stride] = r_sdata[r_tid + r_stride] < 
-      r_sdata[r_tid + r_stride + 4] ? r_sdata[r_tid + r_stride + 4] : 
-      r_sdata[r_tid + r_stride];
+    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid+4] ? r_sdata[r_tid+4] : r_sdata[r_tid];
+    r_sdata[r_tid+r_stride] = r_sdata[r_tid+r_stride] < r_sdata[r_tid+r_stride+4] ? 
+                        r_sdata[r_tid+r_stride+4] : r_sdata[r_tid+r_stride];
   }
   if(block_size >= 4) 
   {
-    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid + 2] ? r_sdata[r_tid + 2] : 
-		     r_sdata[r_tid];
-    r_sdata[r_tid+r_stride] = r_sdata[r_tid + r_stride] < 
-      r_sdata[r_tid + r_stride + 2] ? r_sdata[r_tid + r_stride + 2] : 
-      r_sdata[r_tid + r_stride];
+    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid+2] ? r_sdata[r_tid+2] : r_sdata[r_tid];
+    r_sdata[r_tid+r_stride] = r_sdata[r_tid+r_stride] < r_sdata[r_tid+r_stride+2] ? 
+                        r_sdata[r_tid+r_stride+2] : r_sdata[r_tid+r_stride];
   }
   if(block_size >= 2) 
   {
-    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid + 1] ? r_sdata[r_tid + 1] : 
-		     r_sdata[r_tid];
-    r_sdata[r_tid+r_stride] = r_sdata[r_tid + r_stride] < 
-      r_sdata[r_tid + r_stride + 1] ? r_sdata[r_tid + r_stride + 1] : 
-      r_sdata[r_tid + r_stride];
+    r_sdata[r_tid] = r_sdata[r_tid] < r_sdata[r_tid+1] ? r_sdata[r_tid+1] : r_sdata[r_tid];
+    r_sdata[r_tid+r_stride] = r_sdata[r_tid+r_stride] < r_sdata[r_tid+r_stride+1] ? 
+                        r_sdata[r_tid+r_stride+1] : r_sdata[r_tid+r_stride];
   }
 }
 
@@ -835,7 +814,7 @@ void MaxR2PhiReduceKernel(T* r_idata1, T* r_idata2, T* r_idata3, uint* r_loss,
         {
           tmpx -= x_avg;
           tmpy -= y_avg;
-          tmpr2 = tmpx * tmpx + tmpy * tmpy;
+          tmpr2 = tmpx*tmpx + tmpy*tmpy;
           tmpphi -= phi_avg;
           tmpphi = tmpphi > 0.0 ? tmpphi : -tmpphi;
           r2_max = r2_max < tmpr2 ? tmpr2 : r2_max;
@@ -850,8 +829,7 @@ void MaxR2PhiReduceKernel(T* r_idata1, T* r_idata2, T* r_idata3, uint* r_loss,
         phi_max = phi_max < tmpphi ? tmpphi : phi_max; 
       }
 
-      // ensure we don't read out of bounds -- this is optimized away for 
-      // powerOf2 sized arrays
+      // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
       if (i + block_size < r_sz)
         if(r_first_pass_flag)
         {
@@ -863,7 +841,7 @@ void MaxR2PhiReduceKernel(T* r_idata1, T* r_idata2, T* r_idata3, uint* r_loss,
           {
             tmpx -= x_avg;
             tmpy -= y_avg;
-            tmpr2 = tmpx * tmpx + tmpy * tmpy;
+            tmpr2 = tmpx*tmpx + tmpy*tmpy;
             tmpphi -= phi_avg;
             tmpphi = tmpphi > 0.0 ? tmpphi : -tmpphi;
             r2_max = r2_max < tmpr2 ? tmpr2 : r2_max;
@@ -938,50 +916,50 @@ __device__ void WarpReduce4(volatile T* r_sdata, uint r_tid, uint r_stride)
   {
     r_sdata[r_tid] += r_sdata[r_tid + 32]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 32]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 32]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 32]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 32]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 32]; 
   }
   if(block_size >= 32) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 16]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 16]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 16]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 16]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 16]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 16]; 
   }
   if(block_size >= 16) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 8]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 8]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 8]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 8]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 8]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 8]; 
   }
   if(block_size >= 8) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 4]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 4]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 4]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 4]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 4]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 4]; 
   }
   if(block_size >= 4) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 2]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 2]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 2]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 2]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 2]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 2]; 
   }
   if(block_size >= 2) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 1]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 1]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 1]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 1]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 1]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 1]; 
   }
 }
 
 template <class T, uint block_size>
 __global__ 
-void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2, 
-  uint r_sz, uint* r_loss, uint* r_lloss, uint r_first_pass_flag)
+void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2, uint r_sz, 
+                        uint* r_loss, uint* r_lloss, uint r_first_pass_flag)
 {
     T *sdata = SharedMemory<T>();
 
@@ -1015,22 +993,20 @@ void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
         if(tmploss == 0)
         {
           x_sum += tmpdata1;
-          x2_sum += tmpdata1 * tmpdata1;
+          x2_sum += tmpdata1*tmpdata1;
           y_sum += tmpdata2;
-          y2_sum += tmpdata2 * tmpdata2;
+          y2_sum += tmpdata2*tmpdata2;
         }
       }
       else
       {
         x_sum += r_idata1[i];
-	// r_sz in second pass = grid_size of the first pass
-        x2_sum += r_idata1[i + r_sz]; 
+        x2_sum += r_idata1[i + r_sz]; // r_sz in second pass = grid_size of the first pass
         y_sum += r_idata2[i]; 
         y2_sum += r_idata2[i + r_sz];
       }
 
-      // ensure we don't read out of bounds -- this is optimized away for 
-      // powerOf2 sized arrays
+      // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
       if (i + block_size < r_sz)
         if(r_first_pass_flag)
         {
@@ -1041,9 +1017,9 @@ void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
           if(tmploss == 0)
           {
             x_sum += tmpdata1;
-            x2_sum += tmpdata1 * tmpdata1;
+            x2_sum += tmpdata1*tmpdata1;
             y_sum += tmpdata2;
-            y2_sum += tmpdata2 * tmpdata2;
+            y2_sum += tmpdata2*tmpdata2;
           }
         }
         else
@@ -1059,8 +1035,8 @@ void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
     // each thread puts its local sum into shared memory
     sdata[tid] = x_sum;
     sdata[tid + sstride] = x2_sum;
-    sdata[tid + 2 * sstride] = y_sum;
-    sdata[tid + 3 * sstride] = y2_sum;
+    sdata[tid + 2*sstride] = y_sum;
+    sdata[tid + 3*sstride] = y2_sum;
     __syncthreads();
 
 
@@ -1071,8 +1047,8 @@ void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
       {
         sdata[tid] += sdata[tid + 256];
         sdata[tid + sstride] += sdata[tid + sstride + 256];
-        sdata[tid + 2 * sstride] += sdata[tid + 2 * sstride + 256];
-        sdata[tid + 3 * sstride] += sdata[tid + 3 * sstride + 256];
+        sdata[tid + 2*sstride] += sdata[tid + 2*sstride + 256];
+        sdata[tid + 3*sstride] += sdata[tid + 3*sstride + 256];
       }
       __syncthreads();
     }
@@ -1083,8 +1059,8 @@ void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
       {
         sdata[tid] += sdata[tid + 128];
         sdata[tid + sstride] += sdata[tid + sstride + 128];
-        sdata[tid + 2 * sstride] += sdata[tid + 2 * sstride + 128];
-        sdata[tid + 3 * sstride] += sdata[tid + 3 * sstride + 128];
+        sdata[tid + 2*sstride] += sdata[tid + 2*sstride + 128];
+        sdata[tid + 3*sstride] += sdata[tid + 3*sstride + 128];
       }
       __syncthreads();
     }
@@ -1095,8 +1071,8 @@ void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
       {
         sdata[tid] += sdata[tid +  64];
         sdata[tid + sstride] += sdata[tid + sstride + 64];
-        sdata[tid + 2 * sstride] += sdata[tid + 2 * sstride + 64];
-        sdata[tid + 3 * sstride] += sdata[tid + 3 * sstride + 64];
+        sdata[tid + 2*sstride] += sdata[tid + 2*sstride + 64];
+        sdata[tid + 3*sstride] += sdata[tid + 3*sstride + 64];
       }
       __syncthreads();
     }
@@ -1109,8 +1085,8 @@ void XYX2Y2ReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
     {
       r_odata1[blockIdx.x] = sdata[0];  // x
       r_odata1[blockIdx.x + gridDim.x] = sdata[sstride];  // x2
-      r_odata2[blockIdx.x] = sdata[2 * sstride];  // y
-      r_odata2[blockIdx.x + gridDim.x] = sdata[3 * sstride];// y2
+      r_odata2[blockIdx.x] = sdata[2*sstride];  // y
+      r_odata2[blockIdx.x + gridDim.x] = sdata[3*sstride];// y2
     }
 }
 
@@ -1121,49 +1097,49 @@ __device__ void WarpReduce5(volatile T* r_sdata, uint r_tid, uint r_stride)
   {
     r_sdata[r_tid] += r_sdata[r_tid + 32]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 32]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 32]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 32]; 
-    r_sdata[r_tid + 4 * r_stride] += r_sdata[r_tid + 4 * r_stride + 32]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 32]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 32]; 
+    r_sdata[r_tid + 4*r_stride] += r_sdata[r_tid + 4*r_stride + 32]; 
   }
   if(block_size >= 32) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 16]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 16]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 16]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 16]; 
-    r_sdata[r_tid + 4 * r_stride] += r_sdata[r_tid + 4 * r_stride + 16]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 16]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 16]; 
+    r_sdata[r_tid + 4*r_stride] += r_sdata[r_tid + 4*r_stride + 16]; 
   }
   if(block_size >= 16) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 8]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 8]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 8]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 8]; 
-    r_sdata[r_tid + 4 * r_stride] += r_sdata[r_tid + 4 * r_stride + 8]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 8]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 8]; 
+    r_sdata[r_tid + 4*r_stride] += r_sdata[r_tid + 4*r_stride + 8]; 
   }
   if(block_size >= 8) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 4]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 4]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 4]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 4]; 
-    r_sdata[r_tid + 4 * r_stride] += r_sdata[r_tid + 4 * r_stride + 4]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 4]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 4]; 
+    r_sdata[r_tid + 4*r_stride] += r_sdata[r_tid + 4*r_stride + 4]; 
   }
   if(block_size >= 4) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 2]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 2]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 2]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 2]; 
-    r_sdata[r_tid + 4 * r_stride] += r_sdata[r_tid + 4 * r_stride + 2]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 2]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 2]; 
+    r_sdata[r_tid + 4*r_stride] += r_sdata[r_tid + 4*r_stride + 2]; 
   }
   if(block_size >= 2) 
   {
     r_sdata[r_tid] += r_sdata[r_tid + 1]; 
     r_sdata[r_tid + r_stride] += r_sdata[r_tid + r_stride + 1]; 
-    r_sdata[r_tid + 2 * r_stride] += r_sdata[r_tid + 2 * r_stride + 1]; 
-    r_sdata[r_tid + 3 * r_stride] += r_sdata[r_tid + 3 * r_stride + 1]; 
-    r_sdata[r_tid + 4 * r_stride] += r_sdata[r_tid + 4 * r_stride + 1]; 
+    r_sdata[r_tid + 2*r_stride] += r_sdata[r_tid + 2*r_stride + 1]; 
+    r_sdata[r_tid + 3*r_stride] += r_sdata[r_tid + 3*r_stride + 1]; 
+    r_sdata[r_tid + 4*r_stride] += r_sdata[r_tid + 4*r_stride + 1]; 
   }
 }
 
@@ -1188,8 +1164,7 @@ __device__ void WarpReduce5(volatile T* r_sdata, uint r_tid, uint r_stride)
  */
 template <class T, uint block_size>
 __global__ 
-void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2, 
-  uint r_sz, uint* r_loss, uint r_first_pass_flag)
+void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2, uint r_sz, uint* r_loss, uint r_first_pass_flag)
 {
     T *sdata = SharedMemory<T>();
 
@@ -1223,24 +1198,22 @@ void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
         if(tmploss == 0)
         {
           x_sum += tmpdata1;
-          x2_sum += tmpdata1 * tmpdata1;
+          x2_sum += tmpdata1*tmpdata1;
           xp_sum += tmpdata2;
-          xp2_sum += tmpdata2 * tmpdata2;
-          xxp_sum += tmpdata1 * tmpdata2;
+          xp2_sum += tmpdata2*tmpdata2;
+          xxp_sum += tmpdata1*tmpdata2;
         }
       }
       else
       {
         x_sum += r_idata1[i];
-	// r_sz in second pass = grid_size of the first pass
-        x2_sum += r_idata1[i + r_sz]; 
+        x2_sum += r_idata1[i + r_sz]; // r_sz in second pass = grid_size of the first pass
         xp_sum += r_idata2[i]; 
         xp2_sum += r_idata2[i + r_sz];
-        xxp_sum += r_idata2[i + 2 * r_sz];
+        xxp_sum += r_idata2[i + 2*r_sz];
       }
 
-      // ensure we don't read out of bounds -- this is optimized away for 
-      // powerOf2 sized arrays
+      // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
       if (i + block_size < r_sz)
         if(r_first_pass_flag)
         {
@@ -1250,10 +1223,10 @@ void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
           if(tmploss == 0)
           {
             x_sum += tmpdata1;
-            x2_sum += tmpdata1 * tmpdata1;
+            x2_sum += tmpdata1*tmpdata1;
             xp_sum += tmpdata2;
-            xp2_sum += tmpdata2 * tmpdata2;
-            xxp_sum += tmpdata1 * tmpdata2;
+            xp2_sum += tmpdata2*tmpdata2;
+            xxp_sum += tmpdata1*tmpdata2;
           }
         }
         else
@@ -1262,7 +1235,7 @@ void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
           x2_sum += r_idata1[i + r_sz + block_size];
           xp_sum += r_idata2[i + block_size]; 
           xp2_sum += r_idata2[i + r_sz + block_size]; 
-          xxp_sum += r_idata2[i + 2 * r_sz + block_size]; 
+          xxp_sum += r_idata2[i + 2*r_sz + block_size]; 
         }
       i += grid_size;
     }
@@ -1270,9 +1243,9 @@ void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
     // each thread puts its local sum into shared memory
     sdata[tid] = x_sum;
     sdata[tid + sstride] = x2_sum;
-    sdata[tid + 2 * sstride] = xp_sum;
-    sdata[tid + 3 * sstride] = xp2_sum;
-    sdata[tid + 4 * sstride] = xxp_sum;
+    sdata[tid + 2*sstride] = xp_sum;
+    sdata[tid + 3*sstride] = xp2_sum;
+    sdata[tid + 4*sstride] = xxp_sum;
     __syncthreads();
 
 
@@ -1283,9 +1256,9 @@ void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
       {
         sdata[tid] += sdata[tid + 256];
         sdata[tid + sstride] += sdata[tid + sstride + 256];
-        sdata[tid + 2 * sstride] += sdata[tid + 2 * sstride + 256];
-        sdata[tid + 3 * sstride] += sdata[tid + 3 * sstride + 256];
-        sdata[tid + 4 * sstride] += sdata[tid + 4 * sstride + 256];
+        sdata[tid + 2*sstride] += sdata[tid + 2*sstride + 256];
+        sdata[tid + 3*sstride] += sdata[tid + 3*sstride + 256];
+        sdata[tid + 4*sstride] += sdata[tid + 4*sstride + 256];
       }
       __syncthreads();
     }
@@ -1296,9 +1269,9 @@ void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
       {
         sdata[tid] += sdata[tid + 128];
         sdata[tid + sstride] += sdata[tid + sstride + 128];
-        sdata[tid + 2 * sstride] += sdata[tid + 2 * sstride + 128];
-        sdata[tid + 3 * sstride] += sdata[tid + 3 * sstride + 128];
-        sdata[tid + 4 * sstride] += sdata[tid + 4 * sstride + 128];
+        sdata[tid + 2*sstride] += sdata[tid + 2*sstride + 128];
+        sdata[tid + 3*sstride] += sdata[tid + 3*sstride + 128];
+        sdata[tid + 4*sstride] += sdata[tid + 4*sstride + 128];
       }
       __syncthreads();
     }
@@ -1309,9 +1282,9 @@ void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
       {
         sdata[tid] += sdata[tid +  64];
         sdata[tid + sstride] += sdata[tid + sstride + 64];
-        sdata[tid + 2 * sstride] += sdata[tid + 2 * sstride + 64];
-        sdata[tid + 3 * sstride] += sdata[tid + 3 * sstride + 64];
-        sdata[tid + 4 * sstride] += sdata[tid + 4 * sstride + 64];
+        sdata[tid + 2*sstride] += sdata[tid + 2*sstride + 64];
+        sdata[tid + 3*sstride] += sdata[tid + 3*sstride + 64];
+        sdata[tid + 4*sstride] += sdata[tid + 4*sstride + 64];
       }
       __syncthreads();
     }
@@ -1324,9 +1297,9 @@ void EmittanceReduceKernel(T* r_idata1, T* r_idata2, T* r_odata1, T* r_odata2,
     {
       r_odata1[blockIdx.x] = sdata[0];  // x
       r_odata1[blockIdx.x + gridDim.x] = sdata[sstride];  // x2
-      r_odata2[blockIdx.x] = sdata[2 * sstride];  // xp 
-      r_odata2[blockIdx.x + gridDim.x] = sdata[3 * sstride];// xp2
-      r_odata2[blockIdx.x + 2 * gridDim.x] = sdata[4 * sstride];// xxp
+      r_odata2[blockIdx.x] = sdata[2*sstride];  // xp 
+      r_odata2[blockIdx.x + gridDim.x] = sdata[3*sstride];// xp2
+      r_odata2[blockIdx.x + 2*gridDim.x] = sdata[4*sstride];// xxp
     }
 }
 
@@ -1337,20 +1310,19 @@ void UpdateTransverseEmittanceKernel(double* r_xavg, double* r_xsig,
   uint* r_loss, double* r_w_ref, double r_mass)
 {
   volatile double surv_num = r_num - (*r_loss);
-  volatile double x = r_partial1[0] / surv_num;
-  volatile double x2 = r_partial1[1] / surv_num;
-  volatile double xp = r_partial2[0] / surv_num;
-  volatile double xp2 = r_partial2[1] / surv_num;
-  volatile double xxp = r_partial2[2] / surv_num;
-  volatile double gamma1 = *r_w_ref / r_mass;
-  volatile double betagamma = sqrt(gamma1 * (gamma1 + 2.0));
+  volatile double x = r_partial1[0]/surv_num;
+  volatile double x2 = r_partial1[1]/surv_num;
+  volatile double xp = r_partial2[0]/surv_num;
+  volatile double xp2 = r_partial2[1]/surv_num;
+  volatile double xxp = r_partial2[2]/surv_num;
+  volatile double gamma1 = *r_w_ref/r_mass;
+  volatile double betagamma = sqrt(gamma1*(gamma1+2.0));
   r_xavg[0] = x;
-  r_xsig[0] = sqrt(x2 - x * x);
+  r_xsig[0] = sqrt(x2-x*x);
   r_xpavg[0] = xp;
-  r_xpsig[0] = sqrt(xp2 - xp * xp);
-  //r_xeps[0] = sqrt(x2 * xp2-xxp * xxp) * betagamma;
-  r_xeps[0] = sqrt((x2 - x * x) * (xp2 - xp * xp) - 
-    (xxp - x * xp) * (xxp - x * xp)) * betagamma;
+  r_xpsig[0] = sqrt(xp2-xp*xp);
+  //r_xeps[0] = sqrt(x2*xp2-xxp*xxp)*betagamma;
+  r_xeps[0] = sqrt((x2-x*x)*(xp2-xp*xp)-(xxp-x*xp)*(xxp-x*xp))*betagamma;
 }
 
 __global__
@@ -1359,19 +1331,19 @@ void UpdateLongitudinalEmittanceKernel(double* r_phi, double* r_phisig,
   double* r_partial2, uint r_num, uint* r_loss)
 {
   volatile double surv_num = r_num - (*r_loss);
-  volatile double phi = r_partial1[0] / surv_num;
-  volatile double phi2 = r_partial1[1] / surv_num;
-  volatile double w = r_partial2[0] / surv_num;
-  volatile double w2 = r_partial2[1] / surv_num;
-  volatile double phi_w = r_partial2[2] / surv_num;
-  volatile double phi_var = phi2 - phi * phi;
-  volatile double w_var = w2 - w * w; 
+  volatile double phi = r_partial1[0]/surv_num;
+  volatile double phi2 = r_partial1[1]/surv_num;
+  volatile double w = r_partial2[0]/surv_num;
+  volatile double w2 = r_partial2[1]/surv_num;
+  volatile double phi_w = r_partial2[2]/surv_num;
+  volatile double phi_var = phi2-phi*phi;
+  volatile double w_var = w2-w*w;
   volatile double phi_w_covar = phi_w-phi*w;
-  r_phi[0] = phi; //-*r_phi_ref;///RADIAN;
-  r_w[0] = w; //-*r_w_ref;
+  r_phi[0] = phi;//-*r_phi_ref;///RADIAN;
+  r_w[0] = w;//-*r_w_ref;
   r_phisig[0] = sqrt(phi_var);
   r_wsig[0] = sqrt(w_var);
-  r_leps[0] = sqrt(phi_var * w_var - phi_w_covar * phi_w_covar);
+  r_leps[0] = sqrt(phi_var*w_var-phi_w_covar*phi_w_covar);
 }
 
 __global__
@@ -1387,8 +1359,8 @@ void UpdateHorizontalAvgXYKernel(double* r_x_avg, double* r_y_avg,
   double* r_x_avg_val, double* r_y_avg_val, uint r_num, uint* r_loss)
 {
   volatile double surv_num = r_num - (*r_loss);
-  volatile double xavg = r_x_avg_val[0] / surv_num;
-  volatile double yavg = r_y_avg_val[0] / surv_num;
+  volatile double xavg = r_x_avg_val[0]/surv_num;
+  volatile double yavg = r_y_avg_val[0]/surv_num;
   r_x_avg[0] = xavg;
   r_y_avg[0] = yavg;
 }
@@ -1399,14 +1371,14 @@ void UpdateHorizontalAvgSigKernel(double* r_x_avg, double* r_x_sig,
   uint r_num, uint* r_loss)
 {
   volatile double surv_num = r_num - (*r_loss);
-  volatile double xavg = r_x_x2[0] / surv_num;
-  volatile double x2avg = r_x_x2[1] / surv_num;
-  volatile double yavg = r_y_y2[0] / surv_num;
-  volatile double y2avg = r_y_y2[1] / surv_num;
+  volatile double xavg = r_x_x2[0]/surv_num;
+  volatile double x2avg = r_x_x2[1]/surv_num;
+  volatile double yavg = r_y_y2[0]/surv_num;
+  volatile double y2avg = r_y_y2[1]/surv_num;
   r_x_avg[0] = xavg;
-  r_x_sig[0] = sqrt(x2avg - xavg * xavg);
+  r_x_sig[0] = sqrt(x2avg-xavg*xavg);
   r_y_avg[0] = yavg;
-  r_y_sig[0] = sqrt(y2avg - yavg * yavg);
+  r_y_sig[0] = sqrt(y2avg-yavg*yavg);
 }
 
 __global__
@@ -1414,14 +1386,14 @@ void UpdateVariableAvgKernel(double* r_avg, double* r_sum,
                                     uint r_num, uint* r_loss)
 {
   double surv_num = r_num - (*r_loss);
-  r_avg[0] = r_sum[0] / surv_num;
+  r_avg[0] = r_sum[0]/surv_num;
 }
 
 __global__
 void UpdateVariableAvgWithLlossKernel(double* r_avg, double* r_sum, uint* r_num)
 {
   if(r_num[0] > 0)
-    r_avg[0] = r_sum[0] / r_num[0];
+    r_avg[0] = r_sum[0]/r_num[0];
   else
     r_avg[0] = -99999;
 }
@@ -1431,18 +1403,18 @@ void UpdateVariableSigmaKernel(double* r_sig, double* r_sum,
                            double* r_sum2, uint r_num, uint* r_loss)
 {
   double surv_num = r_num - (*r_loss);
-  double avg = r_sum[0] / surv_num;
-  double avg2 = r_sum2[0] / surv_num;
-  r_sig[0] = sqrt(avg2 - avg * avg);
+  double avg = r_sum[0]/surv_num;
+  double avg2 = r_sum2[0]/surv_num;
+  r_sig[0] = sqrt(avg2-avg*avg);
 }
 
 __global__
 void UpdateVariableSigmaWithLlossKernel(double* r_sig, double* r_sum,
                            double* r_sum2, uint* r_num)
 {
-  double avg = r_sum[0] / r_num[0];
-  double avg2 = r_sum2[0] / r_num[0];
-  r_sig[0] = sqrt(avg2 - avg  *  avg);
+  double avg = r_sum[0]/r_num[0];
+  double avg2 = r_sum2[0]/r_num[0];
+  r_sig[0] = sqrt(avg2-avg*avg);
 }
 
 template<typename T>
@@ -1462,11 +1434,10 @@ void SetValueKernel(T* r_pos, uint r_index, T r_val)
  * \param r_num Particle number 
  */
 __global__
-void CutBeamKernel(double* r_x, uint* r_loss, double r_min, double r_max, 
-  uint r_num)
+void CutBeamKernel(double* r_x, uint* r_loss, double r_min, double r_max, uint r_num)
 {
-  uint index = blockIdx.x * blockDim.x+threadIdx.x;
-  uint stride = blockDim.x * gridDim.x;
+  uint index = blockIdx.x*blockDim.x+threadIdx.x;
+  uint stride = blockDim.x*gridDim.x;
   while(index > 0 && index < r_num)
   {
     if(r_loss[index] == 0)
@@ -1490,7 +1461,7 @@ template<typename T>
 __global__
 void ShiftVariableKernel(T* r_var, T r_val, uint r_sz)
 {
-  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint index = blockIdx.x*blockDim.x + threadIdx.x;
   if (index > 0 && index < r_sz)
     r_var[index] += r_val;
 }
@@ -1504,10 +1475,9 @@ void ShiftVariableKernel(T* r_var, T r_val, uint r_sz)
  * \param r_sz Particle number
  */
 __global__
-void UpdateRelativePhiKernel(double* r_phi_r, double* r_phi, double* r_ref_phi, 
-  uint r_sz)
+void UpdateRelativePhiKernel(double* r_phi_r, double* r_phi, double* r_ref_phi, uint r_sz)
 {
-  uint index = blockIdx.x * blockDim.x + threadIdx.x;  
+  uint index = blockIdx.x*blockDim.x + threadIdx.x;  
   if(index < r_sz)
   {
     double tmp = r_phi[index] - r_ref_phi[0] + PI;
@@ -1517,7 +1487,7 @@ void UpdateRelativePhiKernel(double* r_phi_r, double* r_phi, double* r_ref_phi,
       sign = -1.0;
       tmp = -tmp;
     }
-    r_phi_r[index] = sign * (fmod(tmp, TWOPI) - PI);
+    r_phi_r[index] = sign*(fmod(tmp, TWOPI) - PI);
   }     
 } 
 
@@ -1547,10 +1517,9 @@ void ChangeFrequencyKernel(double* r_phi, double r_freq_ratio, uint r_sz)
  * is 3*PI away from the average.
  */
 __global__
-void UpdateLongitudinalLossCoordinateKernel(uint* r_lloss, double* r_phi, 
-  double* r_phi_avg, uint r_sz)
+void UpdateLongitudinalLossCoordinateKernel(uint* r_lloss, double* r_phi, double* r_phi_avg, uint r_sz)
 {
-  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint index = blockIdx.x*blockDim.x + threadIdx.x;
   if(index < r_sz)
   {
     if(r_phi[index] > r_phi_avg[0] + TWOPI + PI)

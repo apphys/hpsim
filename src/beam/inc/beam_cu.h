@@ -1,6 +1,5 @@
 #ifndef BEAM_CU_H
 #define BEAM_CU_H
-
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <vector>
@@ -21,10 +20,9 @@ void CopyParticleFromDevice(Beam* r_beam, uint r_index, double* r_x_h,
   uint* r_loss_h, uint* r_lloss_h);
 void UpdateLossCountKernelCall(Beam* r_beam, bool r_lloss = false);
 void UpdateLongitudinalLossCoordinateKernelCall(Beam* r_beam);
-void UpdateAvgOfOneVariableKernelCall(Beam* r_beam, double* r_x, 
-  double* r_x_avg, bool r_good_only = false);
-void UpdateSigmaOfOneVariableKernelCall(Beam* r_beam, double* r_x, 
-  double* r_x_sig, bool r_good_only = false);
+void UpdateAvgOfOneVariableKernelCall(Beam* r_beam, double* r_x, double* r_x_avg, 
+                                      bool r_good_only = false);
+void UpdateSigmaOfOneVariableKernelCall(Beam* r_beam, double* r_x, double* r_x_sig, bool r_good_only = false);
 //void UpdateSigmaR(Beam* r_beam);
 void UpdateHorizontalEmittanceKernelCall(Beam* r_beam);
 void UpdateVerticalEmittanceKernelCall(Beam* r_beam);
@@ -34,8 +32,7 @@ void UpdateAvgXYKernelCall(Beam* r_beam);
 void UpdateMaxRPhiKernelCall(Beam* r_beam);
 void UpdateRelativePhiKernelCall(Beam* r_beam, bool r_use_good = false);
 void SetDoubleValue(double* r_arr, uint r_index, double r_val);
-void CutBeamKernelCall(double* r_coord, uint* r_loss, double r_min, 
-  double r_max, uint r_num, uint r_grid, uint r_blck);
+void CutBeamKernelCall(double* r_coord, uint* r_loss, double r_min, double r_max, uint r_num, uint r_grid, uint r_blck);
 void ShiftVariableKernelCall(Beam* r_beam, double* r_var, double r_val);
 void ChangeFrequnecyKernelCall(Beam* r_beam, double r_freq_ratio);
 void UpdateGoodParticleCountKernelCall(Beam* r_beam);
