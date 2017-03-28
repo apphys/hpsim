@@ -208,11 +208,13 @@ void UpdateBeamOnDevice(Beam* r_beam, double* r_x_h, double* r_xp_h,
   if(r_loss_h == NULL)
     cudaMemset(r_beam->loss, 0, num*sizeof(uint));
   else
-    cudaMemcpy(r_beam->loss, r_loss_h, sizeof(uint)*num, cudaMemcpyHostToDevice); 
+    cudaMemcpy(r_beam->loss, r_loss_h, sizeof(uint)*num, 
+      cudaMemcpyHostToDevice);
   if(r_lloss_h == NULL)
     cudaMemset(r_beam->lloss, 0, num*sizeof(uint));
   else
-    cudaMemcpy(r_beam->lloss, r_lloss_h, sizeof(uint)*num, cudaMemcpyHostToDevice); 
+    cudaMemcpy(r_beam->lloss, r_lloss_h, sizeof(uint)*num, 
+      cudaMemcpyHostToDevice); 
 }
 
 /*!
@@ -235,7 +237,8 @@ void CopyBeamFromDevice(Beam* r_beam, double* r_x_h, double* r_xp_h,
   cudaMemcpy(r_w_h, r_beam->w, sizeof(double)*num, cudaMemcpyDeviceToHost);
   cudaMemcpy(r_loss_h, r_beam->loss, sizeof(uint)*num, cudaMemcpyDeviceToHost);
   cudaMemcpy(r_lloss_h, r_beam->lloss, sizeof(uint)*num, cudaMemcpyDeviceToHost);
-  cudaMemcpy(r_num_loss_h, r_beam->num_loss, sizeof(uint), cudaMemcpyDeviceToHost);
+  cudaMemcpy(r_num_loss_h, r_beam->num_loss, sizeof(uint), 
+    cudaMemcpyDeviceToHost);
 }
 
 /*!
@@ -246,17 +249,20 @@ void CopyBeamFromDevice(Beam* r_beam, double* r_x_h, double* r_xp_h,
  * \callgraph
  */
 void CopyParticleFromDevice(Beam* r_beam, uint r_index, double* r_x_h, 
-  double* r_xp_h, double* r_y_h, double* r_yp_h, double* r_phi_h, double* r_w_h, 
+  double* r_xp_h, double* r_y_h, double* r_yp_h, double* r_phi_h, double* r_w_h,
   uint* r_loss_h, uint* r_lloss_h)
 {
   cudaMemcpy(r_x_h, r_beam->x+r_index, sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_xp_h, r_beam->xp+r_index, sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_y_h, r_beam->y+r_index, sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_yp_h, r_beam->yp+r_index, sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(r_phi_h, r_beam->phi+r_index, sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(r_phi_h, r_beam->phi+r_index, sizeof(double), 
+    cudaMemcpyDeviceToHost);
   cudaMemcpy(r_w_h, r_beam->w+r_index, sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(r_loss_h, r_beam->loss+r_index, sizeof(uint), cudaMemcpyDeviceToHost);
-  cudaMemcpy(r_lloss_h, r_beam->lloss+r_index, sizeof(uint), cudaMemcpyDeviceToHost);
+  cudaMemcpy(r_loss_h, r_beam->loss+r_index, sizeof(uint), 
+    cudaMemcpyDeviceToHost);
+  cudaMemcpy(r_lloss_h, r_beam->lloss+r_index, sizeof(uint), 
+    cudaMemcpyDeviceToHost);
 }
 
 /*!
@@ -269,8 +275,9 @@ void CopyParticleFromDevice(Beam* r_beam, uint r_index, double* r_x_h,
 void GetNumBlocksAndThreads(uint r_sz, uint r_max_blocks, uint r_max_threads, 
                             uint& r_grid_size, uint& r_block_size)
 {
-  r_block_size = (r_sz < r_max_threads*2) ? NextPow2((r_sz + 1)/ 2) : r_max_threads;
-  r_grid_size = (r_sz + (r_block_size * 2 - 1)) / (r_block_size* 2);
+  r_block_size = (r_sz < r_max_threads*2) ? NextPow2((r_sz + 1) / 2) : 
+    r_max_threads;
+  r_grid_size = (r_sz + (r_block_size * 2 - 1)) / (r_block_size * 2);
   r_grid_size = std::min(r_max_blocks, r_grid_size);
 }
 
@@ -282,33 +289,65 @@ void GetNumBlocksAndThreads(uint r_sz, uint r_max_blocks, uint r_max_threads,
  * \callergraph
  */
 template<class T>
-void XReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, T* r_odata, uint r_size, Beam* r_beam, uint r_first_pass_flag, bool check_lloss = false)
+void XReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, 
+  T* r_odata, uint r_size, Beam* r_beam, uint r_first_pass_flag, 
+  bool check_lloss = false)
 {
-  uint smem_sz = (r_block_size <= 32) ? 64*sizeof(T) : r_block_size*sizeof(T); 
+  uint smem_sz = (r_block_size <= 32) ? 64 * sizeof(T) : r_block_size*sizeof(T);
   if(check_lloss)
   {
     switch (r_block_size)
     {
       case 512:
-          XReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 256:
-          XReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 128:
-          XReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 64:
-          XReduceKernel<T,  64><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T,  64><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 32:
-          XReduceKernel<T,  32><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T,  32><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 16:
-          XReduceKernel<T,  16><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T,  16><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case  8:
-          XReduceKernel<T,   8><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T,   8><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case  4:
-          XReduceKernel<T,   4><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T,   4><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case  2:
-          XReduceKernel<T,   2><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XReduceKernel<T,   2><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case  1:
-          XReduceKernel<T,   1><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break; 
+          XReduceKernel<T,   1><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break; 
     }  
   }  
   else
@@ -316,25 +355,45 @@ void XReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, T* r_oda
     switch (r_block_size)
     {
       case 512:
-          XReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 256:
-          XReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 128:
-          XReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 64:
-          XReduceKernel<T,  64><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T,  64><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 32:
-          XReduceKernel<T,  32><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T,  32><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 16:
-          XReduceKernel<T,  16><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T,  16><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case  8:
-          XReduceKernel<T,   8><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T,   8><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case  4:
-          XReduceKernel<T,   4><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T,   4><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case  2:
-          XReduceKernel<T,   2><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XReduceKernel<T,   2><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case  1:
-          XReduceKernel<T,   1><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break; 
+          XReduceKernel<T,   1><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break; 
     }
   }
 }
@@ -349,7 +408,8 @@ void XReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, T* r_oda
  *                    transversely lost, otherwise, only consider good particles
  *                    which are not lost either transversely nor longitudinally.
  */
-void UpdateAvgOfOneVariableKernelCall(Beam* r_beam, double* r_x, double* r_x_avg, bool r_good_only)
+void UpdateAvgOfOneVariableKernelCall(Beam* r_beam, double* r_x, 
+  double* r_x_avg, bool r_good_only)
 {
   //cudaEvent_t start, stop; 
   uint block_sz, grid_sz;
@@ -357,24 +417,27 @@ void UpdateAvgOfOneVariableKernelCall(Beam* r_beam, double* r_x, double* r_x_avg
   double* partial1 = r_beam->partial_double2;
   //StartTimer(&start, &stop);
   GetNumBlocksAndThreads(num, 64, r_beam->blck_size, grid_sz, block_sz);
-  XReduceKernelCall<double>(block_sz, grid_sz, r_x, partial1, num, r_beam, 1, r_good_only);
+  XReduceKernelCall<double>(block_sz, grid_sz, r_x, partial1, num, r_beam, 1, 
+    r_good_only);
   uint s = grid_sz;
   while(s > 1)
   {
     GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
-    XReduceKernelCall<double>(block_sz, grid_sz, partial1, partial1, s, r_beam, 0, r_good_only); 
+    XReduceKernelCall<double>(block_sz, grid_sz, partial1, partial1, s, r_beam, 
+      0, r_good_only); 
     s = (s + (block_sz*2-1))/(block_sz*2);
   }
   //StopTimer(&start, &stop, "new reducion kernel-2");
   if(!r_good_only)
     UpdateVariableAvgKernel<<<1, 1>>>(r_x_avg, partial1, num, r_beam->num_loss);
   else
-    UpdateVariableAvgWithLlossKernel<<<1, 1>>>(r_x_avg, partial1, r_beam->num_good);
+    UpdateVariableAvgWithLlossKernel<<<1, 1>>>(r_x_avg, partial1, 
+      r_beam->num_good);
 }
 
 /*!
- * \brief Call parallel reduce kernel to count the number of non-zero elements of 
- *        an uint array.
+ * \brief Call parallel reduce kernel to count the number of non-zero elements 
+ * 	of an uint array.
  *
  * \callgraph
  * \callergraph
@@ -382,7 +445,7 @@ void UpdateAvgOfOneVariableKernelCall(Beam* r_beam, double* r_x, double* r_x_avg
 void LossReduceKernelCall(uint r_block_size, uint r_grid_size, uint* r_idata, 
                           uint* r_odata, uint r_size, uint r_first_pass_flag)
 {
-  uint smem_sz = (r_block_size <= 32) ? 64*sizeof(uint) : 
+  uint smem_sz = (r_block_size <= 32) ? 64 * sizeof(uint) : 
                                         r_block_size*sizeof(uint); 
   switch (r_block_size)
   {
@@ -442,25 +505,30 @@ void UpdateLossCountKernelCall(Beam* r_beam, bool r_lloss)
   {
     GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
     LossReduceKernelCall(block_sz, grid_sz, partial, partial, s, 0);
-    s = (s + (block_sz*2-1))/(block_sz*2);
+    s = (s + (block_sz * 2 - 1)) / (block_sz * 2);
   }
   if(!r_lloss)
-    cudaMemcpy(r_beam->num_loss, partial, sizeof(uint), cudaMemcpyDeviceToDevice);
+    cudaMemcpy(r_beam->num_loss, partial, sizeof(uint), 
+      cudaMemcpyDeviceToDevice);
   else
-    cudaMemcpy(r_beam->num_lloss, partial, sizeof(uint), cudaMemcpyDeviceToDevice);
+    cudaMemcpy(r_beam->num_lloss, partial, sizeof(uint), 
+      cudaMemcpyDeviceToDevice);
 }
 
 /*!
- * \brief Call parallel reduce kernel to calculate the sum of x and x^2 of coordinates. 
+ * \brief Call parallel reduce kernel to calculate the sum of x and x^2 of 
+ *	coordinates. 
  *
  * \callgraph
  * \callergraph
  */
 template<class T>
-void XX2ReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, T* r_odata, 
-      uint r_size, Beam* r_beam, uint r_first_pass_flag, bool check_lloss = false)
+void XX2ReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, 
+  T* r_odata, uint r_size, Beam* r_beam, uint r_first_pass_flag, 
+  bool check_lloss = false)
 {
-  uint smem_sz = (r_block_size <= 32) ? 64*sizeof(T) : r_block_size*sizeof(T); 
+  uint smem_sz = (r_block_size <= 32) ? 64 * sizeof(T) : r_block_size * 
+		  sizeof(T);
   smem_sz *= 2;
 
   if(check_lloss)
@@ -468,35 +536,55 @@ void XX2ReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, T* r_o
     switch (r_block_size)
     {
       case 512:
-          XX2ReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 256:
-          XX2ReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 128:
-          XX2ReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 64:
-          XX2ReduceKernel<T, 64><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 64><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 32:
-          XX2ReduceKernel<T, 32><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 32><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case 16:
-          XX2ReduceKernel<T, 16><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 16><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case  8:
-          XX2ReduceKernel<T, 8><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 8><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case  4:
-          XX2ReduceKernel<T, 4><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 4><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case  2:
-          XX2ReduceKernel<T, 2><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 2><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
       case  1:
-          XX2ReduceKernel<T, 1><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, r_beam->lloss); break;
+          XX2ReduceKernel<T, 1><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, 
+	    r_beam->lloss); 
+	  break;
     }  
   }
   else
@@ -504,35 +592,45 @@ void XX2ReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, T* r_o
     switch (r_block_size)
     {
       case 512:
-          XX2ReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 256:
-          XX2ReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 128:
-          XX2ReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 64:
-          XX2ReduceKernel<T, 64><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 64><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 32:
-          XX2ReduceKernel<T, 32><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 32><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case 16:
-          XX2ReduceKernel<T, 16><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 16><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case  8:
-          XX2ReduceKernel<T, 8><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 8><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case  4:
-          XX2ReduceKernel<T, 4><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 4><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case  2:
-          XX2ReduceKernel<T, 2><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 2><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
       case  1:
-          XX2ReduceKernel<T, 1><<< r_grid_size, r_block_size, smem_sz >>>(r_idata, 
-              r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); break;
+          XX2ReduceKernel<T, 1><<< r_grid_size, r_block_size, smem_sz >>>(
+	    r_idata, r_odata, r_size, r_beam->loss, r_first_pass_flag, NULL); 
+	  break;
     }
   }
 }
@@ -550,7 +648,8 @@ void XX2ReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata, T* r_o
  * \callgraph
  * \callergraph
  */
-void UpdateSigmaOfOneVariableKernelCall(Beam* r_beam, double* r_x, double* r_x_sig, bool r_good_only)
+void UpdateSigmaOfOneVariableKernelCall(Beam* r_beam, double* r_x, 
+    double* r_x_sig, bool r_good_only)
 {
   //cudaEvent_t start, stop; 
   uint block_sz, grid_sz;
@@ -558,12 +657,14 @@ void UpdateSigmaOfOneVariableKernelCall(Beam* r_beam, double* r_x, double* r_x_s
   double* partial1 = r_beam->partial_double2;
   //StartTimer(&start, &stop);
   GetNumBlocksAndThreads(num, 64, r_beam->blck_size, grid_sz, block_sz);
-  XX2ReduceKernelCall<double>(block_sz, grid_sz, r_x, partial1, num, r_beam, 1, r_good_only);
+  XX2ReduceKernelCall<double>(block_sz, grid_sz, r_x, partial1, num, r_beam, 1, 
+    r_good_only);
   uint s = grid_sz;
   while(s > 1)
   {
     GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
-    XX2ReduceKernelCall<double>(block_sz, grid_sz, partial1, partial1, s, r_beam, 0, r_good_only); 
+    XX2ReduceKernelCall<double>(block_sz, grid_sz, partial1, partial1, s, 
+      r_beam, 0, r_good_only); 
     s = (s + (block_sz*2-1))/(block_sz*2);
   }
 
@@ -576,69 +677,6 @@ void UpdateSigmaOfOneVariableKernelCall(Beam* r_beam, double* r_x, double* r_x_s
   //StopTimer(&start, &stop, "new sig reducion kernel");
 }
 
-/*
-template<class T>
-void RR2ReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idatax, T* r_idatay, 
-      T* r_odata, uint r_size, Beam* r_beam, uint r_first_pass_flag)
-{
-  uint smem_sz = (r_block_size <= 32) ? 64*sizeof(T) : r_block_size*sizeof(T); 
-  smem_sz *= 2;
-  switch (r_block_size)
-  {
-    case 512:
-        RR2ReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case 256:
-        RR2ReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case 128:
-        RR2ReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case 64:
-        RR2ReduceKernel<T, 64><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case 32:
-        RR2ReduceKernel<T, 32><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case 16:
-        RR2ReduceKernel<T, 16><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case  8:
-        RR2ReduceKernel<T, 8><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case  4:
-        RR2ReduceKernel<T, 4><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case  2:
-        RR2ReduceKernel<T, 2><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-    case  1:
-        RR2ReduceKernel<T, 1><<< r_grid_size, r_block_size, smem_sz >>>(r_idatax, 
-            r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag); break;
-  }  
-}
-
-void UpdateSigmaR(Beam* r_beam)
-{
-  //cudaEvent_t start, stop; 
-  uint block_sz, grid_sz;
-  uint num = r_beam->num_particle;
-  double* partial1 = r_beam->partial_double2;
-  //StartTimer(&start, &stop);
-  GetNumBlocksAndThreads(num, 64, r_beam->blck_size, grid_sz, block_sz);
-  RR2ReduceKernelCall<double>(block_sz, grid_sz, r_beam->x, r_beam->y, partial1, num, r_beam, 1);
-  uint s = grid_sz;
-  while(s > 1)
-  {
-    GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
-    RR2ReduceKernelCall<double>(block_sz, grid_sz, partial1, NULL, partial1, s, r_beam, 0); 
-    s = (s + (block_sz*2-1))/(block_sz*2);
-  }
-  UpdateVariableSigmaKernel<<<1, 1>>>(r_beam->r_sig, partial1, 
-                      partial1+1, num, r_beam->num_loss);
-  //StopTimer(&start, &stop, "new sig reducion kernel");
-}
-*/
 
 template<class T>
 void XYReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata1, 
@@ -732,7 +770,8 @@ void UpdateAvgXYKernelCall(Beam* r_beam)
 template<class T>
 void MaxR2PhiReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata1, 
       T* r_idata2, T* r_idata3, uint* r_loss, T* r_x_avg, T* r_y_avg, 
-      T* r_phi_avg, T* r_odata1, T* r_odata2, uint r_size, uint r_first_pass_flag)
+      T* r_phi_avg, T* r_odata1, T* r_odata2, uint r_size, 
+      uint r_first_pass_flag)
 {
   uint smem_sz = (r_block_size <= 32) ? 64*sizeof(T) : r_block_size*sizeof(T); 
   smem_sz *= 2;
@@ -797,7 +836,7 @@ void UpdateMaxRPhiKernelCall(Beam* r_beam)
   //StartTimer(&start, &stop);
   GetNumBlocksAndThreads(num, 64, r_beam->blck_size, grid_sz, block_sz);
   MaxR2PhiReduceKernelCall<double>(block_sz, grid_sz, r_beam->x, r_beam->y, 
-    r_beam->phi_r, r_beam->loss, r_beam->x_avg, r_beam->y_avg, r_beam->phi_avg_r, 
+    r_beam->phi_r, r_beam->loss, r_beam->x_avg, r_beam->y_avg, r_beam->phi_avg_r,
     partial1, partial2, num, 1);
   uint s = grid_sz;
   while(s > 1)
@@ -813,17 +852,18 @@ void UpdateMaxRPhiKernelCall(Beam* r_beam)
 }
 
 /*!
- * \brief Call kernel function to calculates averages and stds of x and y coordiantes simultaneously. 
+ * \brief Call kernel function to calculates averages and stds of x and y 
+ *	coordiantes simultaneously. 
  *
  * \callgraph
  * \callergraph
  */
 template<class T>
 void XYX2Y2ReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata1, 
-      T* r_idata2, T* r_odata1, T* r_odata2, uint r_size, uint* r_loss, uint* r_lloss,
-      uint r_first_pass_flag)
+      T* r_idata2, T* r_odata1, T* r_odata2, uint r_size, uint* r_loss, 
+      uint* r_lloss, uint r_first_pass_flag)
 {
-  uint smem_sz = (r_block_size <= 32) ? 64*sizeof(T) : r_block_size*sizeof(T); 
+  uint smem_sz = (r_block_size <= 32) ? 64 * sizeof(T) : r_block_size*sizeof(T);
   smem_sz *= 4;
   switch (r_block_size)
   {
@@ -883,18 +923,19 @@ void UpdateAvgSigXYKernelCall(Beam* r_beam)
   double* partial1 = r_beam->partial_double2;
   double* partial2 = r_beam->partial_double3;
   GetNumBlocksAndThreads(num, 64, r_beam->blck_size, grid_sz, block_sz);
-  XYX2Y2ReduceKernelCall<double>(block_sz, grid_sz, r_beam->x, r_beam->y, partial1, 
-                              partial2, num, r_beam->loss, r_beam->lloss, 1);
+  XYX2Y2ReduceKernelCall<double>(block_sz, grid_sz, r_beam->x, r_beam->y, 
+    partial1, partial2, num, r_beam->loss, r_beam->lloss, 1);
   uint s = grid_sz;
   while(s > 1)
   {
     GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
     XYX2Y2ReduceKernelCall<double>(block_sz, grid_sz, partial1, partial2, 
                                 partial1, partial2, s, NULL, NULL, 0); 
-    s = (s + (block_sz*2-1))/(block_sz*2);
-  }
-  UpdateHorizontalAvgSigKernel<<<1, 1>>>(r_beam->x_avg_good, r_beam->x_sig_good, 
-    r_beam->y_avg_good, r_beam->y_sig_good, partial1, partial2, num, r_beam->num_loss);
+    s = (s + (block_sz * 2 - 1)) / (block_sz * 2);
+  } 
+  UpdateHorizontalAvgSigKernel<<<1, 1>>>(r_beam->x_avg_good, r_beam->x_sig_good,
+    r_beam->y_avg_good, r_beam->y_sig_good, partial1, partial2, num, 
+    r_beam->num_loss);
 }
 
 /*!
@@ -905,7 +946,7 @@ void UpdateAvgSigXYKernelCall(Beam* r_beam)
  * \callergraph
  */
 template<class T>
-void EmittanceReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata1, 
+void EmittanceReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idata1,
       T* r_idata2, T* r_odata1, T* r_odata2, uint r_size, uint* r_loss, 
       uint r_first_pass_flag)
 {
@@ -980,7 +1021,7 @@ void UpdateHorizontalEmittanceKernelCall(Beam* r_beam)
     GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
     EmittanceReduceKernelCall<double>(block_sz, grid_sz, partial1, partial2, 
                                       partial1, partial2, s, NULL, 0); 
-    s = (s + (block_sz*2-1))/(block_sz*2);
+    s = (s + (block_sz * 2 - 1)) / (block_sz * 2);
   }
   UpdateTransverseEmittanceKernel<<<1, 1>>>(r_beam->x_avg, r_beam->x_sig, 
     r_beam->xp_avg, r_beam->xp_sig, r_beam->x_emit, 
@@ -1011,7 +1052,7 @@ void UpdateVerticalEmittanceKernelCall(Beam* r_beam)
     GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
     EmittanceReduceKernelCall<double>(block_sz, grid_sz, partial1, partial2, 
                                       partial1, partial2, s, NULL, 0); 
-    s = (s + (block_sz*2-1))/(block_sz*2);
+    s = (s + (block_sz * 2 - 1)) / (block_sz * 2);
   }
   UpdateTransverseEmittanceKernel<<<1, 1>>>(r_beam->y_avg, r_beam->y_sig, 
     r_beam->yp_avg, r_beam->yp_sig, r_beam->y_emit, 
@@ -1034,7 +1075,7 @@ void UpdateLongitudinalEmittanceKernelCall(Beam* r_beam)
   double* partial2 = r_beam->partial_double3;
   //StartTimer(&start, &stop);
   GetNumBlocksAndThreads(num, 64, r_beam->blck_size, grid_sz, block_sz);
-  EmittanceReduceKernelCall<double>(block_sz, grid_sz, r_beam->phi_r, r_beam->w, 
+  EmittanceReduceKernelCall<double>(block_sz, grid_sz, r_beam->phi_r, r_beam->w,
                                   partial1, partial2, num, r_beam->loss, 1);
   uint s = grid_sz;
   while(s > 1)
@@ -1042,11 +1083,11 @@ void UpdateLongitudinalEmittanceKernelCall(Beam* r_beam)
     GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
     EmittanceReduceKernelCall<double>(block_sz, grid_sz, partial1, partial2, 
                                       partial1, partial2, s, NULL, 0); 
-    s = (s + (block_sz*2-1))/(block_sz*2);
+    s = (s + (block_sz * 2 - 1)) / (block_sz * 2);
   }
-  UpdateLongitudinalEmittanceKernel<<<1, 1>>>(r_beam->phi_avg_r, r_beam->phi_sig_r,
-    r_beam->w_avg, r_beam->w_sig, r_beam->z_emit, partial1, partial2,
-    num, r_beam->num_loss);
+  UpdateLongitudinalEmittanceKernel<<<1, 1>>>(r_beam->phi_avg_r, 
+    r_beam->phi_sig_r, r_beam->w_avg, r_beam->w_sig, r_beam->z_emit, partial1, 
+    partial2, num, r_beam->num_loss);
   //StopTimer(&start, &stop, "new l-emittance reducion kernel");
 }
 
@@ -1081,11 +1122,11 @@ void ShiftVariableKernelCall(Beam* r_beam, double* r_var, double r_val)
 void UpdateRelativePhiKernelCall(Beam* r_beam, bool r_use_good)
 {
   if(!r_use_good)
-    UpdateRelativePhiKernel<<<r_beam->grid_size, r_beam->blck_size>>>(r_beam->phi_r, 
-      r_beam->phi, r_beam->phi, r_beam->num_particle);
+    UpdateRelativePhiKernel<<<r_beam->grid_size, r_beam->blck_size>>>(
+      r_beam->phi_r, r_beam->phi, r_beam->phi, r_beam->num_particle);
   else
-    UpdateRelativePhiKernel<<<r_beam->grid_size, r_beam->blck_size>>>(r_beam->phi_r, 
-      r_beam->phi, r_beam->phi_avg_good, r_beam->num_particle);
+    UpdateRelativePhiKernel<<<r_beam->grid_size, r_beam->blck_size>>>(
+      r_beam->phi_r, r_beam->phi, r_beam->phi_avg_good, r_beam->num_particle);
 }
 
 /*!
@@ -1094,7 +1135,7 @@ void UpdateRelativePhiKernelCall(Beam* r_beam, bool r_use_good)
  * \callgraph
  * \callergraph
  */
-void CutBeamKernelCall(double* r_coord, uint* r_loss, double r_min, double r_max, 
+void CutBeamKernelCall(double* r_coord, uint* r_loss, double r_min, double r_max,
   uint r_num, uint r_grid, uint r_blck)
 {
   CutBeamKernel<<<r_grid, r_blck>>>(r_coord, r_loss, r_min, r_max, r_num);
@@ -1120,54 +1161,66 @@ void ChangeFrequnecyKernelCall(Beam* r_beam, double r_freq_ratio)
  */
 void UpdateLongitudinalLossCoordinateKernelCall(Beam* r_beam)
 {
-  UpdateLongitudinalLossCoordinateKernel<<<r_beam->grid_size, r_beam->blck_size>>>(r_beam->lloss, 
-    r_beam->phi, r_beam->phi_avg_good, r_beam->num_particle);
+  UpdateLongitudinalLossCoordinateKernel<<<r_beam->grid_size, 
+    r_beam->blck_size>>>(r_beam->lloss, r_beam->phi, r_beam->phi_avg_good, 
+    r_beam->num_particle);
 }
 
 /*!
- * \brief Call Parallel reduce kernel to count the number of good particles (not lost 
- *        neither transversely nor longitudinally)
+ * \brief Call Parallel reduce kernel to count the number of good particles 
+ *	(not lost neither transversely nor longitudinally)
  *
  * \callgraph
  * \callergraph
  */
 void GoodParticleCountReduceKernelCall(uint r_block_size, uint r_grid_size, 
-    uint* r_idata, uint* r_idata2, uint* r_odata, uint r_size, uint r_first_pass_flag)
+    uint* r_idata, uint* r_idata2, uint* r_odata, uint r_size, 
+    uint r_first_pass_flag)
 {
-  uint smem_sz = (r_block_size <= 32) ? 64*sizeof(uint) : 
-                                        r_block_size*sizeof(uint); 
+  uint smem_sz = (r_block_size <= 32) ? 64 * sizeof(uint) : 
+                                        r_block_size * sizeof(uint); 
   switch (r_block_size)
   {
     case 512:
-        GoodParticleCountReduceKernel<512><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<512><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case 256:
-        GoodParticleCountReduceKernel<256><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<256><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case 128:
-        GoodParticleCountReduceKernel<128><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<128><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case 64:
-        GoodParticleCountReduceKernel<64><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<64><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case 32:
-        GoodParticleCountReduceKernel<32><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<32><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case 16:
-        GoodParticleCountReduceKernel<16><<< r_grid_size, r_block_size, smem_sz >>>(  
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<16><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case  8:
-        GoodParticleCountReduceKernel<8><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<8><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case  4:
-        GoodParticleCountReduceKernel<4><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<4><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case  2:
-        GoodParticleCountReduceKernel<2><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<2><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
     case  1:
-        GoodParticleCountReduceKernel<1><<< r_grid_size, r_block_size, smem_sz >>>(
-            r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); break;
+        GoodParticleCountReduceKernel<1><<< r_grid_size, r_block_size, 
+	  smem_sz >>>(r_idata, r_idata2, r_odata, r_size, r_first_pass_flag); 
+	break;
   }  
 }
 
@@ -1185,17 +1238,94 @@ void UpdateGoodParticleCountKernelCall(Beam* r_beam)
   uint* partial = r_beam->partial_int1;
   //StartTimer(&start, &stop);
   GetNumBlocksAndThreads(num, 64, r_beam->blck_size, grid_sz, block_sz);
-  GoodParticleCountReduceKernelCall(block_sz, grid_sz, r_beam->loss, r_beam->lloss, partial, num, 1);
+  GoodParticleCountReduceKernelCall(block_sz, grid_sz, r_beam->loss, 
+    r_beam->lloss, partial, num, 1);
   //StopTimer(&start, &stop, "new loss reducion kernel-1");
   //StartTimer(&start, &stop);
   uint s = grid_sz;
   while(s > 1)
   {
     GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
-    GoodParticleCountReduceKernelCall(block_sz, grid_sz, partial, NULL, partial, s, 0);
-    s = (s + (block_sz*2-1))/(block_sz*2);
+    GoodParticleCountReduceKernelCall(block_sz, grid_sz, partial, NULL, 
+	partial, s, 0);
+    s = (s + (block_sz * 2 - 1)) / (block_sz * 2);
   }
   cudaMemcpy(r_beam->num_good, partial, sizeof(uint), cudaMemcpyDeviceToDevice);
   //StopTimer(&start, &stop, "new loss reducion kernel");
 }
 
+/*
+template<class T>
+void RR2ReduceKernelCall(uint r_block_size, uint r_grid_size, T* r_idatax, 
+    T* r_idatay, T* r_odata, uint r_size, Beam* r_beam, uint r_first_pass_flag)
+{
+  uint smem_sz = (r_block_size <= 32) ? 64*sizeof(T) : r_block_size*sizeof(T); 
+  smem_sz *= 2;
+  switch (r_block_size)
+  {
+    case 512:
+        RR2ReduceKernel<T, 512><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case 256:
+        RR2ReduceKernel<T, 256><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case 128:
+        RR2ReduceKernel<T, 128><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case 64:
+        RR2ReduceKernel<T, 64><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case 32:
+        RR2ReduceKernel<T, 32><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case 16:
+        RR2ReduceKernel<T, 16><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case  8:
+        RR2ReduceKernel<T, 8><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case  4:
+        RR2ReduceKernel<T, 4><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case  2:
+        RR2ReduceKernel<T, 2><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+    case  1:
+        RR2ReduceKernel<T, 1><<< r_grid_size, r_block_size, smem_sz >>>(
+	  r_idatax, r_idatay, r_odata, r_size, r_beam->loss, r_first_pass_flag);
+	break;
+  }  
+}
+
+void UpdateSigmaR(Beam* r_beam)
+{
+  //cudaEvent_t start, stop; 
+  uint block_sz, grid_sz;
+  uint num = r_beam->num_particle;
+  double* partial1 = r_beam->partial_double2;
+  //StartTimer(&start, &stop);
+  GetNumBlocksAndThreads(num, 64, r_beam->blck_size, grid_sz, block_sz);
+  RR2ReduceKernelCall<double>(block_sz, grid_sz, r_beam->x, r_beam->y, 
+      partial1, num, r_beam, 1);
+  uint s = grid_sz;
+  while(s > 1)
+  {
+    GetNumBlocksAndThreads(s, 64, r_beam->blck_size, grid_sz, block_sz);
+    RR2ReduceKernelCall<double>(block_sz, grid_sz, partial1, NULL, partial1, 	
+      s, r_beam, 0); 
+    s = (s + (block_sz * 2 - 1)) / (block_sz * 2);
+  }
+  UpdateVariableSigmaKernel<<<1, 1>>>(r_beam->r_sig, partial1, 
+                      partial1+1, num, r_beam->num_loss);
+  //StopTimer(&start, &stop, "new sig reducion kernel");
+}
+*/
