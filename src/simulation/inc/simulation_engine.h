@@ -1,5 +1,6 @@
 #ifndef SIMULATION_ENGHINE_H
 #define SIMULATION_ENGHINE_H
+
 #include "beam.h"
 #include "beamline.h"
 #include "space_charge.h"
@@ -17,10 +18,7 @@
 class SimulationEngine : public Visitor, public PyWrapper
 {
 public:
-  /*!
-   * \brief Constructor
-   */
-  SimulationEngine() : PyWrapper() {}
+  SimulationEngine();
   ~SimulationEngine();
   void InitEngine(Beam*, BeamLine*, SpaceCharge* r_spch = NULL, 
           bool r_graph_on = false, PlotData* r_plot_data = NULL);
@@ -56,11 +54,15 @@ private:
   void Visit(SpaceChargeCompensation*);
   void Visit(Steerer*);
 
+  //! Pointer to Beam
   Beam* beam_;
+  //! Pointer to BeamLine
   BeamLine* beamline_;
+  //! Pointer to SpaceCharge
   SpaceCharge* spch_;
+  //! Simulation parameter
   SimulationParam param_;
-  bool initialized_;
+  //! Model index of the last simulated beamline element, used to reset 
   int prev_end_element_index_;
 };
 

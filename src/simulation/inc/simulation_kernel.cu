@@ -18,18 +18,19 @@ double Bessi0c(double r_x)
   double ans, Cell_y, ax = abs(r_x);
   if(ax < 3.75)
   {
-    Cell_y = r_x/3.75;
-    Cell_y = Cell_y*Cell_y;
-    ans = 1.0+Cell_y*(3.5156229+Cell_y*(3.0899424+Cell_y*(1.2067492+Cell_y*
-          (0.2659732+Cell_y*(0.360768e-1+Cell_y*0.45813e-2)))));
+    Cell_y = r_x / 3.75;
+    Cell_y = Cell_y * Cell_y;
+    ans = 1.0 + Cell_y * (3.5156229 + Cell_y * (3.0899424 + Cell_y * 
+      (1.2067492 + Cell_y * (0.2659732 + Cell_y * (0.360768e-1 + 
+      Cell_y * 0.45813e-2)))));
   }
   else
   {
-    Cell_y = 3.75/ax;
-    ans = (exp(ax)*rsqrt(ax))*(0.39894228+Cell_y*(0.1328592e-1+
-        Cell_y*(0.225319e-2+Cell_y*(-0.157565e-2+Cell_y*(0.916281e-2+
-        Cell_y*(-0.2057706e-1+Cell_y*(0.2635537e-1+Cell_y*
-        (-0.1647633e-1+Cell_y*0.392377e-2))))))));
+    Cell_y = 3.75 / ax;
+    ans = (exp(ax) * rsqrt(ax)) * (0.39894228 + Cell_y * (0.1328592e-1 +
+      Cell_y * (0.225319e-2 + Cell_y * (-0.157565e-2 + Cell_y * (0.916281e-2 +
+      Cell_y * (-0.2057706e-1 + Cell_y * (0.2635537e-1 + Cell_y *
+      (-0.1647633e-1 + Cell_y * 0.392377e-2))))))));
   }
   return ans;
 }
@@ -40,20 +41,21 @@ double Bessi1c(double r_x)
   double Cell_y, ans, ax = abs(r_x);
   if (ax < 3.75)
   {
-    Cell_y = r_x/3.75;
-    Cell_y = Cell_y*Cell_y;
-    ans = ax*(0.5+Cell_y*(0.87890594+Cell_y*(0.51498869+Cell_y*(0.15084934+Cell_y*
-          (0.2658733e-1+Cell_y*(0.301532e-2+Cell_y*0.32411e-3))))));
+    Cell_y = r_x / 3.75;
+    Cell_y = Cell_y * Cell_y;
+    ans = ax * (0.5 + Cell_y * (0.87890594 + Cell_y * (0.51498869 + Cell_y * 
+      (0.15084934 + Cell_y * (0.2658733e-1 + Cell_y * (0.301532e-2 + Cell_y * 
+      0.32411e-3))))));
   }
   else
   {
-    Cell_y = 3.75/ax;
-    ans = 0.2282967e-1+Cell_y*(-0.2895312e-1+Cell_y*
-          (0.1787654e-1-Cell_y*0.420059e-2));
-    ans = 0.39894228+Cell_y*(-0.3988024e-1+Cell_y*
-          (-0.362018e-2+Cell_y*(0.163801e-2+Cell_y*
-          (-0.1031555e-1+Cell_y*ans))));
-    ans = ans*(exp(ax)*rsqrt(ax));
+    Cell_y = 3.75 / ax;
+    ans = 0.2282967e-1 + Cell_y * (-0.2895312e-1 + Cell_y *
+          (0.1787654e-1 - Cell_y * 0.420059e-2));
+    ans = 0.39894228 + Cell_y * (-0.3988024e-1 + Cell_y *
+          (-0.362018e-2 + Cell_y * (0.163801e-2 + Cell_y *
+          (-0.1031555e-1 + Cell_y * ans))));
+    ans = ans * (exp(ax) * rsqrt(ax));
   }
   if (r_x < 0.0)
     return -ans;
@@ -65,7 +67,7 @@ __device__
 double Bessi1p(double r_x)
 {
   if (r_x != 0.0)
-    return Bessi0c(r_x) - Bessi1c(r_x)/r_x;
+    return Bessi0c(r_x) - Bessi1c(r_x) / r_x;
   else
     return 0.5;
 }
@@ -74,7 +76,7 @@ __global__
 void SimulateTransportKernel(double* r_ref_phase, double* r_ref_energy, 
   double r_freq, double r_energy = 0.0, double r_phi  = 0.0)
 {
-  d_wavelen = CLIGHT/r_freq;
+  d_wavelen = CLIGHT / r_freq;
   if(r_energy != 0.0)
     r_ref_energy[0] = r_energy;
   if(r_phi != 0.0)
@@ -86,28 +88,29 @@ void SimulatePartialDriftKernel(double* r_x, double* r_y, double* r_phi,
   double* r_xp, double* r_yp, double* r_w, uint* r_loss, double r_hf_spch_len, 
   double r_aper, uint r_elem_indx)
 {
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
-  uint stride = blockDim.x*gridDim.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
   while(index < d_const.num_particle)
   {
     if(r_loss[index] == 0)
     {
-      double aper2 = r_aper*r_aper;
+      double aper2 = r_aper * r_aper;
       // transport hf spch_len
       double x = r_x[index];
       double y = r_y[index];
       x += r_xp[index] * r_hf_spch_len;
       y += r_yp[index] * r_hf_spch_len;
       // check for loss
-      if(aper2 != 0.0 && x*x+y*y > aper2)
+      if(aper2 != 0.0 && x * x + y * y > aper2)
         r_loss[index] = r_elem_indx;
       else
       {
         r_x[index] = x;
         r_y[index] = y;
-        double gm1 = r_w[index]/d_const.mass;
-        double bt = sqrt(gm1*(gm1+2.0))/(gm1+1.0);
-        r_phi[index] += TWOPI*r_hf_spch_len/(d_wavelen*bt); // absolute phase
+        double gm1 = r_w[index] / d_const.mass;
+        double bt = sqrt(gm1 * (gm1 + 2.0))/(gm1 + 1.0);
+	// absolute phase
+        r_phi[index] += TWOPI * r_hf_spch_len / (d_wavelen * bt); 
       }
     }// if loss
     index += stride;
@@ -118,34 +121,34 @@ __global__
 void SimulateSteererKernel(double* r_xp, double* r_yp, 
   double* r_w, uint* r_loss, double r_blh, double r_blv)
 {
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
-  uint stride = blockDim.x*gridDim.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
   while(index < d_const.num_particle)
   {
     if(r_loss[index] == 0)
     {
-      double gm1 = r_w[index]/d_const.mass;  
-      double btgm = sqrt(gm1*(gm1+2.0)); 
-      double p = btgm * d_const.mass/CLIGHT;
+      double gm1 = r_w[index] / d_const.mass;  
+      double btgm = sqrt(gm1 * (gm1 + 2.0)); 
+      double p = btgm * d_const.mass / CLIGHT;
       if (r_blh > 1e-10)
-        r_xp[index] += r_blh * d_const.charge/p; 
+        r_xp[index] += r_blh * d_const.charge / p; 
       if (r_blv > 1e-10)
-        r_yp[index] += r_blv * d_const.charge/p; 
+        r_yp[index] += r_blv * d_const.charge / p; 
     }
     index += stride;
   }
 }
 
 __global__ 
-void SimulateHalfQuadKernel(double* r_x, double* r_y, double* r_phi, double* r_xp, 
-                  double* r_yp, double* r_w, uint* r_loss, double r_length, 
-                  double r_aper, double r_gradient, uint r_elem_indx)
+void SimulateHalfQuadKernel(double* r_x, double* r_y, double* r_phi, 
+  double* r_xp, double* r_yp, double* r_w, uint* r_loss, double r_length, 
+  double r_aper, double r_gradient, uint r_elem_indx)
 {
   double aper2 = r_aper;
   aper2 *= aper2;
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
-  uint stride = blockDim.x*gridDim.x;
-  double qg = r_gradient*d_const.charge;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
+  double qg = r_gradient * d_const.charge;
   while(index < d_const.num_particle)
   {
     if(r_loss[index] == 0)
@@ -159,45 +162,40 @@ void SimulateHalfQuadKernel(double* r_x, double* r_y, double* r_phi, double* r_x
 
       if(qg == 0)
       {
-        r_x[index] = x + xp * r_length*0.5;
-        r_y[index] = y + yp * r_length*0.5;
+        r_x[index] = x + xp * r_length * 0.5;
+        r_y[index] = y + yp * r_length * 0.5;
       }
       else 
       {
-        double gamma1 = w/d_const.mass;
-        double bg = sqrt(gamma1*(gamma1+2.0)*(1.0+xp*xp+yp*yp));
+        double gamma1 = w / d_const.mass;
+        double bg = sqrt(gamma1 * (gamma1 + 2.0) * (1.0 + xp * xp + yp * yp));
         double absqg = qg > 0.0 ? qg : -qg;
-        double k = sqrt(absqg/(bg*d_const.mass)*CLIGHT);
-        double inv_k = 1.0/k;
-        double kds = r_length*0.25*k;
+        double k = sqrt(absqg / (bg * d_const.mass) *CLIGHT);
+        double inv_k = 1.0 / k;
+        double kds = r_length * 0.25 * k;
         double s, c, sh = sinh(kds), ch = cosh(kds);
         sincos(kds, &s, &c);
-        double  xx, yy, sovk = s*inv_k, shovk = sh*inv_k, sk = s*k, shk = sh*k;
+        double  xx, yy, sovk = s * inv_k, shovk = sh * inv_k, sk = s * k, 
+		shk = sh * k;
         if(qg> 0.0)
         {
-          xx=c*x+sovk*xp; xp=-sk*x+c*xp; x=xx;
-          yy=ch*y+shovk*yp; yp=shk*y+ch*yp; y=yy;
+          xx = c * x + sovk * xp; xp = -sk * x + c * xp; x = xx;
+          yy = ch * y + shovk * yp; yp = shk * y + ch * yp; y = yy;
         }
         else
         {
-          xx=ch*x+shovk*xp; xp=shk*x+ch*xp; x=xx;
-          yy=c*y+sovk*yp; yp=-sk*y+c*yp; y=yy;
+          xx = ch * x + shovk * xp; xp = shk * x + ch * xp; x = xx;
+          yy = c * y + sovk * yp; yp = -sk * y + c * yp; y=yy;
         } 
-  /*
-        bg = sqrt(gamma1*(gamma1+2.0)*(1.0+xp*xp+yp*yp));
-        k = sqrt(qg/(bg*d_const.mass)*CLIGHT);
-        kds = r_length*0.25*k;
-        sincos(kds, &s, &c); sh = sinh(kds); ch = cosh(kds);
-  */
         if(qg > 0.0)
         {
-          xx=c*x+sovk*xp; xp=-sk*x+c*xp; x=xx;
-          yy=ch*y+shovk*yp; yp=shk*y+ch*yp; y=yy;
+          xx = c * x + sovk * xp; xp = -sk * x + c * xp; x = xx;
+          yy = ch * y + shovk * yp; yp = shk * y + ch * yp; y = yy;
         }
         else
         {
-          xx=ch*x+shovk*xp; xp=shk*x+ch*xp; x=xx;
-          yy=c*y+sovk*yp; yp=-sk*y+c*yp; y=yy;
+          xx = ch * x + shovk * xp; xp = shk * x + ch * xp; x = xx;
+          yy = c * y + sovk * yp; yp = -sk * y + c * yp; y = yy;
         } 
         r_x[index] = x;
         r_y[index] = y;
@@ -205,13 +203,14 @@ void SimulateHalfQuadKernel(double* r_x, double* r_y, double* r_phi, double* r_x
         r_yp[index] = yp;
       }
       // at the center & the end of the quad, check for loss
-      if(aper2 != 0 && x*x+y*y > aper2)
+      if(aper2 != 0 && x * x + y * y > aper2)
         r_loss[index] = r_elem_indx;
       else // if not lost, then check phase 
       {
-        double gm1 = w/d_const.mass;
-        double bt = sqrt(gm1*(gm1+2.0))/(gm1+1.0);
-        r_phi[index] += TWOPI*r_length*0.5/(d_wavelen*bt); // absolute phase
+        double gm1 = w / d_const.mass;
+        double bt = sqrt(gm1 * (gm1 + 2.0)) / (gm1 + 1.0);
+	// absolute phase
+        r_phi[index] += TWOPI * r_length * 0.5 / (d_wavelen * bt); 
       }// if aper2
     } // if loss
     index += stride;
@@ -221,7 +220,7 @@ void SimulateHalfQuadKernel(double* r_x, double* r_y, double* r_phi, double* r_x
 __global__
 void UpdateWaveLengthKernel(double r_freq)
 {
-  d_wavelen = CLIGHT/r_freq; // in meter
+  d_wavelen = CLIGHT / r_freq; // in meter
 }
 
 __global__
@@ -233,9 +232,8 @@ void SimulateRFGapFirstHalfKernel(double* r_x, double* r_y, double* r_phi,
                             double r_qlen2 = 0.0, bool flag_ccl = true)
 {
   RFGapParameter gap = *r_elem;
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
-
-  uint stride = blockDim.x*gridDim.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
   while(index < d_const.num_particle)
   {
     if(r_loss[index] == 0)
@@ -246,42 +244,42 @@ void SimulateRFGapFirstHalfKernel(double* r_x, double* r_y, double* r_phi,
       double yp = r_yp[index];
       double phi = r_phi[index];
       double w = r_w[index];
-      double cell_len = r_length + r_qlen1*0.5 + r_qlen2*0.5;
-      double dd1 = 0.5*cell_len - gap.dg - 0.5*r_qlen1; 
+      double cell_len = r_length + r_qlen1 * 0.5 + r_qlen2 * 0.5;
+      double dd1 = 0.5 * cell_len - gap.dg - 0.5 * r_qlen1; 
       r_x[index] = x + dd1 * xp;
       r_y[index] = y + dd1 * yp;
-      double wave_len = CLIGHT/gap.frequency;
+      double wave_len = CLIGHT / gap.frequency;
       d_wavelen = wave_len;
       if(gap.amplitude == 0.0)
       {
-        double gm1 = w/d_const.mass;
-        double bt = sqrt(gm1*(gm1+2.0))/(gm1+1.0);
-        r_phi[index] += TWOPI * dd1/(d_wavelen*bt); // absolute phase
+        double gm1 = w / d_const.mass;
+        double bt = sqrt(gm1 * (gm1 + 2.0)) / (gm1 + 1.0);
+        r_phi[index] += TWOPI * dd1 / (d_wavelen * bt); // absolute phase
       }
       else
       {
-        double gam = r_design_w_in/d_const.mass;
-        double beta_in = sqrt((gam+2.0)*gam)/(gam+1.0);
-        gam = w/d_const.mass;
-        double beta = sqrt((gam+2.0)*gam)/(gam+1.0);
+        double gam = r_design_w_in / d_const.mass;
+        double beta_in = sqrt((gam + 2.0) * gam) / (gam + 1.0);
+        gam = w / d_const.mass;
+        double beta = sqrt((gam + 2.0) * gam) / (gam + 1.0);
         if(!flag_ccl) // dtl
         {
           double dps = gap.phase_ref - r_phi_in;
-          double d_cell_len = cell_len - gap.beta_center*wave_len;
-          double dphi_qlen1 = TWOPI*0.5*r_qlen1/(beta*wave_len);
+          double d_cell_len = cell_len - gap.beta_center * wave_len;
+          double dphi_qlen1 = TWOPI * 0.5 * r_qlen1 / (beta * wave_len);
           double dphi_clen = 0.0;
           if(d_cell_len > 1e-15 || d_cell_len < -1e-15)
-            dphi_clen = PI*d_cell_len/(beta*wave_len);
-//          r_phi[index] = phi - ((beta-beta_in)*(PI*gap.cell_length_over_beta_lambda+dps)/beta-dps) + dphi_clen;
-          r_phi[index] = phi + (1.0 - (beta-beta_in)/beta)*
+            dphi_clen = PI * d_cell_len / (beta * wave_len);
+          r_phi[index] = phi + (1.0 - (beta - beta_in) / beta)*
             (PI*gap.cell_length_over_beta_lambda + dps) + dphi_clen - dphi_qlen1;
         }
         else // ccl
         {
           double dps = gap.phase_ref - r_phi_in;
-          double betag = cell_len/(gap.cell_length_over_beta_lambda * wave_len);
-          r_phi[index] = phi + (1.0 - (beta-beta_in)*betag/(beta*beta_in))*
-                (PI*gap.cell_length_over_beta_lambda + dps);
+          double betag = cell_len / (gap.cell_length_over_beta_lambda * 
+	    wave_len);
+          r_phi[index] = phi + (1.0 - (beta - beta_in) * betag / 
+	    (beta * beta_in)) * (PI * gap.cell_length_over_beta_lambda + dps);
         }
       }
     }// if loss
@@ -290,20 +288,23 @@ void SimulateRFGapFirstHalfKernel(double* r_x, double* r_y, double* r_phi,
 }
 
 __device__
-void GetTransitTimeFactors(double* r_t, double* r_tp, double* r_sp, double r_beta, double r_betag, 
-                           double r_betamin, double r_ta0, double r_ta1, double r_ta2, double r_ta3, 
-                           double r_ta4, double r_ta5, double r_sa1, double r_sa2, double r_sa3, 
-                           double r_sa4, double r_sa5)
+void GetTransitTimeFactors(double* r_t, double* r_tp, double* r_sp, 
+  double r_beta, double r_betag, double r_betamin, double r_ta0, double r_ta1, 
+  double r_ta2, double r_ta3, double r_ta4, double r_ta5, double r_sa1, 
+  double r_sa2, double r_sa3, double r_sa4, double r_sa5)
 {
   double beta = r_beta;
   if (r_beta > 1.1 * r_betag)
     beta = r_betag;
   else if (r_beta < r_betamin)
     beta = r_betamin;
-  *r_t = r_ta0 + beta * (r_ta1 + beta * (r_ta2 + beta * (r_ta3 + beta *(r_ta4 + beta * r_ta5))));
-  double coef = beta * beta/(TWOPI * r_betag); 
-  *r_tp = coef * (r_ta1 + beta * (2*r_ta2 + beta * (3*r_ta3 + beta * (4*r_ta4 + 5*beta*r_ta5))));
-  *r_sp = -coef * (r_sa1 + beta * (2*r_sa2 + beta * (3*r_sa3 + beta * (4*r_sa4 + 5*beta*r_sa5))));
+  *r_t = r_ta0 + beta * (r_ta1 + beta * (r_ta2 + beta * (r_ta3 + beta * 
+    (r_ta4 + beta * r_ta5))));
+  double coef = beta * beta / (TWOPI * r_betag); 
+  *r_tp = coef * (r_ta1 + beta * (2*r_ta2 + beta * (3 * r_ta3 + beta * 
+    (4 * r_ta4 + 5 * beta * r_ta5))));
+  *r_sp = -coef * (r_sa1 + beta * (2*r_sa2 + beta * (3 * r_sa3 + beta * 
+    (4 * r_sa4 + 5 * beta * r_sa5))));
 }
 
 __global__
@@ -313,174 +314,171 @@ void SimulateRFGapSecondHalfKernel(double* r_x, double* r_y, double* r_phi,
                             double r_phi_in, RFGapParameter* r_elem, 
                             double r_length, uint r_ccl_cell_num, 
                             double r_qlen1 = 0.0, double r_qlen2 = 0.0,
-                            bool flag_ccl = true)//, bool flag_horder_tf = true)
+                            bool flag_ccl = true) //, bool flag_horder_tf)
 {
   RFGapParameter gap = *r_elem;
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
-  uint stride = blockDim.x*gridDim.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
   while(index < d_const.num_particle)
   { 
     if(r_loss[index] == 0)
     {
-      double cell_len = r_length + r_qlen1*0.5 + r_qlen2*0.5;
-      double dd2 = 0.5*cell_len+gap.dg-r_qlen2*0.5;
+      double cell_len = r_length + r_qlen1 * 0.5 + r_qlen2 * 0.5;
+      double dd2 = 0.5 * cell_len + gap.dg - r_qlen2 * 0.5;
       double x = r_x[index];
       double y = r_y[index];
       double xp = r_xp[index];
       double yp = r_yp[index];
-      double inv_mass = 1.0/d_const.mass;
+      double inv_mass = 1.0 / d_const.mass;
       double phi = r_phi[index];
       double w = r_w[index];
-      double gm_in = r_design_w_in*inv_mass+1.0;
-      double beta_in = sqrt(1.0-1.0/(gm_in*gm_in));
-      double gam = w*inv_mass;
-      double bg1 = sqrt(gam*(gam+2.0));    
-      double beta = bg1/(gam+1.0);
+      double gm_in = r_design_w_in * inv_mass + 1.0;
+      double beta_in = sqrt(1.0 - 1.0 / (gm_in * gm_in));
+      double gam = w * inv_mass;
+      double bg1 = sqrt(gam * (gam + 2.0));    
+      double beta = bg1 / (gam + 1.0);
       double t_fac = gap.t;
       double tp_fac = gap.tp;
       double sp_fac = gap.sp;
-//        if (flag_horder_tf)
-          GetTransitTimeFactors(&t_fac, &tp_fac, &sp_fac, beta, 
-            gap.fit_beta_center, gap.fit_beta_min, 
-            gap.fit_t0, gap.fit_t1, gap.fit_t2, gap.fit_t3, gap.fit_t4, gap.fit_t5, 
-            gap.fit_s1, gap.fit_s2, gap.fit_s3, gap.fit_s4, gap.fit_s5);
+//      if (flag_horder_tf)
+      GetTransitTimeFactors(&t_fac, &tp_fac, &sp_fac, beta, 
+         gap.fit_beta_center, gap.fit_beta_min, 
+         gap.fit_t0, gap.fit_t1, gap.fit_t2, gap.fit_t3, gap.fit_t4, gap.fit_t5,
+         gap.fit_s1, gap.fit_s2, gap.fit_s3, gap.fit_s4, gap.fit_s5);
 
-      if(gap.amplitude== 0.0 || (flag_ccl && beta < gap.fit_beta_min)) 
+      if(gap.amplitude == 0.0 || (flag_ccl && beta < gap.fit_beta_min)) 
       {
-        r_x[index] = x + dd2*xp;
-        r_y[index] = y + dd2*yp;
-        double gm1 = r_w[index]/d_const.mass;
-        double bt = sqrt(gm1*(gm1+2.0))/(gm1+1.0);
-        r_phi[index] += TWOPI*dd2/(d_wavelen*bt); // absolute phase
+        r_x[index] = x + dd2 * xp;
+        r_y[index] = y + dd2 * yp;
+        double gm1 = r_w[index] / d_const.mass;
+        double bt = sqrt(gm1 * (gm1 + 2.0)) / (gm1 + 1.0);
+        r_phi[index] += TWOPI * dd2 / (d_wavelen * bt); // absolute phase
       }
       else
       {
-        double wave_len = CLIGHT/gap.frequency;
-        double cl = cell_len/gap.cell_length_over_beta_lambda;
-        double betag_ccl = cl/wave_len;
+        double wave_len = CLIGHT / gap.frequency;
+        double cl = cell_len / gap.cell_length_over_beta_lambda;
+        double betag_ccl = cl / wave_len;
         double betag;
         if(flag_ccl) // ccl
           betag = gap.beta_center;// beta at the center of the gap
         else // dtl
           betag = betag_ccl;
-        double betag2 = betag*betag;
-        double gmg = 1.0/sqrt(1.0-betag2);
-        double inv_gmg2 = 1.0/(gmg*gmg);
+        double betag2 = betag * betag;
+        double gmg = 1.0 / sqrt(1.0 - betag2);
+        double inv_gmg2 = 1.0 / (gmg * gmg);
         double q = d_const.charge;
         q = q > 0.0 ? q : -q;
-        double gm_out = gap.energy_out*inv_mass+1.0;
-        double beta_out = sqrt(1.0-1.0/(gm_out*gm_out));
-        double efl = gap.amplitude*cell_len;
-    ///* Full Bessel Function
-        double concomm = q*efl/(d_const.mass*betag2);
-        double concomm1 = concomm*inv_gmg2/gmg;
-        double con1 = PI*concomm1;
-        double con2nex = concomm*inv_gmg2;
+        double gm_out = gap.energy_out * inv_mass + 1.0;
+        double beta_out = sqrt(1.0 - 1.0 / (gm_out * gm_out));
+        double efl = gap.amplitude * cell_len;
+	// Full Bessel Function
+        double concomm = q * efl / (d_const.mass * betag2);
+        double concomm1 = concomm * inv_gmg2 / gmg;
+        double con1 = PI * concomm1;
+        double con2nex = concomm * inv_gmg2;
         double con5nex, tw, inv_fkis, inv_gmgcl;
-        if(flag_ccl)//ccl
+        if(flag_ccl) //ccl
         {
-          inv_gmgcl = 1.0/(gmg*betag*wave_len);
-          inv_fkis = betag*wave_len/TWOPI;
-          con5nex = concomm*(t_fac*inv_fkis-betag_ccl*wave_len*tp_fac*inv_gmg2);
-          tw = t_fac-TWOPI*tp_fac*(beta_in/beta-1.0)*betag_ccl/beta_in;
+          inv_gmgcl = 1.0 / (gmg * betag * wave_len);
+          inv_fkis = betag * wave_len / TWOPI;
+          con5nex = concomm * (t_fac * inv_fkis - betag_ccl * wave_len * 
+	    tp_fac * inv_gmg2);
+          tw = t_fac - TWOPI * tp_fac * (beta_in / beta - 1.0) * 
+	    betag_ccl / beta_in;
         }
         else // dtl
         {
-          inv_gmgcl = 1.0/(gmg*cl);
-          inv_fkis = cl/TWOPI;
-          con5nex = concomm*(t_fac*inv_fkis-beta_in*wave_len*tp_fac*inv_gmg2);
+          inv_gmgcl = 1.0 / (gmg * cl);
+          inv_fkis = cl / TWOPI;
+          con5nex = concomm * (t_fac * inv_fkis - beta_in * wave_len * tp_fac 
+	    * inv_gmg2);
           tw = t_fac;
-//          tw = t_fac-TWOPI*tp_fac*(beta_in/beta-1.0);
         }
-        double con5nex1 = concomm1*t_fac;
-        double con5nex2 = -con2nex*t_fac*inv_fkis;
-    //*/ 
-        double fkr = TWOPI*inv_gmgcl;
+        double con5nex1 = concomm1 * t_fac;
+        double con5nex2 = -con2nex * t_fac * inv_fkis;
+        double fkr = TWOPI * inv_gmgcl;
         double sinps, cosps;
         sincos(gap.phase_ref, &sinps, &cosps);
         double phi1, sinp1, cosp1;
         if(flag_ccl) // ccl
-          phi1 = phi + gap.phase_shift - TWOPI*gap.dg/(beta*wave_len) + r_ccl_cell_num * PI;
+          phi1 = phi + gap.phase_shift - TWOPI * gap.dg / (beta * wave_len) + 
+	    r_ccl_cell_num * PI;
         else // dtl
           phi1 = phi + gap.phase_shift;
         sincos(phi1, &sinp1, &cosp1);
-        double prome1 = -con1*(tp_fac*(sinp1-sinps)+sp_fac*(cosp1-cosps));
-        sincos(phi1+prome1, &sinp1, &cosp1);
-        
+        double prome1 = -con1 * (tp_fac * (sinp1 - sinps) + sp_fac * 
+	  (cosp1 - cosps));
+        sincos(phi1 + prome1, &sinp1, &cosp1);
 
-        double rs_p = x*x + y*y;
-        double rrp = x*xp+y*yp;
-        double ris = 0.0, fkrris=0.0, rpris=0.0, bes1covr = 0.0;
-    ///* Full Bessel Function
+        double rs_p = x * x + y * y;
+        double rrp = x * xp + y * yp;
+        double ris = 0.0, fkrris = 0.0, rpris = 0.0, bes1covr = 0.0;
+	// Full Bessel Function
         ris = sqrt(rs_p);
-        fkrris = fkr*ris;
+        fkrris = fkr * ris;
         double b0c = Bessi0c(fkrris);
         double b1c = Bessi1c(fkrris);
         double b1p = Bessi1p(fkrris);
         if(ris != 0.0)
-          bes1covr = b1c/ris;
+          bes1covr = b1c / ris;
         else
-          bes1covr = fkr*0.5;
-        double delte = q*efl*(tw*b0c*cosp1+((tw-TWOPI*tp_fac)/
-              gmg*bes1covr+tw/gmg*fkr*b1p-tw*gmg*bes1covr)*rrp*sinp1);
-
-    //*/
+          bes1covr = fkr * 0.5;
+        double delte = q * efl * (tw * b0c * cosp1 + ((tw - TWOPI * tp_fac) /
+	  gmg * bes1covr + tw / gmg * fkr * b1p - tw * gmg * bes1covr) * 
+	  rrp * sinp1);
         w += delte;
-        gam = w*inv_mass;
-        double bg = sqrt(gam*(gam+2.0));
-        beta = bg/(gam+1.0);
-        double bgr = bg1/bg;
-
-    ///* Full Bessel Function
-        double onema = 1.0 - (con5nex*bes1covr+con5nex1*b1p
-                                +con5nex2*bes1covr)*cosp1;
-        double dovbl = con2nex*bes1covr*tw*sinp1;
-    //*/
-        double bgrovonema = bgr/onema;
-
-
-        xp = -dovbl*x+bgrovonema*xp;
-        x = x*onema+dd2*xp;
-        yp = -dovbl*y+bgrovonema*yp;
-        y = y*onema+dd2*yp;
+        gam = w * inv_mass;
+        double bg = sqrt(gam * (gam + 2.0));
+        beta = bg / (gam + 1.0);
+        double bgr = bg1 / bg;
+	// Full Bessel Function
+        double onema = 1.0 - (con5nex * bes1covr + con5nex1 * b1p
+		      + con5nex2 * bes1covr) * cosp1;
+        double dovbl = con2nex * bes1covr * tw * sinp1;
+        double bgrovonema = bgr / onema;
+        xp = -dovbl * x + bgrovonema * xp;
+        x = x * onema + dd2 * xp;
+        yp = -dovbl * y + bgrovonema * yp;
+        y = y * onema + dd2 * yp;
         if(rs_p > 0.0)
-        {
-          rpris = rrp/ris;
-        }
+          rpris = rrp / ris;
 
-    ///* Full Bessel Function
-        double prome = 2.0*con1*(-tp_fac*b0c+ris*tw*b1c*
-                 inv_gmgcl)*(sinp1-sinps)-efl*inv_mass*tw*b1c*rpris*
-                 (cosp1-cosps);
+	// Full Bessel Function
+        double prome = 2.0 * con1 * (-tp_fac * b0c + ris * tw * b1c *
+	   inv_gmgcl) * (sinp1 - sinps) - efl * inv_mass * tw * b1c * rpris *
+	   (cosp1 - cosps);
 
-    //*/
         double phi_new;
         if(flag_ccl) // ccl
         {
           double dps = r_phi_in - gap.phase_ref;
-          phi_new = phi + (1.0 - (beta-beta_out)*betag_ccl/(beta*beta_out))*
-                   (PI*gap.cell_length_over_beta_lambda + dps) + prome; // absolute phase
+          phi_new = phi + (1.0 - (beta - beta_out) * betag_ccl / 
+	    (beta * beta_out)) * (PI*gap.cell_length_over_beta_lambda + dps) 
+	    + prome; // absolute phase
         }
         else // dtl
         {
           double d_cell_len = cell_len - gap.beta_center * wave_len;
-          double dphi_qlen2 = TWOPI*0.5*r_qlen2/(beta*wave_len);
+          double dphi_qlen2 = TWOPI * 0.5 * r_qlen2 / (beta * wave_len);
           double dphi_clen = 0.0;
           if(d_cell_len > 1e-15 || d_cell_len < -1e-15)
-            dphi_clen = PI*d_cell_len/(beta*wave_len);
+            dphi_clen = PI * d_cell_len / (beta * wave_len);
           double dps = gap.phase_ref - r_phi_in;
-//          r_phi[index] = phi-(beta-beta_out)/beta*(PI*gap.cell_length_over_beta_lambda + dps)+prome+dps+dphi_clen;
-          phi_new = phi + (1.0 -(beta-beta_out)/beta)*(PI*gap.cell_length_over_beta_lambda + dps) +
-                         prome + dphi_clen - dphi_qlen2; // absolute phase
+          phi_new = phi + (1.0 - (beta - beta_out) / beta) * (PI * 
+	    gap.cell_length_over_beta_lambda + dps) + prome + 
+	    dphi_clen - dphi_qlen2; // absolute phase
         }
 
-        if(w <= 0.0 || x != x || y != y || xp != xp || yp != yp || w != w || phi_new != phi_new)
+        if(w <= 0.0 || x != x || y != y || xp != xp || yp != yp || w != w || 
+	  phi_new != phi_new)
         {
           r_loss[index] = 33333333; //TODO: change this.
           if (w > 0.0)
           {
             printf("NAN error, onema= %f, dovbl = %f\n", onema, dovbl);
-            printf("NAN error, coordinates : %f, %f, %f, %f, %f, %f\n", x, xp, y, yp, r_phi[index], w);
+            printf("NAN error, coordinates : %f, %f, %f, %f, %f, %f\n", x, xp, 
+	      y, yp, r_phi[index], w);
           }
         }
         else

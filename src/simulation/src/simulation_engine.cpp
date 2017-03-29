@@ -3,13 +3,27 @@
 #include "simulation_engine_cu.h"
 #include "timer.h"
 
+/*!
+ * \brief Constructor
+ */
+SimulationEngine::SimulationEngine() : PyWrapper(), beam_(NULL), 
+  beamline_(NULL), spch_(NULL) 
+{
+}
+
+/*!
+ * \brief Destructor
+ *
+ * \callgraph
+ */
 SimulationEngine::~SimulationEngine()
 {
-  if(initialized_)
+  if(beam_ != NULL)
     Cleanup();
 }
+
 /*!
- * \brief Initialize the simulation setting
+ * \brief Initialize simulation setting
  * \param r_beam Beam*
  * \param r_bl   BeamLine*
  * \param r_spch SpaceCharge*
@@ -35,18 +49,26 @@ void SimulationEngine::InitEngine(Beam* r_beam, BeamLine* r_bl,
   d_const.charge = r_beam->charge;
   SetConstOnDevice(&d_const);
   Init(beam_, beamline_, spch_, param_);
-  initialized_ = true;
   prev_end_element_index_ = std::numeric_limits<uint>::max();
 }
 
+/*!
+ * \brief Reset some of the bookkeeping parameters when simulation 
+ *	restarts.
+ *
+ * \callgraph
+ */
 void SimulationEngine::ResetEngine()
 {
   Reset();
 }
+
 /*!
  * \brief Simulate inclusively from an element to another.
  * \param r_start Name of the start element
  * \param r_end Name of the end element
+ *
+ * \callgraph
  */
 void SimulationEngine::Simulate(std::string r_start, std::string r_end)
 {
@@ -67,45 +89,86 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
       UpdateBlIndex(i);
       (*beamline_)[i]->Accept(this);
     }
-  StopTimer(&start, &stop, "whole Simulation");
+  StopTimer(&start, &stop, "Whole simulation");
   if(param_.graphics_on)
     beam_->UpdateStatForPlotting();
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(ApertureCircular* r_aper)
 {
   SimulateApertureCircular(r_aper);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(ApertureRectangular* r_aper)
 {
   SimulateApertureRectangular(r_aper);
 }
+
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(Buncher* r_buncher)
 {
   SimulateBuncher(r_buncher);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(Dipole* r_dipole)
 {
   SimulateDipole(r_dipole);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(Diagnostics* r_diag)
 {
   SimulateDiagnostics(r_diag);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(Drift* r_drift)
 {
   SimulateDrift(r_drift);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(Quad* r_quad)
 {
   SimulateQuad(r_quad);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(RFGap* r_gap)
 {
   if (r_gap->GetType() == "RFGap-DTL")
@@ -114,16 +177,31 @@ void SimulationEngine::Visit(RFGap* r_gap)
     SimulateCCLRFGap(r_gap);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(Rotation* r_rot)
 {
   SimulateRotation(r_rot);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(SpaceChargeCompensation* r_spcomp)
 {
   SimulateSpaceChargeCompensation(r_spcomp);
 }
 
+/*!
+ * \brief Implementation of the visitor pattern.
+ *
+ * \callgraph
+ */
 void SimulationEngine::Visit(Steerer* r_steerer)
 {
   SimulateSteerer(r_steerer);
