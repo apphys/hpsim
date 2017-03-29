@@ -14,11 +14,14 @@ struct BeamLine : public PyWrapper
   ~BeamLine();
   void AddElement(BeamLineElement*);
   uint GetSize() const;
-  uint GetElementModelIndex(std::string) const throw(BeamLineElementNotFoundException);
+  uint GetElementModelIndex(std::string) const 
+      throw(BeamLineElementNotFoundException);
   std::string GetElementName(uint) const;
-  std::vector<std::string> GetElementNames(std::string r_begin = "", std::string r_end = "", std::string r_type = "") const;
-  uint GetNumOfMonitors(std::string r_begin = "", std::string r_end = "") const; // inclusive
-  std::vector<uint> GetMonitoredElementsIndices(std::string r_begin = "", std::string r_end = "") const;
+  std::vector<std::string> GetElementNames(std::string r_begin = "", 
+      std::string r_end = "", std::string r_type = "") const;
+  uint GetNumOfMonitors(std::string r_begin = "", std::string r_end = "") const;
+  std::vector<uint> GetMonitoredElementsIndices(std::string r_begin = "", 
+      std::string r_end = "") const;
   void Print() const;
   void Print(std::string, std::string) const;
   const BeamLineElement* operator[](uint) const;
