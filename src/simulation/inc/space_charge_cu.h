@@ -1,5 +1,6 @@
 #ifndef SPACE_CHARGE_KERNEL_CALL_H
 #define SPACE_CHARGE_KERNEL_CALL_H
+
 #include "space_charge_parameter.h"
 
 void SetParameters(Beam*, uint, uint, double, uint, double);

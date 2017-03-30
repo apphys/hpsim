@@ -1,21 +1,18 @@
 #ifndef SPACE_CHARGE_H
 #define SPACE_CHARGE_H
-#include <cuda_runtime_api.h> // double2
+
+#include <cuda_runtime_api.h> // for double2
 #include "beam.h"
 #include "space_charge_parameter.h"
 #include "py_wrapper.h"
 
+/*!
+ * \brief Space charge base class.
+ */
 class SpaceCharge : public PyWrapper
 {
 public:
-  SpaceCharge(uint r_nx, uint r_nz, uint r_ny = 0) 
-    : PyWrapper(), nx_(r_nx), ny_(r_ny), nz_(r_nz), 
-      adj_bunch_(0), fraction_(1.0), interval_(0.01),
-      adj_bunch_w_(0.0), sigr_old_(0.0), sigz_old_(0.0),
-      gm_old_(0.0), good_cnt_old_(0), dist_accum_(0.0),
-      mesh_w_(0.0), nx_init_(r_nx), ny_init_(r_ny), 
-      nz_init_(r_nz), interval_init_(0.01), remesh_val_(0.05)
-  {}
+  SpaceCharge(uint r_nx, uint r_nz, uint r_ny = 0);
   virtual ~SpaceCharge(){}
   virtual void Start(Beam*, double r_length) = 0;
   virtual void SetMeshSize(uint r_nx, uint r_nz, uint r_ny = 0)
@@ -89,22 +86,55 @@ public:
     remesh_val_ = r_val;
   }
 protected:
-  uint nx_, ny_, nz_;
+  //! Horizontal mesh size, transverse mesh size for SCHEFF
+  uint nx_;
+  //! Vertical mesh size
+  uint ny_;
+  //! longitudinal mesh size
+  uint nz_;
+  //! Initial mesh sizes
   uint nx_init_, ny_init_, nz_init_;
+  //! Number of adjacent bunches
   uint adj_bunch_;
+  //! Fraction of effective current due to space charge compensation
   double fraction_;
+  //! Maximum spacing between space charge kicks
   double interval_;
+  //! Initial maximum spacing between space charge kicks
   double interval_init_;
+  //! Cutoff energy (MeV) above which the adjacent bunches are 
+  //! no longer used in space charge calculation
   double adj_bunch_w_;
+  //! Cutoff energy for the beam at which the mesh size will
+  //! decrease by nr/2 and nz/2 and interval increase by 4.This enables 
+  //! automatic transition to faster space charge calculation
   double mesh_w_;
+  //! Previous transverse sigma 
   double sigr_old_;
+  //! Previous longitudinal sigma 
   double sigz_old_;
+  //! Previous gamma
   double gm_old_;
+  //! Previous number of good particles (not lost tranversely or longitudinally)
   uint good_cnt_old_;
-  double dist_accum_;
+  //! Remeshing factor (concept borrowed from ASTRA 
+  //! (http://www.desy.de/~mpyflo/)
+  //! default is 0.05) where zero means remesh before every space-charge kick,
+  //! positive means adaptive algorithm determines how much beam shape can 
+  //! change before mesh must be redone
   double remesh_val_;
 };
 
+/*!
+ * \brief 2D SCHEFF (Space CHarge EFFect) class. Calculates the radial and 
+ * longitudinal space charge forces for cylindrically symmetric beam 
+ * distribution.
+ *
+ * Algorithm details see 
+ * X. Pang, L. Rybarcyk, "GPU Accelerated Online Beam Dynamics Simulator 
+ * for Linear Particle Accelerators", Computer Physics Communications, 
+ * 185, pp. 744-753, 2014.
+ */
 class Scheff : public SpaceCharge
 {
 public:
@@ -114,15 +144,24 @@ public:
   virtual void SetMeshSize(uint r_nx, uint r_nz, uint r_ny = 0);
 
 private:
-  // for dim, the first num is what the consecutive elems share 
 #ifdef DOUBLE_PRECISION
+  //! Device pointer to charge density table (2D, nz by nx) 
+  //! consecutive threads share the same nz 
   double* d_bin_tbl_;
-  double2* d_fld_tbl2_; // nz*nr
+  //! Device pointer to final Green's function table(2D, nz by nx) 
+  //! consecutive threads share the same nz 
+  double2* d_fld_tbl2_; 
 #else
-  float* d_bin_tbl_;    // nz*nr 
-  float2* d_fld_tbl2_; // nz*nr
+  //! Device pointer to charge density table (2D, nz by nx), 
+  //! consecutive threads share the same nz 
+  float* d_bin_tbl_;   
+  //! Device pointer to final Green's function table (2D, nz by nx) 
+  //! consecutive threads share the same nz 
+  float2* d_fld_tbl2_;
 #endif
-  double2* d_fld_tbl1_; // (nr+1)*nr*nz
+  //! Device pointer to the intermediate Green's function table 
+  //! (3D, nx+1 by nx by nz) consecutive threads share the same nx
+  double2* d_fld_tbl1_; 
 };
 
 #endif
