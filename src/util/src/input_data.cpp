@@ -5,6 +5,9 @@
 #include "input_data.h"
 #include "utility.h"
 
+/*!
+ * \brief Process the input txt file for online mode.
+ */
 InputData ProcessInputFile(std::string r_file)
 {
   InputData rlt; 
@@ -22,7 +25,8 @@ InputData ProcessInputFile(std::string r_file)
       if(!rlt.db.empty()) 
       {
         std::cout << "DB files: ";
-        std::copy(rlt.db.begin(), rlt.db.end(), std::ostream_iterator<std::string>(std::cout, "  "));
+        std::copy(rlt.db.begin(), rlt.db.end(), 
+	  std::ostream_iterator<std::string>(std::cout, "  "));
         std::cout << std::endl;
         db_not_found = false;
       }
@@ -36,7 +40,8 @@ InputData ProcessInputFile(std::string r_file)
     {
       rlt.libdb = Split(tmp);       
       std::cout << "DB external libraries: " ;
-      std::copy(rlt.libdb.begin(), rlt.libdb.end(), std::ostream_iterator<std::string>(std::cout, "  "));
+      std::copy(rlt.libdb.begin(), rlt.libdb.end(), 
+	std::ostream_iterator<std::string>(std::cout, "  "));
       std::cout << std::endl;
     }
     if(StartWithPattern(tmp, "beam"))
@@ -95,7 +100,8 @@ InputData ProcessInputFile(std::string r_file)
         std::cout << "server: " << server_tmp[0] << std::endl;
       }
       else
-        std::cout << "No server status is defined, use default: off " << std::endl;
+        std::cout << "No server status is defined, use default: off " 
+	  << std::endl;
     }
     if(StartWithPattern(tmp, "output"))
       rlt.put_pvs =  Split(tmp);
@@ -121,4 +127,3 @@ InputData ProcessInputFile(std::string r_file)
   }
   return rlt;
 }
-

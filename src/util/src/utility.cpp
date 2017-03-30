@@ -103,7 +103,8 @@ bool ContainOnlyNumbers(std::string r_str)
     return false;
   std::string::const_iterator it = str.begin();
   while(it != str.end()
-        && (std::isdigit(*it)|| (*it)=='.' || (*it) == '-') || std::tolower(*it) == 'e')
+    && (std::isdigit(*it)|| (*it)=='.' || (*it) == '-') || 
+    std::tolower(*it) == 'e')
     it++;
   return (it == str.end());
 }

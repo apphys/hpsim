@@ -16,4 +16,5 @@ struct InputData
 };
 
 InputData ProcessInputFile(std::string r_file);
+
 #endif

@@ -1,5 +1,6 @@
 #ifndef PLOT_DATA_H
 #define PLOT_DATA_H
+
 #include <vector>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
@@ -39,6 +40,9 @@ struct PlotDataMember
   int size;
 };
 
+/*!
+ * \brief Data to be plotted in online model with 2D graphics
+ */
 struct PlotData
 {
   PlotData();
@@ -63,4 +67,5 @@ struct PlotData
   PlotDataMember<double> loss_ratio;
   PlotDataMember<double> loss_local;
 };
+
 #endif
