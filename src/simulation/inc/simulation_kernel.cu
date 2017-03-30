@@ -497,9 +497,10 @@ void SimulateRFGapSecondHalfKernel(double* r_x, double* r_y, double* r_phi,
 }
 
 __global__
-void SimulateDisplaceKernel(double* r_x, double* r_y, uint* r_loss, double r_dx, double r_dy)
+void SimulateDisplaceKernel(double* r_x, double* r_y, uint* r_loss, double r_dx,
+  double r_dy)
 {
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
   if(index < d_const.num_particle && r_loss[index] == 0)
   {
     r_x[index] -= r_dx;
@@ -508,9 +509,10 @@ void SimulateDisplaceKernel(double* r_x, double* r_y, uint* r_loss, double r_dx,
 }
 
 __global__
-void SimulateRotationKernel(double* r_x, double* r_y, double* r_xp, double* r_yp, uint* r_loss, double r_angle)
+void SimulateRotationKernel(double* r_x, double* r_y, double* r_xp, 
+  double* r_yp, uint* r_loss, double r_angle)
 {
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
   if(index < d_const.num_particle && r_loss[index] == 0)
   {
     double x = r_x[index];
@@ -519,17 +521,18 @@ void SimulateRotationKernel(double* r_x, double* r_y, double* r_xp, double* r_yp
     double yp = r_yp[index];
     double cosa = cos(r_angle);
     double sina = sin(r_angle);
-    r_x[index] = x*cosa + y*sina;
-    r_y[index] = y*cosa - x*sina;
-    r_xp[index] = xp*cosa + yp*sina;
-    r_yp[index] = yp*cosa - xp*sina;
+    r_x[index] = x * cosa + y * sina;
+    r_y[index] = y * cosa - x * sina;
+    r_xp[index] = xp * cosa + yp * sina;
+    r_yp[index] = yp * cosa - xp * sina;
   }
 }
 
 __global__
-void SimulateTiltKernel(double* r_xp, double* r_yp, uint* r_loss, double r_dxp, double r_dyp)
+void SimulateTiltKernel(double* r_xp, double* r_yp, uint* r_loss, 
+  double r_dxp, double r_dyp)
 {
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
   if(index < d_const.num_particle && r_loss[index] == 0)
   {
     r_xp[index] += r_dxp;
@@ -541,13 +544,13 @@ __global__
 void SimulateCircularApertureKernel(double* r_x, double* r_y, uint* r_loss, 
   double r_aper, double* r_center_x, double* r_center_y, int r_elem_indx)
 {
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
   if(index > 0 && index < d_const.num_particle && r_loss[index] == 0)
   {
-    double aper2 = r_aper*r_aper;
+    double aper2 = r_aper * r_aper;
     double x = r_x[index] - r_center_x[0];
     double y = r_y[index] - r_center_y[0];
-    if(x*x + y*y > aper2)
+    if(x * x + y * y > aper2)
       r_loss[index] = r_elem_indx;
   }
 }
@@ -557,7 +560,7 @@ void SimulateRectangularApertureKernel(double* r_x, double* r_y, uint* r_loss,
   double r_aper_xl, double r_aper_xr, double r_aper_yt, double r_aper_yb, 
   double* r_center_x, double* r_center_y, int r_elem_indx)
 {
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
   if(index > 0 && index < d_const.num_particle && r_loss[index] == 0)
   {
     double xmin = r_center_x[0] - r_aper_xl; 
@@ -592,16 +595,18 @@ void SetPlottingDataKernel(double* r_xavg_o, double* r_xavg,
   r_num_loss_o[r_index] = r_num_loss[0]; 
 }
 
-/*! The reason Dipole was not broken up into left edge + half sector + half sector 
-+ right edge is to copy data once (x,y,xp,yp), do as many calc as it can. 
-Breaking into smaller pieces needs more copying*/
+/*! 
+ * The reason Dipole was not broken up into left edge + half sector + 
+ * half sector + right edge is to copy data once (x,y,xp,yp), do as many 
+ * calc as possible. Breaking into smaller pieces needs more copying
+ */
 __global__
 void SimulateFirstHalfDipoleKernel(double* r_x, double* r_y, double* r_phi, 
   double* r_xp,double* r_yp, double* r_w, uint* r_loss, DipoleParameter* r_elem)
 {
   DipoleParameter dipole = *r_elem;
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
-  uint stride = blockDim.x*gridDim.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
 
   while(index < d_const.num_particle)
   {
@@ -612,7 +617,7 @@ void SimulateFirstHalfDipoleKernel(double* r_x, double* r_y, double* r_phi,
       double y = r_y[index];
       double yp = r_yp[index];
 
-      double h = 1.0/dipole.radius;
+      double h = 1.0 / dipole.radius;
       double b1 = dipole.edge_angle_in;
       double hf_g = dipole.half_gap;
       double k1 = dipole.k1;
@@ -621,75 +626,78 @@ void SimulateFirstHalfDipoleKernel(double* r_x, double* r_y, double* r_phi,
       double design_w = dipole.kinetic_energy;
       
       // first edge
-      double c1 = 2.0*hf_g*k1*h;
-      double sinb;// = sin(b1);
-      double inv_cosb;// = 1.0/cos(b1);
+      double c1 = 2.0 * hf_g * k1 * h;
+      double sinb; // = sin(b1);
+      double inv_cosb; // = 1.0/cos(b1);
       sincos(b1, &sinb, &inv_cosb);
-      inv_cosb = 1.0/inv_cosb;
-      double psi = c1*(1.0+sinb*sinb)*inv_cosb*(1.0-c1*k2*sinb*inv_cosb);
-      double r21 = tan(b1)*h;
-      double r43 = tan(b1-psi)*h;
-      xp += r21*x;
-      yp -= r43*y;
+      inv_cosb = 1.0 / inv_cosb;
+      double psi = c1 * (1.0 + sinb * sinb) * inv_cosb * 
+	(1.0 - c1 * k2 * sinb * inv_cosb);
+      double r21 = tan(b1) * h;
+      double r43 = tan(b1 - psi) * h;
+      xp += r21 * x;
+      yp -= r43 * y;
       // first half sector dipole
-      double h2 = h*h;
+      double h2 = h * h;
       double dl = 0.5 * dipole.radius * dipole.angle;
-      double yk2 = findx*h2;
+      double yk2 = findx * h2;
       double yk = sqrt(abs(yk2));
-      double inv_yk = 1.0/yk;
-      double ykl = yk*dl;
-      double xk2 = h2-yk2;
-      double inv_xk2 = 1.0/xk2;
+      double inv_yk = 1.0 / yk;
+      double ykl = yk * dl;
+      double xk2 = h2 - yk2;
+      double inv_xk2 = 1.0 / xk2;
       double xk = sqrt(abs(xk2));
-      double inv_xk = 1.0/xk;
-      double xkl = xk*dl;
+      double inv_xk = 1.0 / xk;
+      double xkl = xk * dl;
       double cxkl = 1.0;
       double sxokx = dl;
       if(xk2 > 0.0)
       {
         cxkl = cos(xkl);
-        sxokx = sin(xkl)*inv_xk;
+        sxokx = sin(xkl) * inv_xk;
       }
       else if(xk2 < 0.0)
       {
         cxkl = cosh(xkl);
-        sxokx = sinh(xkl)*inv_xk;
+        sxokx = sinh(xkl) * inv_xk;
       }
       double cykl = 1.0;
       double syoky = dl;
       if(yk2 > 0.0)
       {
         cykl = cos(ykl);
-        syoky = sin(ykl)*inv_yk;
+        syoky = sin(ykl) * inv_yk;
       }
       else if(yk2 < 0.0)
       {
         cykl = cosh(ykl);
-        syoky = sinh(ykl)*inv_yk;
+        syoky = sinh(ykl) * inv_yk;
       }
       double r11 = cxkl;
       double r12 = sxokx;
-      r21 = -xk2*sxokx;
+      r21 = -xk2 * sxokx;
       double r22 = cxkl;
       double r33 = cykl;
       double r34 = syoky;
-      r43 = -yk2*syoky;
+      r43 = -yk2 * syoky;
       double r44 = cykl;
-      double r26 = h*sxokx;
-      double r16 = h*(1.0-cxkl)*inv_xk2;
+      double r26 = h * sxokx;
+      double r16 = h * (1.0 - cxkl) * inv_xk2;
       double r51 = -r26;
       double r52 = -r16;
-      double gamma = design_w/d_const.mass + 1.0;
-      double beta2 = 1.0-1.0/(gamma*gamma);
+      double gamma = design_w / d_const.mass + 1.0;
+      double beta2 = 1.0 - 1.0 / (gamma * gamma);
       double beta = sqrt(beta2);
-      double r56 = -h2*(dl*beta2-sxokx)*inv_xk2+dl*(1.0-h2*inv_xk2)/(gamma*gamma);
-      double dpop = gamma/(design_w*(gamma+1.0))*(r_w[index] - design_w);
+      double r56 = -h2 * (dl * beta2 - sxokx) * inv_xk2 + dl * 
+	(1.0 - h2 * inv_xk2) / (gamma * gamma);
+      double dpop = gamma / (design_w * (gamma + 1.0)) * (r_w[index] - design_w);
 
-      r_x[index] = r11*x + r12*xp + r16*dpop;
-      r_xp[index] = r21*x + r22*xp + r26*dpop;
-      r_y[index] = r33*y + r34*yp;
-      r_yp[index] = r43*y + r44*yp;
-      r_phi[index] += TWOPI*(-(r51*x + r52*xp + r56*dpop) + dl)/(beta*d_wavelen);
+      r_x[index] = r11 * x + r12 * xp + r16 * dpop;
+      r_xp[index] = r21 * x + r22 * xp + r26 * dpop;
+      r_y[index] = r33 * y + r34 * yp;
+      r_yp[index] = r43 * y + r44 * yp;
+      r_phi[index] += TWOPI * (-(r51 * x + r52 * xp + r56 * dpop) + dl) / 
+	(beta * d_wavelen);
     }// if loss
     index += stride;
   }// while
@@ -700,8 +708,8 @@ void SimulateSecondHalfDipoleKernel(double* r_x, double* r_y, double* r_phi,
   double* r_xp, double* r_yp, double* r_w, uint* r_loss, DipoleParameter* r_elem)
 {
   DipoleParameter dipole = *r_elem;
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
-  uint stride = blockDim.x*gridDim.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
   while(index < d_const.num_particle)
   {
     if(r_loss[index] == 0)
@@ -711,7 +719,7 @@ void SimulateSecondHalfDipoleKernel(double* r_x, double* r_y, double* r_phi,
       double y = r_y[index];
       double yp = r_yp[index];
 
-      double h = 1.0/dipole.radius;
+      double h = 1.0 / dipole.radius;
       double b2 = dipole.edge_angle_out;
       double hf_g = dipole.half_gap;
       double k1 = dipole.k1;
@@ -720,74 +728,77 @@ void SimulateSecondHalfDipoleKernel(double* r_x, double* r_y, double* r_phi,
       double design_w = dipole.kinetic_energy;
 
       // second half sector dipole
-      double h2 = h*h;
+      double h2 = h * h;
       double dl = 0.5 * dipole.radius * dipole.angle;
-      double yk2 = findx*h2;
+      double yk2 = findx * h2;
       double yk = sqrt(abs(yk2));
-      double inv_yk = 1.0/yk;
-      double ykl = yk*dl;
-      double xk2 = h2-yk2;
-      double inv_xk2 = 1.0/xk2;
+      double inv_yk = 1.0 / yk;
+      double ykl = yk * dl;
+      double xk2 = h2 - yk2;
+      double inv_xk2 = 1.0 / xk2;
       double xk = sqrt(abs(xk2));
-      double inv_xk = 1.0/xk;
-      double xkl = xk*dl;
+      double inv_xk = 1.0 / xk;
+      double xkl = xk * dl;
       double cxkl = 1.0;
       double sxokx = dl;
       if(xk2 > 0.0)
       {
         cxkl = cos(xkl);
-        sxokx = sin(xkl)*inv_xk;
+        sxokx = sin(xkl) * inv_xk;
       }
       else if(xk2 < 0.0)
       {
         cxkl = cosh(xkl);
-        sxokx = sinh(xkl)*inv_xk;
+        sxokx = sinh(xkl) * inv_xk;
       }
       double cykl = 1.0;
       double syoky = dl;
       if(yk2 > 0.0)
       {
         cykl = cos(ykl);
-        syoky = sin(ykl)*inv_yk;
+        syoky = sin(ykl) * inv_yk;
       }
       else if(yk2 < 0.0)
       {
         cykl = cosh(ykl);
-        syoky = sinh(ykl)*inv_yk;
+        syoky = sinh(ykl) * inv_yk;
       }
       double r11 = cxkl;
       double r12 = sxokx;
-      double r21 = -xk2*sxokx;
+      double r21 = -xk2 * sxokx;
       double r22 = cxkl;
       double r33 = cykl;
       double r34 = syoky;
-      double r43 = -yk2*syoky;
+      double r43 = -yk2 * syoky;
       double r44 = cykl;
-      double r26 = h*sxokx;
-      double r16 = h*(1.0-cxkl)*inv_xk2;
+      double r26 = h * sxokx;
+      double r16 = h * (1.0 - cxkl) * inv_xk2;
       double r51 = -r26;
       double r52 = -r16;
-      double gamma = design_w/d_const.mass + 1.0;
-      double beta2 = 1.0-1.0/(gamma*gamma);
+      double gamma = design_w / d_const.mass + 1.0;
+      double beta2 = 1.0 - 1.0 / (gamma * gamma);
       double beta = sqrt(beta2);
-      double r56 = -h2*(dl*beta2-sxokx)*inv_xk2+dl*(1.0-h2*inv_xk2)/(gamma*gamma);
-      double dpop = gamma/(design_w*(gamma+1.0))*(r_w[index] - design_w);
-      r_phi[index] += TWOPI*(-(r51*x + r52*xp + r56*dpop) + dl)/(beta*d_wavelen);
-      double x_new = r11*x + r12*xp + r16*dpop;
-      xp = r21*x + r22*xp + r26*dpop;
-      double y_new = r33*y + r34*yp;
-      yp = r43*y + r44*yp;
+      double r56 = -h2 * (dl * beta2 - sxokx) * inv_xk2 + dl * 
+	(1.0 - h2 * inv_xk2) / (gamma * gamma);
+      double dpop = gamma / (design_w * (gamma + 1.0)) * (r_w[index] - design_w);
+      r_phi[index] += TWOPI * (-(r51 * x + r52 * xp + r56 * dpop) + dl) / 
+	(beta * d_wavelen);
+      double x_new = r11 * x + r12 * xp + r16 * dpop;
+      xp = r21 * x + r22 * xp + r26 * dpop;
+      double y_new = r33 * y + r34 * yp;
+      yp = r43 * y + r44 * yp;
       r_x[index] = x_new;
       r_y[index] = y_new;
       // second edge
-      double c1 = 2.0*hf_g*k1*h;
+      double c1 = 2.0 * hf_g * k1 * h;
       double sinb = sin(b2);
-      double inv_cosb = 1.0/cos(b2);
-      double psi = c1*(1.0+sinb*sinb)*inv_cosb*(1.0-c1*k2*sinb*inv_cosb);
-      r21 = tan(b2)*h;
-      r43 = tan(b2-psi)*h;
-      r_xp[index] = xp + r21*x_new;
-      r_yp[index] = yp - r43*y_new;
+      double inv_cosb = 1.0 / cos(b2);
+      double psi = c1 * (1.0 + sinb * sinb) * inv_cosb * 
+	(1.0 - c1 * k2 * sinb * inv_cosb);
+      r21 = tan(b2) * h;
+      r43 = tan(b2 - psi) * h;
+      r_xp[index] = xp + r21 * x_new;
+      r_yp[index] = yp - r43 * y_new;
     }// if loss
     index += stride;
   }// while
@@ -799,8 +810,8 @@ void SimulateBuncherKernel(double* r_x, double* r_y, double* r_phi,
   double r_freq, double r_voltage, double r_phase, double r_aper, 
   double r_freq_ratio, uint r_elem_indx)
 {
-  uint index = blockIdx.x*blockDim.x+threadIdx.x;
-  uint stride = blockDim.x*gridDim.x;
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
   while(index < d_const.num_particle)
   {
     if(r_loss[index] == 0)
@@ -811,7 +822,7 @@ void SimulateBuncherKernel(double* r_x, double* r_y, double* r_phi,
       double yp = r_yp[index];
       double phi = r_phi[index] * r_freq_ratio;
       double w = r_w[index];
-      double r2 = x*x + y*y;
+      double r2 = x * x + y * y;
       double aper2 = r_aper * r_aper;
       // check for loss
       if(aper2 != 0.0 && r2 > aper2)
@@ -820,20 +831,21 @@ void SimulateBuncherKernel(double* r_x, double* r_y, double* r_phi,
         index += stride;
         continue;
       }
-      double h = r_freq*d_wavelen/CLIGHT;
-      double gm1 = r_w_ref/d_const.mass;
+      double h = r_freq * d_wavelen / CLIGHT;
+      double gm1 = r_w_ref / d_const.mass;
       double gm = gm1 + 1.0;
-      double btgm = sqrt(gm1*(gm1+2.0)); 
-      double beta = btgm/gm; 
-      double k = h*TWOPI/(btgm*d_wavelen); 
-      double k2 = k*k; 
+      double btgm = sqrt(gm1 * (gm1 + 2.0)); 
+      double beta = btgm / gm; 
+      double k = h * TWOPI / (btgm * d_wavelen); 
+      double k2 = k * k; 
       double q = d_const.charge;
       q = q > 0.0 ? q : -q;
-      double con1 = TWOPI*h*r_voltage*q/(beta*d_wavelen*d_const.mass);
-      double arg = k2*r2*0.25;
-      double ph = h*phi + r_phase;
-      double dw = q*r_voltage*cos(ph)*(1.0+arg*(1.0+arg*(0.25+arg/36.0)));
-      double wb_par = w + 0.5*dw;
+      double con1 = TWOPI * h * r_voltage * q / (beta * d_wavelen*d_const.mass);
+      double arg = k2 * r2 * 0.25;
+      double ph = h * phi + r_phase;
+      double dw = q * r_voltage * cos(ph) * (1.0 + arg * (1.0 + arg * 
+	(0.25 + arg / 36.0)));
+      double wb_par = w + 0.5 * dw;
       double wf = w + dw;
       if(wb_par <= 0.0 || wf <= 0.0)
       {
@@ -842,15 +854,16 @@ void SimulateBuncherKernel(double* r_x, double* r_y, double* r_phi,
         continue;
       }
       double bav, gmtmp, bg, rbgf, del;
-      gmtmp = wb_par/d_const.mass;
-      bav = sqrt(gmtmp*(gmtmp+2.0))/(gmtmp+1.0);
-      gmtmp = w/d_const.mass;
-      bg = sqrt(gmtmp*(gmtmp+2.0));
-      gmtmp = wf/d_const.mass;
-      rbgf = rsqrt(gmtmp*(gmtmp+2.0));
-      del = -con1*sin(ph)*(1.0-bav*beta)*(0.5+arg*(0.25+arg/24.0))/bav;
-      r_xp[index] = (xp*bg + del*x)*rbgf;
-      r_yp[index] = (yp*bg + del*y)*rbgf;
+      gmtmp = wb_par / d_const.mass;
+      bav = sqrt(gmtmp * (gmtmp + 2.0)) / (gmtmp + 1.0);
+      gmtmp = w / d_const.mass;
+      bg = sqrt(gmtmp * (gmtmp + 2.0));
+      gmtmp = wf / d_const.mass;
+      rbgf = rsqrt(gmtmp * (gmtmp + 2.0));
+      del = -con1 * sin(ph) * (1.0 - bav * beta) * (0.5 + arg * 
+	(0.25 + arg / 24.0)) / bav;
+      r_xp[index] = (xp * bg + del * x) * rbgf;
+      r_yp[index] = (yp * bg + del * y) * rbgf;
       r_w[index] = wf;
     }
     index += stride;

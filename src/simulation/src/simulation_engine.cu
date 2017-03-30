@@ -37,29 +37,46 @@ extern "C"
       double loss_local_h = beam_tmp->GetLossNum() - loss_num;
       loss_num += loss_local_h;
       loss_local_h /= beam_tmp->num_particle;
-      loss_local_h = std::log10(loss_local_h+1e-6);
-      double loss_ratio_h = (double)loss_num/beam_tmp->num_particle;
-      cudaMemcpyAsync((param->plot_data->loss_local).d_ptr + monitor_num, &loss_local_h, sizeof(double), cudaMemcpyHostToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->loss_ratio).d_ptr + monitor_num, &loss_ratio_h, sizeof(double), cudaMemcpyHostToDevice, 0);
+      loss_local_h = std::log10(loss_local_h + 1e-6);
+      double loss_ratio_h = (double)loss_num / beam_tmp->num_particle;
+      cudaMemcpyAsync((param->plot_data->loss_local).d_ptr + monitor_num, 
+	&loss_local_h, sizeof(double), cudaMemcpyHostToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->loss_ratio).d_ptr + monitor_num, 
+	&loss_ratio_h, sizeof(double), cudaMemcpyHostToDevice, 0);
       beam_tmp->UpdateEmittance();
 
-      cudaMemcpyAsync((param->plot_data->xavg).d_ptr + monitor_num, beam_tmp->x_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->xsig).d_ptr + monitor_num, beam_tmp->x_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->xpavg).d_ptr + monitor_num, beam_tmp->xp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->xpsig).d_ptr + monitor_num, beam_tmp->xp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->yavg).d_ptr + monitor_num, beam_tmp->y_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->ysig).d_ptr + monitor_num, beam_tmp->y_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->ypavg).d_ptr + monitor_num, beam_tmp->yp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->ypsig).d_ptr + monitor_num, beam_tmp->yp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->phiavg).d_ptr + monitor_num, beam_tmp->phi_avg_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->phisig).d_ptr + monitor_num, beam_tmp->phi_sig_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->wsig).d_ptr + monitor_num, beam_tmp->w_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->xemit).d_ptr + monitor_num, beam_tmp->x_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->yemit).d_ptr + monitor_num, beam_tmp->y_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
-      cudaMemcpyAsync((param->plot_data->zemit).d_ptr + monitor_num, beam_tmp->z_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->xavg).d_ptr + monitor_num, 
+	beam_tmp->x_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->xsig).d_ptr + monitor_num, 
+	beam_tmp->x_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->xpavg).d_ptr + monitor_num, 
+	beam_tmp->xp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->xpsig).d_ptr + monitor_num, 
+	beam_tmp->xp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->yavg).d_ptr + monitor_num, 	
+	beam_tmp->y_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->ysig).d_ptr + monitor_num, 
+	beam_tmp->y_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->ypavg).d_ptr + monitor_num, 
+	beam_tmp->yp_avg, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->ypsig).d_ptr + monitor_num, 
+	beam_tmp->yp_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->phiavg).d_ptr + monitor_num, 
+	beam_tmp->phi_avg_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->phisig).d_ptr + monitor_num, 
+	beam_tmp->phi_sig_r, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->wsig).d_ptr + monitor_num, 
+	beam_tmp->w_sig, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->xemit).d_ptr + monitor_num, 
+	beam_tmp->x_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->yemit).d_ptr + monitor_num, 
+	beam_tmp->y_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
+      cudaMemcpyAsync((param->plot_data->zemit).d_ptr + monitor_num, 
+	beam_tmp->z_emit, sizeof(double), cudaMemcpyDeviceToDevice, 0);
 
       double w_avg = beam_tmp->GetAvgW() - beam_tmp->GetRefEnergy();
-      cudaMemcpy((param->plot_data->wavg).d_ptr + monitor_num, &w_avg, sizeof(double), cudaMemcpyHostToDevice);
+      cudaMemcpy((param->plot_data->wavg).d_ptr + monitor_num, &w_avg, 
+	sizeof(double), cudaMemcpyHostToDevice);
 
       ++monitor_num;
     }
@@ -93,7 +110,8 @@ extern "C"
     blck_size = beam_tmp->blck_size;
   }
 
-  void Init(Beam* r_beam, BeamLine* r_bl, SpaceCharge* r_spch, SimulationParam& r_param)
+  void Init(Beam* r_beam, BeamLine* r_bl, SpaceCharge* r_spch, 
+    SimulationParam& r_param)
   {
     spch_tmp= r_spch;
     beam_tmp = r_beam;
@@ -113,37 +131,39 @@ extern "C"
     double hf_spch_len = 0.5 * length / num_spch_kicks;
     for(int nk = 0; nk < num_spch_kicks; ++nk)
     {
-      SimulatePartialDriftKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, 
-        beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, hf_spch_len, 
-        r_drift->GetAperture(), cur_id);
+      SimulatePartialDriftKernel<<<grid_size, blck_size>>>(beam_tmp->x, 
+	beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+	beam_tmp->loss, hf_spch_len, r_drift->GetAperture(), cur_id);
 
       if(param->space_charge_on)
-        spch_tmp->Start(beam_tmp, 2.0*hf_spch_len); 
+        spch_tmp->Start(beam_tmp, 2.0 * hf_spch_len); 
 
-      SimulatePartialDriftKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, 
-        beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, hf_spch_len, 
-        r_drift->GetAperture(), cur_id);
-    }// for
+      SimulatePartialDriftKernel<<<grid_size, blck_size>>>(beam_tmp->x, 
+	beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+	beam_tmp->loss, hf_spch_len, r_drift->GetAperture(), cur_id);
+    } // for
   }
 
   void SimulateQuad(Quad* r_quad)
   {
-    SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, 
-      beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, r_quad->GetLength(),
-      r_quad->GetAperture(), r_quad->GetGradient(), cur_id);
+    SimulateHalfQuadKernel<<<grid_size, blck_size / 2>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+      beam_tmp->loss, r_quad->GetLength(), r_quad->GetAperture(), 
+      r_quad->GetGradient(), cur_id);
     if(param->graphics_on && r_quad->IsMonitorOn())
       Update2DPlotData();
     if(param->space_charge_on)
       spch_tmp->Start(beam_tmp, r_quad->GetLength()); 
-    SimulateHalfQuadKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, 
-      beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, r_quad->GetLength(),
-      r_quad->GetAperture(), r_quad->GetGradient(), cur_id);
+    SimulateHalfQuadKernel<<<grid_size, blck_size / 2>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+      beam_tmp->loss, r_quad->GetLength(), r_quad->GetAperture(), 
+      r_quad->GetGradient(), cur_id);
   }
 
   void PrepSimulateRFGap(RFGap* r_gap)
   {
-    cudaMemcpyAsync(rfparam, r_gap->GetParametersOnDevice(), sizeof(RFGapParameter), 
-                    cudaMemcpyDeviceToDevice, 0);
+    cudaMemcpyAsync(rfparam, r_gap->GetParametersOnDevice(), 
+      sizeof(RFGapParameter), cudaMemcpyDeviceToDevice, 0);
     // check frequency change
     if(beam_tmp->freq != r_gap->GetFrequency())
     {
@@ -156,11 +176,13 @@ extern "C"
   void SimulateDTLRFGap(RFGap* r_gap)
   {
     PrepSimulateRFGap(r_gap);         
-    // calculate phase_in used in the gap to calculate half phase advance in the gap
+    // calculate phase_in used in the gap to calculate half phase advance in 
+    // the gap
     double phi_in = 0.0;
     uint bl_sz = bl_tmp->GetSize();
     // if first gap in DTL tank
-    if(cur_id == 1 || cur_id > 1 && (*bl_tmp)[cur_id - 2]->GetType() != "RFGap-DTL")
+    if(cur_id == 1 || cur_id > 1 && 
+      (*bl_tmp)[cur_id - 2]->GetType() != "RFGap-DTL")
     {
       // make sure this is not the only gap in the tank
       if(cur_id + 2 < bl_sz && (*bl_tmp)[cur_id + 2]->GetType() == "RFGap-DTL")
@@ -197,15 +219,17 @@ extern "C"
     Quad* next_quad = dynamic_cast<Quad*>((*bl_tmp)[cur_id + 1]);
     double quad1_len = prev_quad->GetLength();
     double quad2_len = next_quad->GetLength();
-    SimulateRFGapFirstHalfKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, 
-      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, 
-      design_w, phi_in, rfparam, r_gap->GetLength(), quad1_len, quad2_len, false);
+    SimulateRFGapFirstHalfKernel<<<grid_size, blck_size / 2>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+      beam_tmp->loss, design_w, phi_in, rfparam, r_gap->GetLength(), quad1_len,
+      quad2_len, false);
     // apply space charge
     if(param->space_charge_on)
       spch_tmp->Start(beam_tmp, r_gap->GetLength()); 
     SimulateRFGapSecondHalfKernel<<<grid_size, blck_size/2>>>(beam_tmp->x, 
-      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, 
-      phi_in, rfparam, r_gap->GetLength(), 0, quad1_len, quad2_len, false);
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+      beam_tmp->loss, design_w, phi_in, rfparam, r_gap->GetLength(), 0, 
+      quad1_len, quad2_len, false);
     design_w = r_gap->GetEnergyOut();
     beam_tmp->design_w = design_w;
   }
@@ -244,16 +268,19 @@ extern "C"
       phi_out = 0.5 * (cur_phase + next_gap->GetRefPhase());
     }
 
-    int gc_blck_size = blck_size/4 > 1 ? blck_size/4 : blck_size;
-    int gc_grid_size = grid_size/2 > 1 ? grid_size/2 : grid_size;
+    int gc_blck_size = blck_size / 4 > 1 ? blck_size / 4 : blck_size;
+    int gc_grid_size = grid_size / 2 > 1 ? grid_size / 2 : grid_size;
 
     //cudaProfilerStart();
-    SimulateRFGapFirstHalfKernel<<<grid_size, gc_blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp,
-      beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, phi_in, rfparam, r_gap->GetLength());
+    SimulateRFGapFirstHalfKernel<<<grid_size, gc_blck_size>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+      beam_tmp->loss, design_w, phi_in, rfparam, r_gap->GetLength());
     if(param->space_charge_on)
       spch_tmp->Start(beam_tmp, r_gap->GetLength());
-    SimulateRFGapSecondHalfKernel<<<grid_size, gc_blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp,
-      beam_tmp->yp, beam_tmp->w, beam_tmp->loss, design_w, phi_out, rfparam, r_gap->GetLength(), ccl_cell_num++);
+    SimulateRFGapSecondHalfKernel<<<grid_size, gc_blck_size>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+      beam_tmp->loss, design_w, phi_out, rfparam, r_gap->GetLength(), 
+      ccl_cell_num++);
     //cudaProfilerStop();
     design_w = r_gap->GetEnergyOut();
     beam_tmp->design_w = design_w;
@@ -261,7 +288,8 @@ extern "C"
 
   void SimulateRotation(Rotation* r_rot)
   {
-    SimulateRotationKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, beam_tmp->xp, beam_tmp->yp, beam_tmp->loss, r_rot->GetAngle());
+    SimulateRotationKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, 
+      beam_tmp->xp, beam_tmp->yp, beam_tmp->loss, r_rot->GetAngle());
   }
   
   void SimulateSpaceChargeCompensation(SpaceChargeCompensation* r_spcomp)
@@ -319,18 +347,22 @@ extern "C"
     SimulateBuncherKernel<<<grid_size, blck_size>>>(beam_tmp->x, beam_tmp->y, 
       beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
       beam_tmp->loss, design_w, bfreq, r_buncher->GetVoltage(), 
-      r_buncher->GetPhase(), r_buncher->GetAperture(), bfreq/beam_tmp->freq, cur_id);
+      r_buncher->GetPhase(), r_buncher->GetAperture(), bfreq/beam_tmp->freq, 
+      cur_id);
     
   }
   
   void SimulateDipole(Dipole* r_dipole)
   {
-    cudaMemcpyAsync(dpparam, r_dipole->GetParametersOnDevice(), sizeof(DipoleParameter), cudaMemcpyDeviceToDevice, 0);
-    SimulateFirstHalfDipoleKernel<<<grid_size, blck_size/4>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp,
-      beam_tmp->yp, beam_tmp->w, beam_tmp->loss, dpparam);
+    cudaMemcpyAsync(dpparam, r_dipole->GetParametersOnDevice(), 
+      sizeof(DipoleParameter), cudaMemcpyDeviceToDevice, 0);
+    SimulateFirstHalfDipoleKernel<<<grid_size, blck_size / 4>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+      beam_tmp->loss, dpparam);
     if(param->space_charge_on)
       spch_tmp->Start(beam_tmp, r_dipole->GetRadius()*r_dipole->GetAngle()); 
-    SimulateSecondHalfDipoleKernel<<<grid_size, blck_size/4>>>(beam_tmp->x, beam_tmp->y, beam_tmp->phi, beam_tmp->xp, 
-      beam_tmp->yp, beam_tmp->w, beam_tmp->loss, dpparam);
+    SimulateSecondHalfDipoleKernel<<<grid_size, blck_size / 4>>>(beam_tmp->x, 
+      beam_tmp->y, beam_tmp->phi, beam_tmp->xp, beam_tmp->yp, beam_tmp->w, 
+      beam_tmp->loss, dpparam);
   }
 }
