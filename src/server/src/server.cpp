@@ -30,9 +30,7 @@ void event_handler(evargs args)
     osstr << val;
 
     PVObserver* updater = (*pv_channels)[std::string(ppv->name)];
-//    ThreadCheck(pthread_mutex_lock(&updater_pair.second), "EPICSMonitorRoutine:lock mutex");
     updater->Update(osstr.str());
-//    ThreadCheck(pthread_mutex_unlock(&updater_pair.second), "EPICSMonitorRoutine:unlock mutex");
   }
 }
 
@@ -80,7 +78,8 @@ bool InitChannel(PVObserver* r_up)
   std::string pv_name = r_up->GetPV();
   chid mychid;
   double val_dbl = 0.0;
-  if(!CACheck(ca_create_channel(pv_name.c_str(),NULL,NULL,10,&mychid), "ca_create_channel", pv_name))
+  if(!CACheck(ca_create_channel(pv_name.c_str(), NULL, NULL, 10, &mychid), 
+    "ca_create_channel", pv_name))
     return false;
   if(!CACheck(ca_pend_io(10.0), "ca_pend_io after ca_create_channel", pv_name))
     return false;
@@ -100,16 +99,19 @@ bool InitChannel(PVObserver* r_up)
 void* ServerRoutine(void* r_arg)
 {
   // EPICS ca context setup
-  CACheck(ca_context_create(ca_disable_preemptive_callback),"ServerRoutine:ca_context_create");
+  CACheck(ca_context_create(ca_disable_preemptive_callback),
+    "ServerRoutine:ca_context_create");
 
   ServerArg* arg = (ServerArg*)r_arg;
   pv_channels = arg->channels; 
-  std::cout <<"server is monitoring " << pv_channels->GetSize() << " pvs" << std::endl;
+  std::cout <<"server is monitoring " << pv_channels->GetSize() << 
+    " pvs" << std::endl;
   
   const int num_channel = pv_channels->GetSize();
   pv* pvs = new pv[num_channel];
   int cnt = 0;
-  for (PVObserverList::MapIter iter = (pv_channels->GetList()).begin(); iter != (pv_channels->GetList()).end(); ++iter)
+  for (PVObserverList::MapIter iter = (pv_channels->GetList()).begin(); 
+    iter != (pv_channels->GetList()).end(); ++iter)
   {
     pvs[cnt++].name = const_cast<char*>((iter->first).c_str());
     InitChannel((iter->second));

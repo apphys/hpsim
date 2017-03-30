@@ -31,7 +31,7 @@ int create_pvs (pv* pvs, int nPvs, caCh *pCB)
                                     &pvs[n].chid);
         if (result != ECA_NORMAL) {
             fprintf(stderr, "CA error %s occurred while trying "
-                    "to create channel '%s'.\n", ca_message(result), pvs[n].name);
+		  "to create channel '%s'.\n", ca_message(result), pvs[n].name);
             pvs[n].status = result;
             returncode = 1;
         }
@@ -49,7 +49,8 @@ int connect_pvs (pv* pvs, int nPvs)
         {
             if (nPvs > 1)
             {
-                fprintf(stderr, "Channel connect timed out: some PV(s) not found.\n");
+	      fprintf(stderr, "Channel connect timed out: some PV(s) not "
+		"found.\n");
             } else {
                 fprintf(stderr, "Channel connect timed out: '%s' not found.\n", 
                         pvs[0].name);

@@ -12,4 +12,5 @@ struct EPICSPutArg
 };
 
 void EPICSPut(std::vector<std::string>&, std::vector<std::vector<double> >&);
+
 #endif

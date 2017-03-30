@@ -14,9 +14,11 @@
 #include "epics_put.h"
 
 bool epics_put_stop_flag = false;
-void EPICSPut(std::vector<std::string>& r_pv_name, std::vector<std::vector<double> >& r_val)
+void EPICSPut(std::vector<std::string>& r_pv_name, 
+  std::vector<std::vector<double> >& r_val)
 {
-  CACheck(ca_context_create(ca_disable_preemptive_callback),"ServerRoutine:ca_context_create"); 
+  CACheck(ca_context_create(ca_disable_preemptive_callback),
+    "ServerRoutine:ca_context_create"); 
   
   const int num_channels = r_pv_name.size();
   pv* pvs = new pv[num_channels];

@@ -24,7 +24,8 @@ static PyObject* CAGet(PyObject* self, PyObject* args)
 
   chid mychid;
   double val_dbl = 0.0;
-  if(!CACheck(ca_create_channel(pv_name, NULL,NULL,10,&mychid), "ca_create_channel", pv_name))
+  if(!CACheck(ca_create_channel(pv_name, NULL, NULL, 10, &mychid), 
+    "ca_create_channel", pv_name))
     return false;
   if(!CACheck(ca_pend_io(5.0), "ca_pend_io after ca_create_channel", pv_name))
     return false;

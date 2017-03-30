@@ -4,8 +4,10 @@
 #ifdef _cplusplus
 extern "C" {
 #endif
+
 PyMODINIT_FUNC initPyEPICS();
 //PyObject* getPyEPICSType(char* name);
+
 #ifdef _cplusplus
 }
 #endif

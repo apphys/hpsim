@@ -6,7 +6,7 @@
 #define DEFAULT_CA_PRIORITY 0  /* Default CA priority */
 #define DEFAULT_TIMEOUT 1.0     /* Default CA timeout */
 
-typedef chid                    chanId; /* for when the structures field name is "chid" */
+typedef chid chanId; /* for when the structures field name is "chid" */
 
 typedef struct
 {

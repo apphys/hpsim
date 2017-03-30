@@ -6,6 +6,10 @@
 #include <sqlite3.h>
 #include "beamline.h"
 
+/*!
+ * \brief EPICS PV observer base class. Monitor the PV value, update database
+ * 	& model accordingly. 
+ */
 class PVObserver
 {
 public:
@@ -23,12 +27,20 @@ public:
   void UpdateDB();
   virtual void UpdateModel() = 0;
 private:
+  //! Name of the EPICS PV (process variable)
   std::string pv_;
+  //! Value of the EPICS PV
   std::string val_;
+  //! Name of the database
   std::string db_;
+  //! Pointer to the database connection
   sqlite3* db_conn_;
 };
-///*
+
+/*!
+ * \brief Master EPICS PV observer class. Used for master PVs, 
+ * 	e.g. master phase channel for CCL.
+ */
 class MasterPVObserver : public PVObserver
 {
 public:
@@ -39,9 +51,10 @@ public:
   void AttachPVObserver(PVObserver*);
 private:
   void UpdateModel();
+  //! List of PVObserver pointers controlled by the master observer
   std::vector<PVObserver*> pvo_;
 };
-//*/
+
 class QuadPVObserver : public PVObserver
 {
 public:
@@ -50,6 +63,7 @@ public:
   std::vector<std::string> GetBeamLineElementNames() const;
 private:
   void UpdateModel();
+  //! List of Quadrupole pointers controlled by the observer
   std::vector<Quad*> quad_;
 };
 
@@ -61,6 +75,7 @@ public:
   std::vector<std::string> GetBeamLineElementNames() const;
 private:
   void UpdateModel();
+  //! List of RF gap pointers controlled by the observer
   std::vector<RFGap*> gap_;
 };
 
@@ -72,6 +87,7 @@ public:
   std::vector<std::string> GetBeamLineElementNames() const;
 private:
   void UpdateModel();
+  //! List of RF gap pointers controlled by the observer
   std::vector<RFGap*> gap_;
 };
 
@@ -84,6 +100,7 @@ public:
   std::vector<std::string> GetBeamLineElementNames() const;
 protected:
   virtual void UpdateModel() = 0;
+  //! Buncher pointer controlled by the observer
   Buncher* buncher_;
 };
 
@@ -111,6 +128,10 @@ private:
   void UpdateModel();
 };
 
+/*!
+ * \brief Dipole EPICS PV observer class. Note that in an arch, changing 
+ * 	dipole current can also affect the drift lengths & aperture sizes.
+ */
 class DipolePVObserver: public PVObserver
 {
 public:
@@ -120,8 +141,11 @@ public:
   std::vector<std::string> GetBeamLineElementNames() const;
 protected:
   virtual void UpdateModel();
+  //! List of dipole pointers controlled by the observer
   std::vector<Dipole*> dipole_;
+  //! List of rectangular aperture pointers controlled by the observer
   std::vector<ApertureRectangular*> aperture_r_;
+  //! List of drift pointers controlled by the observer
   std::vector<Drift*> drift_;
 };
 
@@ -130,26 +154,31 @@ std::string PVObserver::GetPV() const
 {
   return pv_;
 }
+
 inline
 std::string PVObserver::GetDB() const
 {
   return db_;
 }
+
 inline
 sqlite3* PVObserver::GetDBconn() const
 {
   return db_conn_;
 }
+
 inline
 void PVObserver::SetPV(std::string r_pv)
 {
   pv_ = r_pv;
 }
+
 inline
 void PVObserver::SetDBconn(sqlite3* r_db_conn)
 {
   db_conn_ = r_db_conn;
 }
+
 inline
 void PVObserver::SetDB(std::string r_db)
 {

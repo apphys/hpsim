@@ -5,6 +5,9 @@
 #include "pv_observer.h"
 #include "beamline_element.h"
 
+/*!
+ * \brief Hold a list of EPICS PV observers.
+ */
 class PVObserverList
 {
 public:
@@ -18,6 +21,7 @@ public:
   void Print();
   std::map<std::string, PVObserver*>& GetList();
 private:
+  //! List of PV observers. Key is the PV name
   std::map<std::string, PVObserver*> list_;
 };
 
