@@ -1,4 +1,4 @@
-db: ../../db/hb16-tbtd.db ../../db/hb16-dtl.db ../../db/hb16-trst.db ../../db/hb16-ccl.db
+db: ../../db/online-tbtd.db ../../db/online-dtl.db ../../db/online-trst.db ../../db/online-ccl.db
 libdb: ../../db/lib/libsqliteext.so
 beam: ./input_beam.txt
 start: TBDB02
