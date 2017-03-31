@@ -29,7 +29,7 @@ char* FileRead(const char* filename)
 
   while (!feof(in) && !ferror(in)) {
     if (nb_read_total + BUFSIZ > res_size) {
-      if (res_size > 10*1024*1024) break;
+      if (res_size > 10 * 1024 * 1024) break;
       res_size = res_size * 2;
       res = (char*)realloc(res, res_size);
     }
@@ -103,16 +103,25 @@ void PrintBitmapString(void* font, const char* s)
 uint CreateVBO(uint r_sz)
 {
   GLuint vbo;
-  glGenBuffers(1, &vbo); // 1: num of buffer objects. 2: ID of the object
-  glBindBuffer(GL_ARRAY_BUFFER, vbo); // 1. target, hint for vbo to decide mem location:sys, video card,or AGP. 2, ID.
-  glBufferData(GL_ARRAY_BUFFER, r_sz, 0, GL_DYNAMIC_DRAW);// copy data to the buffer object. 1. target,performance hint. 2: size of data in  bytes.3: source data location. 4: usage flag, performance hint.
-  glBindBuffer(GL_ARRAY_BUFFER, 0);// binding buffer with 0 swithes off vbo operation
+  // 1: num of buffer objects. 2: ID of the object
+  glGenBuffers(1, &vbo); 
+  // First arg is target, hint for vbo to decide mem location:sys, 
+  // video card,or AGP. Second arg is ID.
+  glBindBuffer(GL_ARRAY_BUFFER, vbo); 
+  // Copy data to the buffer object. 
+  // First arg is target, performance hint. 
+  // Second is the size of data in bytes.
+  // Thrid is the source data location. 
+  // Fourth is the  usage flag, performance hint.
+  glBufferData(GL_ARRAY_BUFFER, r_sz, 0, GL_DYNAMIC_DRAW);
+  // Binding buffer with 0 swithes off vbo operation
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
   return vbo;
 }
 
 float Lerp(float r_a, float r_b, float r_t)
 {
-  return r_a + r_t*(r_b-r_a);
+  return r_a + r_t * (r_b - r_a);
 }
 
 void ColorRamp(float r_t, float* r_r)
@@ -143,9 +152,9 @@ void ColorRamp(float r_t, float* r_r)
   r_t = r_t * (ncolors-1);
   int i = (int) r_t;
   float u = r_t - floor(r_t);
-  r_r[0] = Lerp(c[i][0], c[i+1][0], u);
-  r_r[1] = Lerp(c[i][1], c[i+1][1], u);
-  r_r[2] = Lerp(c[i][2], c[i+1][2], u);
+  r_r[0] = Lerp(c[i][0], c[i + 1][0], u);
+  r_r[1] = Lerp(c[i][1], c[i + 1][1], u);
+  r_r[2] = Lerp(c[i][2], c[i + 1][2], u);
 }
 
 void ColorRampWhiteBackGround(float r_t, float* r_r, double r_max)
@@ -165,19 +174,32 @@ void ColorRampWhiteBackGround(float r_t, float* r_r, double r_max)
       { 1.0, 0.5, 0.0, },
       { 1.0, 0.0, 0.0, }
   };
-  r_t = sqrt(r_t) * (ncolors-1);
+  r_t = sqrt(r_t) * (ncolors - 1);
   int i = (int) r_t;
   float u = r_t - floor(r_t);
-  r_r[0] = Lerp(c[i][0], c[i+1][0], u);
-  r_r[1] = Lerp(c[i][1], c[i+1][1], u);
-  r_r[2] = Lerp(c[i][2], c[i+1][2], u);
+  r_r[0] = Lerp(c[i][0], c[i + 1][0], u);
+  r_r[1] = Lerp(c[i][1], c[i + 1][1], u);
+  r_r[2] = Lerp(c[i][2], c[i + 1][2], u);
 }
+
+std::string GetProjectTopDir()
+{
+  const int PATH_MAX = 512;
+  char buff[PATH_MAX];
+  std::string path;
+  if(getcwd(buff, PATH_MAX) != 0)
+    path = std::string(buff);
+  size_t found = path.find("hpsim");
+  size_t found1 = path.find_first_of("/", found);
+  return path.substr(0, found1);
+}
+
 /*
 void ColorRampWhiteBackGround(float r_t, float* r_r, double r_max)
 {
-  float a = (1-r_t)*4.0;
+  float a = (1 - r_t) * 4.0;
   int x = floor(a);
-  float y = a-x;
+  float y = a - x;
   switch(x)
   {
     case 0: 
@@ -193,17 +215,3 @@ void ColorRampWhiteBackGround(float r_t, float* r_r, double r_max)
   }
 }
 */
-
-std::string GetProjectTopDir()
-{
-  const int PATH_MAX = 512;
-  char buff[PATH_MAX];
-  std::string path;
-  if(getcwd(buff, PATH_MAX) != 0)
-    path = std::string(buff);
-  size_t found = path.find("hpsim");
-  size_t found1 = path.find_first_of("/", found);
-  return path.substr(0, found1);
-}
-
-

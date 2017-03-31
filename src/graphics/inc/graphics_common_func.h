@@ -7,7 +7,6 @@
 #include <GL/glext.h>
 #else
 #include <GL/glew.h>
-//#include "glew.h"
 #endif
 #include <GL/glut.h>
 #include <string>

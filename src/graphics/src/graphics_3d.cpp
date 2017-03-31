@@ -3,9 +3,8 @@
 #include <cstdio>
 #include <iostream>
 #include <unistd.h>
-#include <GL/glew.h>            // must precede cuda_gl_interop.h
-//#include "glew.h"            // must precede cuda_gl_interop.h
-#include <cuda_gl_interop.h> // must be after glew.h
+#include <GL/glew.h>         // must precede cuda_gl_interop.h
+#include <cuda_gl_interop.h> // must be included after glew.h
 #include "graphics_common_func.h"
 #include "graphics_3d.h"
 #include "graphics_kernel_call_cu.h"
@@ -20,12 +19,12 @@ void DotPlot3D::Init(PlotData3D* r_input, uint r_data_num)
   InitGL();
 
   input_ = r_input;
-//  data_ = new float4[r_data_num];
   ResetColor();
-  unsigned long total_thread_num = std::pow(2, (int)std::ceil(std::log(r_data_num)/std::log(2)));
+  unsigned long total_thread_num = std::pow(2, 
+    (int)std::ceil(std::log(r_data_num) / std::log(2)));
   if(total_thread_num > 512)
   {
-    blck_num_ = total_thread_num/512;
+    blck_num_ = total_thread_num / 512;
     thrd_num_ = 512;
   }
   else
@@ -44,15 +43,17 @@ void DotPlot3D::Free()
   }
   if(color_vbo_)
     glDeleteBuffers(1, (const GLuint*)&color_vbo_);
-//  if(data_)
-//    delete [] data_;
 }
 
 void DotPlot3D::InitGL()
 {
   GLuint vshader, fshader;
-  if ((fshader = CreateShader(std::string(GetProjectTopDir() + "/src/graphics/src/graphics_3d.f.glsl").c_str(), GL_FRAGMENT_SHADER)) == 0) exit(-1);
-  if ((vshader = CreateShader(std::string(GetProjectTopDir() + "/src/graphics/src/graphics_3d.v.glsl").c_str(), GL_VERTEX_SHADER))   == 0) exit(-1);
+  if((fshader = CreateShader(std::string(GetProjectTopDir() + 
+    "/src/graphics/src/graphics_3d.f.glsl").c_str(), GL_FRAGMENT_SHADER)) == 0) 
+    exit(-1);
+  if((vshader = CreateShader(std::string(GetProjectTopDir() + 
+    "/src/graphics/src/graphics_3d.v.glsl").c_str(), GL_VERTEX_SHADER)) == 0) 
+    exit(-1);
 
   GLuint program = glCreateProgram();
   glAttachShader(program, vshader);
@@ -69,9 +70,10 @@ void DotPlot3D::InitGL()
     program = 0;
   }
   program_ = program;
-  pos_vbo_ = CreateVBO(data_num*sizeof(float4));
-  cudaGraphicsGLRegisterBuffer(&cuda_pos_vbo_, pos_vbo_, cudaGraphicsMapFlagsNone);
-  color_vbo_ = CreateVBO(data_num*sizeof(float4));
+  pos_vbo_ = CreateVBO(data_num * sizeof(float4));
+  cudaGraphicsGLRegisterBuffer(&cuda_pos_vbo_, pos_vbo_, 
+    cudaGraphicsMapFlagsNone);
+  color_vbo_ = CreateVBO(data_num * sizeof(float4));
 }
 
 void DotPlot3D::DrawPoints()
@@ -108,7 +110,7 @@ void DotPlot3D::ResetColor()
     if(loss[i] == 0)
     {
       double maxval = M_PI;
-      ColorRamp((z[i] + maxval)/maxval *0.5, color_data);
+      ColorRamp((z[i] + maxval) / maxval * 0.5, color_data);
       color_data += 3;  
       *color_data = 1.0f; 
       ++color_data;
@@ -130,8 +132,10 @@ void DotPlot3D::Update()
 {
   cudaGraphicsMapResources(1, &cuda_pos_vbo_, 0); // count, resource, stream
   size_t num_bytes;
-  cudaGraphicsResourceGetMappedPointer((void**)&data_, &num_bytes, cuda_pos_vbo_);
-  Set3dData(blck_num_, thrd_num_, input_->x, input_->y, input_->phi, data_, data_num);
+  cudaGraphicsResourceGetMappedPointer((void**)&data_, &num_bytes, 
+    cuda_pos_vbo_);
+  Set3dData(blck_num_, thrd_num_, input_->x, input_->y, input_->phi, 
+    data_, data_num);
   cudaGraphicsUnmapResources(1, &cuda_pos_vbo_, 0);
   
   std::vector<uint> loss = input_->GetLoss();
