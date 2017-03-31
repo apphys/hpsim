@@ -1,7 +1,8 @@
 #ifndef GRAPHICS_2D_H
 #define GRAPHICS_2D_H
 
-#include "glew.h" // WARNING: glew.h has to be included before <cuda_gl_interop.h>
+// WARNING: glew.h has to be included before <cuda_gl_interop.h>
+#include <GL/glew.h> 
 #include <GL/glut.h>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
@@ -12,8 +13,10 @@
 struct Curve2D
 {
   Curve2D();
-  Curve2D(double*, double*, uint, GLfloat*, bool r_auto_update = true, bool r_data_tracker_on = true);
-  void Initialize(double*, double*, uint, GLfloat*, bool r_auto_update = true, bool r_data_tracker_on = true);
+  Curve2D(double*, double*, uint, GLfloat*, bool r_auto_update = true, 
+    bool r_data_tracker_on = true);
+  void Initialize(double*, double*, uint, GLfloat*, bool r_auto_update = true, 
+    bool r_data_tracker_on = true);
   virtual ~Curve2D();
   virtual void UpdateData(); // call kernel to set data on device
   double GetMaxX() const
@@ -84,7 +87,8 @@ struct Curve2D
 struct Histogram2D: public Curve2D
 {
   Histogram2D(double*, double*, uint*, uint, uint r_bin_num_x, uint r_bin_num_y);
-  Histogram2D(double*, double*, uint*, uint, double*, double*, double*, double*, uint, uint);
+  Histogram2D(double*, double*, uint*, uint, double*, double*, double*, 
+    double*, uint, uint);
   void InitHistogram2D();
   ~Histogram2D();
   void UpdateData();
@@ -115,7 +119,8 @@ struct PhaseSpace : public Curve2D
 
 struct Histogram : public Curve2D
 {
-  Histogram(double*, uint*, uint, double, double, GLfloat*, uint r_bin_num = 64*2);
+  Histogram(double*, uint*, uint, double, double, GLfloat*, 
+    uint r_bin_num = 64 * 2);
   ~Histogram();
   void UpdateData();
   double max;
@@ -164,8 +169,8 @@ struct Subplot2D
   {
     std::vector<Curve2D*>::iterator iter = curves.begin();
     for(; iter != curves.end(); ++iter)
-      (*iter)->SetMaxMin(r_x_min/label_scale_x, r_x_max/label_scale_x, 
-                        r_y_min/label_scale_y, r_y_max/label_scale_y);
+      (*iter)->SetMaxMin(r_x_min / label_scale_x, r_x_max / label_scale_x, 
+                        r_y_min / label_scale_y, r_y_max / label_scale_y);
   }
   void SetLabelScaleX(float r_scale)
   {
@@ -187,8 +192,6 @@ struct Subplot2D
 
 struct Plot2D
 {
-//  Plot2D();
-//  ~Plot2D();
   int InitPlot();
   void FreePlot();
   void PlotOneSubplot(uint);

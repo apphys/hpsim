@@ -3,7 +3,8 @@
 #include <cstdio>
 #include <iostream>
 #include <unistd.h>
-#include "glew.h"            // must precede cuda_gl_interop.h
+#include <GL/glew.h>            // must precede cuda_gl_interop.h
+//#include "glew.h"            // must precede cuda_gl_interop.h
 #include <cuda_gl_interop.h> // must be after glew.h
 #include "graphics_common_func.h"
 #include "graphics_3d.h"
