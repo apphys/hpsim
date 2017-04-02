@@ -1,4 +1,6 @@
 #hpsim.py
+# 20161201 - ljr - v9, bug fix to get_distribution coord units
+# 20161109 - ljr - v8, _plot_iso_phase_space bug fixes
 # 20160526 - ljr - v7, add 'bin' path to get correct version HPSim
 # 20160303 - ljr - v6, updated to work with latest version of HPSim
 # 20160222 - ljr - v5, bug fixes, code cleanup
@@ -31,7 +33,7 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import math
-import lcsutil_v2 as lcs
+import lcsutil as lcs
 
 import matplotlib as mpl
 
@@ -40,7 +42,8 @@ _COORDINATES = ['x', 'xp', 'y', 'yp', 'phi', 'w']
 _EMITTANCE = ['x', 'y', 'z']
 _PHASESPACE = ['xxp', 'yyp', 'phiw']
 _LOSSES = ['losses']
-# units conversion factors
+# hpsim C code uses MeV, radians, meters
+# units conversion factors so hpsim scripts use MeV, deg, cm, milliradians
 _CM = 100.0
 _MR = 1000.0
 _DEG = 180.0/math.pi
@@ -123,11 +126,11 @@ class Beam():
             loss = np.where(loss_all > 0)[0]
         elif option == 'good':
             loss = np.where(loss_all == 0)[0]
-        return self.get_x(option) * _CM, \
-            self.get_xp(option) * _MR, \
-            self.get_y(option) * _CM, \
-            self.get_yp(option) * _MR, \
-            self.get_phi(option) * _DEG, \
+        return self.get_x(option), \
+            self.get_xp(option), \
+            self.get_y(option), \
+            self.get_yp(option), \
+            self.get_phi(option), \
             self.get_w(option), \
             loss
 
@@ -453,7 +456,16 @@ class Beam():
         """
         lc_var = var.lower()
         if var.lower() in _COORDINATES:
-            return np.std(self.get_coor(lc_var, mask))
+            if lc_var == 'phi':
+#                pcoor = self.get_coor(lc_var, mask)
+#                ptmp = np.mod(pcoor, 360)
+#                hval, hbin = np.histogram(ptmp, bins=360)
+#                print self.beam.get_sig_phi(), np.std(pcoor), np.std(pcoor - hbin[np.argmax(hval)] + 180#)
+#                return np.std(pcoor - hbin[np.argmax(hval)] + 180)
+#                return np.std(pcoor - self.get_avg('phi', mask) + 180)
+                return np.std(self.get_coor(lc_var, mask))
+            else:
+                return np.std(self.get_coor(lc_var, mask))
         else:
             print "Error: Sigma not found. Variable", \
             str.upper(var), "not recognized"
@@ -662,16 +674,20 @@ class Beam():
             print '\nCentroids and RMS sizes'
             print '            Avg         Sigma'
             for item in _COORDINATES:
-                print '{0:3}: {1:10.4f}    {2:10.4f} {3:3}'\
+                print '{0:3}: {1:12.4f}    {2:10.4f} {3:3}'\
                     .format(item, self.get_avg(item, mask),
                         self.get_sig(item, mask), _USER_LABELS[item])
             print '\nTwiss parameters'
 
-            print '         Alpha      Beta      Eurms      Enrms'
+            print '          Alpha       Beta       Eurms       Enrms'
             for item in _EMITTANCE:
                 a, b, eurms = self.get_twiss(item, mask)
-                print '{0:2}: {1:10.4f} {2:10.4f} {3:10.4f} {4:11.5f}'\
-                    .format(item, a, b, eurms, self.get_nrms_emit(item, mask))
+                if item <> _EMITTANCE[-1]:
+                    print '{0:2}: {1:11.4f} {2:11.4f} {3:11.4f} {4:11.5f}'\
+                        .format(item, a, b, eurms, self.get_nrms_emit(item, mask))
+                else: #no normalized long emit
+                    print '{0:2}: {1:11.4f} {2:11.4f} {3:11.4f}'\
+                        .format(item, a, b, eurms)                 
             print '\n'
         else:
             print '\n*** No particles remaining ****'
@@ -1106,10 +1122,6 @@ class Simulator():
         request += "SpaceCharge.spacecharge)"
         self.sim = eval(request)
 
-    def reset(self):
-        """Reset the simulator """
-        self.sim.reset()
-
     def simulate(self, start_elem_name, end_elem_name):
         """Simulate from 'start' element to 'end' element, inclusive"""
         self.sim.simulate(start_elem_name, end_elem_name)
@@ -1259,7 +1271,7 @@ class BeamPlot():
             _plot_phase_space(plt, u_coor, v_coor, marker, labels, limits)
         return
         
-    def iso_phase_space(self, coor, beam, mask, nplt, nbins=[50,50]):
+    def iso_phase_space(self, coor, beam, mask, nplt, nbins=50):
         """Create an isometric phase-space plot.
 
         Arguments:
@@ -1268,7 +1280,7 @@ class BeamPlot():
            mask (Numpy vector): mask for filtering beam prior to plotting
            nplt (int): which plot in figure grid, by row, 
                        1 is upper left, nrow*ncol is lower right
-           nbins ([int, int], optional): number of x and y bins, respectively
+           nbins (int, optional): number of x and y bins, respectively
         """
         if coor in _PHASESPACE:
             u_index = _PHASESPACE.index(coor) * 2
@@ -1382,9 +1394,9 @@ class DistPlot():
     def __init__(self, nrow=1, ncol=1, hsize=None, vsize=None):
         """Creates and instance of a matplotlib figure"""
         if hsize == None or vsize == None:
-            self.fig = plt.figure()
+            self.fig = plt.figure(facecolor='white')
         else:
-            self.fig = plt.figure(figsize = (hsize, vsize))
+            self.fig = plt.figure(figsize = (hsize, vsize),facecolor='white')
 
         self.nrow = nrow
         self.ncol = ncol
@@ -1499,7 +1511,7 @@ class DistPlot():
             _plot_phase_space(plt, u_coor, v_coor, marker, labels, limits)
         return
         
-    def iso_phase_space(self, coor, dist, nplt, nbins=[50,50]):
+    def iso_phase_space(self, coor, dist, nplt, nbins=50):
         """Create an isometric phase-space plot.
 
         Arguments:
@@ -1507,7 +1519,7 @@ class DistPlot():
            dist is beam-distribution object
            nplt (int): which plot in figure grid, by row, 
                        1 is upper left, nrow*ncol is lower right
-           nbins ([int, int], optional): number of x and y bins, respectively
+           nbins (int, optional): number of x and y bins, respectively
         """
         if coor in _PHASESPACE:
             u_index = _PHASESPACE.index(coor) * 2
@@ -2146,7 +2158,7 @@ def _plot_phase_space(plt, u_coor, v_coor, marker='b,', labels=None, limits=None
     plt.set_ylim(yrng)
     return
 
-def _plot_iso_phase_space(ax, u_coor, v_coor, labels=None, nbins=[50,50]):
+def _plot_iso_phase_space(ax, u_coor, v_coor, labels=None, nbins=50):
     """Create an isometric phase-space plot.
 
     Arguments:
@@ -2154,15 +2166,34 @@ def _plot_iso_phase_space(ax, u_coor, v_coor, labels=None, nbins=[50,50]):
        u_coor (Numpy vector, double): x-coordinates of data to be plotted
        v_coor (Numpy vector, double): y-coordinates of data to be plotted
        labels ([str, str]): u- and v-axes lables 
-       nbins ([int, int], optional): number of x and y bins, respectively
+       nbins (int, optional): number of x and y bins, respectively
     """
 
     u_label, v_label = _get_labels(labels)
-    ps_histo, u_bins, v_bins = np.histogram2d(y=v_coor, x=u_coor, bins=nbins) #\
-#                                           range = [[min(u_coor), max(u_coor)],\
-#                                                    [min(v_coor), max(v_coor)]])
-    ps_histo = ps_histo.T
+    limits=None
+    [min_x, max_x], [min_y, max_y] = _get_plimits(limits, u_coor, v_coor)
 
+    ps_histo, u_bins, v_bins = np.histogram2d(y=v_coor, x=u_coor, bins=nbins, \
+                                              range = [[min_x, max_x], [min_y, max_y]])
+    # when plotting over a large range and the peak is at the edge, then find which
+    # edge and add and extra bin there to ensure it is plotted. This is to overcome
+    # a bug in matplotlib polycollection
+    hist_max = np.max(ps_histo)
+    hist_shape = np.shape(ps_histo)
+    loc_max = np.unravel_index(np.argmax(ps_histo),np.shape(ps_histo))
+    if hist_max > 0:
+        if loc_max[0] == 0 or loc_max[-1] == hist_shape[0]-1:
+            if loc_max[0] == 0:
+                min_x = min_x - (u_bins[1] - u_bins[0])
+            elif loc_max[-1] == hist_shape(ps_histo)-1:
+                max_x = max_x + (u_bins[1] - u_bins[0])
+            
+            new_bins = nbins+1
+            ps_histo, u_bins, v_bins = np.histogram2d(y=v_coor, x=u_coor, bins=new_bins, \
+                                              range = [[min_x, max_x], [min_y, max_y]])
+
+
+    ps_histo = ps_histo.T
     verts = []
     for v_slice in ps_histo:
         v_slice[0] = 0.
