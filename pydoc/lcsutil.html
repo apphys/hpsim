@@ -1,0 +1,89 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module lcsutil</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>lcsutil</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/Shared/git-repo/hpsim/pylib/lcsutil.py">/home/Shared/git-repo/hpsim/pylib/lcsutil.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;lcsutil_v2.py<br>
+#&nbsp;Collection&nbsp;of&nbsp;python&nbsp;functions&nbsp;for&nbsp;accessing&nbsp;LANSCE&nbsp;Control&nbsp;System&nbsp;(LCS)&nbsp;info<br>
+#&nbsp;20160223&nbsp;-&nbsp;ljr&nbsp;-&nbsp;code&nbsp;cleanup</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-expand_pv"><strong>expand_pv</strong></a>(pv)</dt><dd><tt>Returns&nbsp;the&nbsp;LCS&nbsp;Process&nbsp;Variable&nbsp;in&nbsp;full&nbsp;syntax&nbsp;AADDDNNNCMM&nbsp;as&nbsp;a&nbsp;string<br>
+where&nbsp;AA&nbsp;is&nbsp;two&nbsp;character&nbsp;area,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DD&nbsp;is&nbsp;device&nbsp;type,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NNN&nbsp;is&nbsp;device&nbsp;number,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C&nbsp;&nbsp;is&nbsp;channel&nbsp;type,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MM&nbsp;is&nbsp;channel&nbsp;number&nbsp;<br>
+Returns&nbsp;partial&nbsp;PVs&nbsp;when&nbsp;input&nbsp;string&nbsp;is&nbsp;incomplete.<br>
+&nbsp;<br>
+Argument:<br>
+&nbsp;&nbsp;&nbsp;pv(str):&nbsp;LCS&nbsp;PV&nbsp;to&nbsp;expane</tt></dd></dl>
+ <dl><dt><a name="-get_neg_beams"><strong>get_neg_beams</strong></a>()</dt><dd><tt>Returns&nbsp;list&nbsp;of&nbsp;names&nbsp;associated&nbsp;with&nbsp;H-&nbsp;beam<br>
+['TB',&nbsp;'H-',&nbsp;'LB',&nbsp;'-']</tt></dd></dl>
+ <dl><dt><a name="-get_pos_beams"><strong>get_pos_beams</strong></a>()</dt><dd><tt>Returns&nbsp;list&nbsp;of&nbsp;names&nbsp;associated&nbsp;with&nbsp;H+&nbsp;beam:<br>
+['TA',&nbsp;'H+',&nbsp;'LA',&nbsp;'IP',&nbsp;'+']</tt></dd></dl>
+ <dl><dt><a name="-get_pv_area"><strong>get_pv_area</strong></a>(pv)</dt><dd><tt>Returns&nbsp;two&nbsp;character&nbsp;area&nbsp;for&nbsp;PV<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;pv(str):&nbsp;name&nbsp;of&nbsp;LCS&nbsp;PV</tt></dd></dl>
+ <dl><dt><a name="-get_pv_asp"><strong>get_pv_asp</strong></a>(n, beam<font color="#909090">='+'</font>)</dt><dd><tt>Returns&nbsp;EPICS/LCS&nbsp;PV&nbsp;name&nbsp;(string)&nbsp;for&nbsp;the&nbsp;amplitude&nbsp;set&nbsp;point&nbsp;of&nbsp;<br>
+module&nbsp;n&nbsp;or&nbsp;buncher&nbsp;n,beam&nbsp;'+'&nbsp;or&nbsp;'-',&nbsp;n&nbsp;can&nbsp;be&nbsp;a&nbsp;string&nbsp;<br>
+e.g.&nbsp;'TA'&nbsp;or&nbsp;'05',&nbsp;or&nbsp;a&nbsp;number&nbsp;5.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;n(str&nbsp;or&nbsp;int):&nbsp;module&nbsp;or&nbsp;buncher&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;beam(str,&nbsp;optional):&nbsp;beam&nbsp;species</tt></dd></dl>
+ <dl><dt><a name="-get_pv_asp_n"><strong>get_pv_asp_n</strong></a>(n)</dt><dd><tt>Returns&nbsp;ASP&nbsp;PV&nbsp;associated&nbsp;with&nbsp;neg(-)&nbsp;beam&nbsp;species,&nbsp;either&nbsp;-.<br>
+Required&nbsp;for&nbsp;Main&nbsp;Buncher.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;n(str&nbsp;or&nbsp;int):&nbsp;module&nbsp;or&nbsp;buncher&nbsp;number</tt></dd></dl>
+ <dl><dt><a name="-get_pv_asp_p"><strong>get_pv_asp_p</strong></a>(n)</dt><dd><tt>Returns&nbsp;ASP&nbsp;PV&nbsp;associated&nbsp;with&nbsp;pos(+)&nbsp;beam&nbsp;species,&nbsp;either&nbsp;+.<br>
+Required&nbsp;for&nbsp;Main&nbsp;Buncher.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;n(str&nbsp;or&nbsp;int):&nbsp;module&nbsp;or&nbsp;buncher&nbsp;number</tt></dd></dl>
+ <dl><dt><a name="-get_pv_device"><strong>get_pv_device</strong></a>(pv)</dt><dd><tt>Returns&nbsp;two&nbsp;character&nbsp;device&nbsp;for&nbsp;PV<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;pv(str):&nbsp;name&nbsp;of&nbsp;LCS&nbsp;PV</tt></dd></dl>
+ <dl><dt><a name="-get_pv_psp"><strong>get_pv_psp</strong></a>(n, beam<font color="#909090">='+'</font>)</dt><dd><tt>Returns&nbsp;EPICS/LCS&nbsp;PV&nbsp;name&nbsp;(string)&nbsp;for&nbsp;the&nbsp;phase&nbsp;set&nbsp;point&nbsp;of&nbsp;<br>
+module&nbsp;n&nbsp;or&nbsp;buncher&nbsp;n&nbsp;can&nbsp;be&nbsp;a&nbsp;string&nbsp;e.g.&nbsp;'TA'&nbsp;or&nbsp;'05',&nbsp;or&nbsp;a&nbsp;number&nbsp;5.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;n(str&nbsp;or&nbsp;int):&nbsp;module&nbsp;or&nbsp;buncher&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;beam(str,&nbsp;optional):&nbsp;beam&nbsp;species</tt></dd></dl>
+ <dl><dt><a name="-get_pv_rf"><strong>get_pv_rf</strong></a>(n, beam<font color="#909090">='+'</font>)</dt><dd><tt>Returns&nbsp;Epics/LCS&nbsp;PV&nbsp;name&nbsp;(string)&nbsp;for&nbsp;the&nbsp;on(intime)/off(delayed)&nbsp;<br>
+set&nbsp;point&nbsp;of&nbsp;module&nbsp;n&nbsp;or&nbsp;buncher&nbsp;n,&nbsp;where&nbsp;n&nbsp;can&nbsp;be&nbsp;a&nbsp;string&nbsp;<br>
+e.g.&nbsp;'TA'&nbsp;or&nbsp;'05',&nbsp;or&nbsp;a&nbsp;number&nbsp;5.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;n(str&nbsp;or&nbsp;int):&nbsp;module&nbsp;or&nbsp;buncher&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;beam(str,&nbsp;optional):&nbsp;beam&nbsp;species</tt></dd></dl>
+ <dl><dt><a name="-get_pv_type"><strong>get_pv_type</strong></a>(pv)</dt><dd><tt>Returns&nbsp;one&nbsp;character&nbsp;type&nbsp;for&nbsp;PV<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;pv(str):&nbsp;name&nbsp;of&nbsp;LCS&nbsp;PV</tt></dd></dl>
+ <dl><dt><a name="-rf_off_val"><strong>rf_off_val</strong></a>(n)</dt><dd><tt>Returns&nbsp;RF&nbsp;'OFF'&nbsp;value&nbsp;for&nbsp;bunchers,&nbsp;DTL&nbsp;or&nbsp;CCL&nbsp;rf,<br>
+n&nbsp;can&nbsp;be&nbsp;a&nbsp;string&nbsp;e.g.&nbsp;'TA'&nbsp;or&nbsp;'05',&nbsp;or&nbsp;a&nbsp;number&nbsp;5.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;n(str&nbsp;or&nbsp;int):&nbsp;module&nbsp;or&nbsp;buncher&nbsp;number</tt></dd></dl>
+ <dl><dt><a name="-rf_on_val"><strong>rf_on_val</strong></a>(n)</dt><dd><tt>Returns&nbsp;RF&nbsp;'ON'&nbsp;value&nbsp;for&nbsp;bunchers,&nbsp;DTL&nbsp;or&nbsp;CCL&nbsp;rf,<br>
+n&nbsp;can&nbsp;be&nbsp;a&nbsp;string&nbsp;e.g.&nbsp;'TA'&nbsp;or&nbsp;'05',&nbsp;or&nbsp;a&nbsp;number&nbsp;5.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;n(str&nbsp;or&nbsp;int):&nbsp;module&nbsp;or&nbsp;buncher&nbsp;number</tt></dd></dl>
+</td></tr></table>
+</body></html>
