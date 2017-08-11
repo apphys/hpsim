@@ -28,7 +28,7 @@ set points into model values used in the simulation.
 
 # Simulated H- beam in LANSCE LEBT + DTL (2D)
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-2d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-2d.gif" title="HPSim 2D"/></a>
-# Simulated H- beam in LANSCE LEBT + DTL + CCL (3D)
+# Simulated H- beam in LANSCE LEBT + DTL + CCL module 5 (3D)
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif" title="HPSim 3D"/></a>
 
 # References
