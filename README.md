@@ -1,4 +1,4 @@
-# HPSim project
+# HPSim
 
 HPSim is a GPU-accelerated online multi-particle beam dynamics simulation tool 
 for ion linacs. It was originally developed for use on the Los Alamos 800-MeV 
@@ -31,7 +31,7 @@ set points into model values used in the simulation.
 # H- beam in LANSCE LEBT + DTL + CCL (3D)
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif" title="HPSim 3D"/></a>
 
-# Reference
+# References
 1. X. Pang, L. Rybarcyk, "GPU Accelerated Online Beam Dynamics Simulator for 
 Linear Particle Accelerators," Computer Physics Communications, 185, pp. 
 744-753, 2014.
