@@ -29,7 +29,7 @@ set points into model values used in the simulation.
 # H- beam in LANSCE LEBT + DTL (2D)
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-2d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-2d.gif" title="HPSim 2D"/></a>
 # H- beam in LANSCE LEBT + DTL + CCL (3D)
-<a href="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif" title="HPSim 2D"/></a>
+<a href="https://github.com/apphys/hpsim/blob/master/hpsim-3d-1.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-3d-1.gif" title="HPSim 2D"/></a>
 
 # Reference
 1. X. Pang, L. Rybarcyk, "GPU Accelerated Online Beam Dynamics Simulator for 
