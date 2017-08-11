@@ -26,7 +26,11 @@ Variable machine control parameters is kept in an SQLite database that also
 contains calibration and conversion factors required to transform the machine 
 set points into model values used in the simulation.
 
+# H- beam in LANSCE LEBT + DTL (2D)
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-2d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-2d.gif" title="HPSim 2D"/></a>
+# H- beam in LANSCE LEBT + DTL + CCL (3D)
+<a href="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif" title="HPSim 2D"/></a>
+
 # Reference
 1. X. Pang, L. Rybarcyk, "GPU Accelerated Online Beam Dynamics Simulator for 
 Linear Particle Accelerators," Computer Physics Communications, 185, pp. 
