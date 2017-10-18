@@ -17,8 +17,8 @@ sys.path.append(pkg_dir)
 
 #import additional python packages
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
+#import matplotlib.pyplot as plt
+#import matplotlib.mlab as mlab
 import math
 # import additional simulation packages
 import hpsim as hps
@@ -113,19 +113,19 @@ print "w/user units"
 beam.print_results(mask)
 
 # create output plot
-plot = hps.BeamPlot(nrow=4, ncol=3, hsize=16, vsize=12)
-plot.title(SIM_STOP)
-plot.iso_phase_space('xxp', beam, mask, 1)
-plot.iso_phase_space('yyp', beam, mask, 2)
-plot.iso_phase_space('phiw', beam, mask, 3 )
-plot.hist2d_phase_space('xxp', beam, mask, 4)
-plot.hist2d_phase_space('yyp', beam, mask, 5)
-plot.hist2d_phase_space('phiw', beam, mask, 6)
-plot.profile('x', beam, mask, 7, 'g-')
-plot.profile('y', beam, mask, 8, 'g-')
-plot.profile('phi', beam, mask, 9, 'g-')
-plot.profile('xp', beam, mask, 10, 'g-')
-plot.profile('yp', beam, mask, 11, 'g-')
-plot.profile('w', beam, mask, 12, 'g-')
-plot.show()
+#plot = hps.BeamPlot(nrow=4, ncol=3, hsize=16, vsize=12)
+#plot.title(SIM_STOP)
+#plot.iso_phase_space('xxp', beam, mask, 1)
+#plot.iso_phase_space('yyp', beam, mask, 2)
+#plot.iso_phase_space('phiw', beam, mask, 3 )
+#plot.hist2d_phase_space('xxp', beam, mask, 4)
+#plot.hist2d_phase_space('yyp', beam, mask, 5)
+#plot.hist2d_phase_space('phiw', beam, mask, 6)
+#plot.profile('x', beam, mask, 7, 'g-')
+#plot.profile('y', beam, mask, 8, 'g-')
+#plot.profile('phi', beam, mask, 9, 'g-')
+#plot.profile('xp', beam, mask, 10, 'g-')
+#plot.profile('yp', beam, mask, 11, 'g-')
+#plot.profile('w', beam, mask, 12, 'g-')
+#plot.show()
 exit()

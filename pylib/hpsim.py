@@ -26,16 +26,16 @@ sys.path.append(pkg_dir)
 #import various packages
 import HPSim as HPSim
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.collections import PolyCollection
-from matplotlib.colors import colorConverter, Normalize
-from matplotlib import cm
-import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
+#from mpl_toolkits.mplot3d import Axes3D
+#from matplotlib.collections import PolyCollection
+#from matplotlib.colors import colorConverter, Normalize
+#from matplotlib import cm
+#import matplotlib.pyplot as plt
+#import matplotlib.mlab as mlab
 import math
 import lcsutil as lcs
 
-import matplotlib as mpl
+#import matplotlib as mpl
 
 #global variables
 _COORDINATES = ['x', 'xp', 'y', 'yp', 'phi', 'w']

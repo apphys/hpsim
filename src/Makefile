@@ -1,12 +1,12 @@
 include make_root.mk
 
-DIR=$(filter-out doxygen/, $(filter-out test/, $(filter-out lib/, \
+DIR=$(filter-out doxygen/, $(filter-out test/, $(filter-out server/, \
   $(filter %/,$(shell ls -F)))))
 OBJS=$(foreach d, $(DIR), $(wildcard $(d)obj/*.o))
 NONGRAPHICS_OBJS=$(foreach d, $(filter-out graphics/, $(DIR)), \
   $(wildcard $(d)obj/*.o))
 
-all: compile ../bin/HPSim.so ../bin/PyEPICS.so
+all: compile ../bin/HPSim.so 
 list:
 	@echo $(OBJS)
 compile:
@@ -19,10 +19,10 @@ compile:
 	   done
 
 ../bin/HPSim.so:
-	$(CC)  $(LDFLAGS) $(PYTHON_LD_FLAGS) $(EPICS_LD_FLAGS) -shared \
+	$(CC)  $(LDFLAGS) $(PYTHON_LD_FLAGS) -shared \
 		-o $@ $(NONGRAPHICS_OBJS)
-../bin/PyEPICS.so: server/obj/pyepics_module.o server/obj/ca_check.o
-	$(CC)  $(LDFLAGS) $(EPICS_LD_FLAGS) -shared -o $@ $^
+#../bin/PyEPICS.so: server/obj/pyepics_module.o server/obj/ca_check.o
+#	$(CC)  $(LDFLAGS) $(EPICS_LD_FLAGS) -shared -o $@ $^
 
 clean:
 	@for d in $(DIR); \
