@@ -1,6 +1,6 @@
 include make_root.mk
 
-DIR=$(filter-out doxygen/, $(filter-out test/, $(filter-out server/, \
+DIR=$(filter-out doxygen/, $(filter-out test/, $(filter-out lib/, \
   $(filter %/,$(shell ls -F)))))
 OBJS=$(foreach d, $(DIR), $(wildcard $(d)obj/*.o))
 NONGRAPHICS_OBJS=$(foreach d, $(filter-out graphics/, $(DIR)), \

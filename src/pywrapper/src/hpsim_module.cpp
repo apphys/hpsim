@@ -27,11 +27,11 @@ typedef std::vector<std::string> StringArray;
 typedef std::vector<std::pair<std::string, std::string> > StringPairArray;
 typedef std::vector<std::pair<std::string, std::pair<std::string, std::string> > >
         StringTripletArray;
-/*
+
 namespace
 {
   PVObserverList pv_oblist;  
-}*/
+}
 
 PyDoc_STRVAR(set_gpu__doc__,
 "set_gpu(device_id) ->\n\n"
@@ -54,7 +54,7 @@ PyDoc_STRVAR(set_db_epics__doc__,
 "set_db_epics(pv_name, value, DBConnection, BeamLine) ->\n\n"
 "Set the epics channel (PV) value."
 );
-/*
+
 static PyObject* SetDbEPICS(PyObject* self, PyObject* args)
 {
   char* pv;
@@ -82,7 +82,7 @@ static PyObject* SetDbEPICS(PyObject* self, PyObject* args)
 
   Py_INCREF(Py_None);
   return Py_None;
-}*/
+}
 
 /*!
  * /todo Rewrite this set_db_model() using GetQueryResults(). Does all db 
@@ -399,7 +399,7 @@ static PyObject* GetElementList(PyObject* self, PyObject* args, PyObject* kwds)
 
 static PyMethodDef HPSimModuleMethods[]={
   {"set_gpu", (PyCFunction)SetGPU, METH_VARARGS, set_gpu__doc__}, 
-//  {"set_db_epics", (PyCFunction)SetDbEPICS, METH_VARARGS, set_db_epics__doc__}, 
+  {"set_db_epics", (PyCFunction)SetDbEPICS, METH_VARARGS, set_db_epics__doc__}, 
   {"set_db_model", (PyCFunction)SetDbModel, METH_VARARGS, set_db_model__doc__}, 
   {"get_db_epics", (PyCFunction)GetDbEPICS, METH_VARARGS, get_db_epics__doc__}, 
   {"get_db_model", (PyCFunction)GetDbModel, METH_VARARGS, get_db_model__doc__}, 
