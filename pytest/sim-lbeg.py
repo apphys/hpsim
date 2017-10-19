@@ -33,9 +33,10 @@ import sqldb as pydb
 ################################################################################
 # install db's and connect to beamline
 db_dir = par_dir + '/db'
-lib_dir = par_dir + '/db/lib'
+lib_dir = par_dir + '/db/lib/'
 dbs = ['tbtd.db','dtl.db','trst.db','ccl.db']
-dbconn1 = hps.DBConnection(db_dir, dbs, lib_dir, 'libsqliteext.so')
+dbconn1 = hps.DBConnection(db_dir, dbs, lib_dir, 'libsqliteext')
+dbconn1.print_libs()
 dbconn1.print_dbs()
 dbconn1.clear_model_index()
 print "*** dB connection established ***"

@@ -251,8 +251,9 @@ DBConnection::DBConnection(DBConnection& r_org) : PyWrapper()
 void DBConnection::LoadLib(std::string r_lib_addr)
 {
   char* errmsg;
-  SQLCheck(sqlite3_load_extension(db_conn, r_lib_addr.c_str(), 0, &errmsg), 
-    "DBConnection::LoadLib : sqlite3_load_extension");
+  if(!SQLCheck(sqlite3_load_extension(db_conn, r_lib_addr.c_str(), 0, &errmsg), 
+    "DBConnection::LoadLib : sqlite3_load_extension"))
+    std::cout << "sqlite3_load_extension error msg :" << errmsg << std::endl;
   libs.push_back(r_lib_addr);
 }
 

@@ -6,7 +6,7 @@ OBJS=$(foreach d, $(DIR), $(wildcard $(d)obj/*.o))
 NONGRAPHICS_OBJS=$(foreach d, $(filter-out graphics/, $(DIR)), \
   $(wildcard $(d)obj/*.o))
 
-all: compile ../bin/HPSim.so 
+all: compile ../bin/HPSim.so ../db/lib/libsqliteext.so
 list:
 	@echo $(OBJS)
 compile:
@@ -23,6 +23,8 @@ compile:
 		-o $@ $(NONGRAPHICS_OBJS)
 #../bin/PyEPICS.so: server/obj/pyepics_module.o server/obj/ca_check.o
 #	$(CC)  $(LDFLAGS) $(EPICS_LD_FLAGS) -shared -o $@ $^
+../db/lib/libsqliteext.so: 
+	gcc -shared -o ../db/lib/libsqliteext.so ../db/lib/extension-functions.c -lm
 
 clean:
 	@for d in $(DIR); \
