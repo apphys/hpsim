@@ -32,14 +32,18 @@ set points into model values used in the simulation.
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif" title="HPSim 3D"/></a>
 
 # Build & Run on Darwin (Power 8 + Tesla P100)
-  `module load cuda` 
+  `module load cuda`
+  
   `git checkout noepics`
+  
   `cd src`
+  
   `make`
 
 Now../bin/HPSim.so should be generated and we can run a test 
 
   `cd ../pytest`
+  
   `python sim-lbeg.py`
 
 # References
