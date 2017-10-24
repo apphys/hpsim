@@ -31,6 +31,14 @@ set points into model values used in the simulation.
 # Simulated H- beam in LANSCE LEBT + DTL + CCL module 5 (3D)
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif" title="HPSim 3D"/></a>
 
+# Build & Run on Darwin (Power 8 + Tesla P100)
+module load cuda
+git checkout noepics
+cd src
+make
+cd ../pytest
+python sim-lbeg.py
+
 # References
 1. X. Pang, L. Rybarcyk, "GPU Accelerated Online Beam Dynamics Simulator for 
 Linear Particle Accelerators," Computer Physics Communications, 185, pp. 
