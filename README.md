@@ -26,9 +26,9 @@ Variable machine control parameters is kept in an SQLite database that also
 contains calibration and conversion factors required to transform the machine 
 set points into model values used in the simulation.
 
-# Simulated H- beam in LANSCE LEBT + DTL (2D)
+# Simulated H- beam in LANSCE LEBT + DTL 
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-2d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-2d.gif" title="HPSim 2D"/></a>
-# Simulated H- beam in LANSCE LEBT + DTL + CCL module 5 (3D)
+# Simulated H- beam in LANSCE LEBT + DTL + CCL module 5 (simulation was intentionally slowed down for displaying)
 <a href="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif"><img src="https://github.com/apphys/hpsim/blob/master/hpsim-3d.gif" title="HPSim 3D"/></a>
 
 # Build & Run on Darwin (Power 8 + Tesla P100)
