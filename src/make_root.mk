@@ -19,11 +19,11 @@ PYTHON_LD_FLAGS=-L./usr/local/lib/ \
 
 #GL_LD_FLAGS+=-lglut -lGLU -lGLEW 
 
-CPPFLAGS+=-arch=sm_35 -Xcompiler '-fPIC' -Xcompiler '-fopenmp' -O3 \
-  -g -w #-DDOUBLE_PRECISION #-D_DEBUG
+CPPFLAGS+=-arch=sm_60 -Xcompiler '-fPIC' -Xcompiler '-fopenmp' -O3 \
+  -g -w -DDOUBLE_PRECISION #-D_DEBUG
 
 #CPPFLAGS+=$(EPICS_INC_FLAGS)
-CPPFLAGS+=$(PYTHON_INC_FLAGS)
-#CPPFLAGS+=-Xptxas -v -Xptxas -dlcm=ca
+CPPFLAGS+=$(PYTHON_INC_FLAGS) 
+#CPPFLAGS+=-Xptxas -dlcm=ca -Xptxas -v  
 
 LDFLAGS=-lcurand -lsqlite3

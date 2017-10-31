@@ -198,13 +198,17 @@ void DistributeParticleKernel(
           d = 1.0 - cc;
           k = (jm1 - 1) * d_scheff_param.nx + i;
 #ifdef DOUBLE_PRECISION
-          atomicAddDouble(&r_bin_tbl[k - 1], a * cc);
+//          atomicAddDouble(&r_bin_tbl[k - 1], a * cc);
+          atomicAdd(&r_bin_tbl[k - 1], a * cc);  // sm_60 or above
           k += i1 - i;
-          atomicAddDouble(&r_bin_tbl[k - 1], b * cc);
+//          atomicAddDouble(&r_bin_tbl[k - 1], b * cc);
+          atomicAdd(&r_bin_tbl[k - 1], b * cc);
           k = (j1 - 1)*d_scheff_param.nx + i;
-          atomicAddDouble(&r_bin_tbl[k - 1], a * d);
+//          atomicAddDouble(&r_bin_tbl[k - 1], a * d);
+          atomicAdd(&r_bin_tbl[k - 1], a * d);
           k += i1 - i;
-          atomicAddDouble(&r_bin_tbl[k - 1], b * d);
+//          atomicAddDouble(&r_bin_tbl[k - 1], b * d);
+          atomicAdd(&r_bin_tbl[k - 1], b * d);
 #else
           atomicAdd(&r_bin_tbl[k - 1], a * cc);
           k += i1 - i;
