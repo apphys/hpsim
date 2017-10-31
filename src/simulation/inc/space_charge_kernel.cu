@@ -513,8 +513,10 @@ void UpdateFldTbl2KernelDouble(double2* r_fld_tbl2,
       tmpx += bin_val * fld1_val.x;
       tmpz += sign * bin_val * fld1_val.y; 
     }
-    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
-    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+//    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
+//    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+    atomicAdd(&(r_fld_tbl2[fld2_indx].x), tmpx);
+    atomicAdd(&(r_fld_tbl2[fld2_indx].y), tmpz);
   }
   else // last block
   {
@@ -543,8 +545,10 @@ void UpdateFldTbl2KernelDouble(double2* r_fld_tbl2,
       tmpx += bin_val * fld1_val.x;
       tmpz += bin_val * fld1_val.y;
     }
-    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
-    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+//    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
+//    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+    atomicAdd(&(r_fld_tbl2[fld2_indx].x), tmpx);
+    atomicAdd(&(r_fld_tbl2[fld2_indx].y), tmpz);
     // for the last mesh point
     zp = d_scheff_param.nz;
     rp = d_scheff_param.nx;
@@ -566,8 +570,10 @@ void UpdateFldTbl2KernelDouble(double2* r_fld_tbl2,
       tmpx += bin_val * fld1_val.x;
       tmpz += bin_val * fld1_val.y;
     }
-    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
-    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+//    atomicAddDouble(&(r_fld_tbl2[fld2_indx].x), tmpx);
+//    atomicAddDouble(&(r_fld_tbl2[fld2_indx].y), tmpz);
+    atomicAdd(&(r_fld_tbl2[fld2_indx].x), tmpx);
+    atomicAdd(&(r_fld_tbl2[fld2_indx].y), tmpz);
   }
 }
 
