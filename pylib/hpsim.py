@@ -436,7 +436,7 @@ class Beam():
         lc_var = var.lower()
         if lc_var in _COORDINATES:
             # if mask is an empty list then return average of 0.0
-            if mask == None:
+            if mask is None:
                 return np.mean(self.get_coor(lc_var, mask))
             elif list(mask) == []:
                 return 0.0
@@ -592,7 +592,7 @@ class Beam():
         Arguments:
            mask (Numpy vector, optional): mask used to select particles
         """
-        if mask == None:
+        if mask is None:
             gamma = 1.0 + self.get_avg('w', mask)/self.get_mass()
             return  math.sqrt(gamma * gamma -1.0)
         elif list(mask) == []:
@@ -609,7 +609,7 @@ class Beam():
         """
         c = 2.99792458e8 # m/s
         wavelength = c / (self.get_frequency() * 1.0e6)
-        if mask == None:
+        if mask is None:
             gamma = 1.0 + self.get_avg('w', mask)/self.get_mass()
             beta = math.sqrt(1.0 - 1/(gamma * gamma))
         elif list(mask) == []:
@@ -639,7 +639,7 @@ class Beam():
         Arguments:
            mask (Numpy vector, optional): mask used to select particles
         """
-        if mask == None:
+        if mask is None:
             # return number of good particles, i.e. not lost transversely
             # when mask in not present
             return self.get_initial_size() - self.beam.get_loss_num()
