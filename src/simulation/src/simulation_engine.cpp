@@ -81,15 +81,17 @@ void SimulationEngine::Simulate(std::string r_start, std::string r_end)
   if(start_index < prev_end_element_index_) 
     Reset();
   prev_end_element_index_ = end_index;
-  cudaEvent_t start, stop;  
-  StartTimer(&start, &stop);
+  //cudaEvent_t start, stop;  
+  //StartTimer(&start, &stop);
   for(uint i = 0; i <= end_index; ++i)
     if (i >= start_index || (*beamline_)[i]->GetType() == "SpchComp")
     {
       UpdateBlIndex(i);
       (*beamline_)[i]->Accept(this);
+      beam_->UpdateLoss();
+      if(beam_->GetLossNum() > beam_->num_particle * 0.95) return;
     }
-  StopTimer(&start, &stop, "Whole simulation");
+  //StopTimer(&start, &stop, "Whole simulation");
   if(param_.graphics_on)
     beam_->UpdateStatForPlotting();
 }
